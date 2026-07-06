@@ -1,3 +1,3 @@
 # MokuLib Browser
 
-Frontend browser for MokuLib, a personal library system.
+Frontend server for MokuLib, a personal library system.
