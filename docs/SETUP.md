@@ -109,6 +109,6 @@ Done in 57.9s using pnpm v11.10.0
 
 - [ ] `pnpm add @element-plus/icons-vue`
 - [ ] `pnpm add @vueuse/core`
-- [ ] `pnpm add axios`
+- [x] `pnpm add axios`
 - [x] `pnpm add element-plus`
-- [ ] `pnpm add js-base64`
+- [x] `pnpm add js-base64`
