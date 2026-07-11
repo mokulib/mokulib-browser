@@ -109,7 +109,9 @@ Done in 57.9s using pnpm v11.10.0
 
 - [ ] `pnpm add @element-plus/icons-vue`
 - [ ] `pnpm add @vueuse/core`
+- [x] `pnpm add @lucide/vue`
+- [x] `pnpm add @tailwindcss/vite`
 - [x] `pnpm add axios`
 - [x] `pnpm add element-plus`
 - [x] `pnpm add js-base64`
-- [x] `pnpm install tailwindcss @tailwindcss/vite`
+- [x] `pnpm add tailwindcss`

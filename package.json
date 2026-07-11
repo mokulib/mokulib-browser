@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@lucide/vue": "^1.24.0",
     "@tailwindcss/vite": "^4.3.2",
     "axios": "^1.18.1",
     "element-plus": "^2.14.2",
