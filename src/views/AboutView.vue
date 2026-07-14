@@ -1,15 +1,18 @@
+<script setup lang="ts">
+
+</script>
+
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
-  </div>
+  <main class="flex-1">
+    <section class="mx-auto max-w-6xl px-4 pb-4 pt-12 md:px-8 md:pt-16">
+      <h1>关于</h1>
+      <div>
+        <p>内容</p>
+      </div>
+    </section>
+  </main>
 </template>
 
 <style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
+
 </style>
