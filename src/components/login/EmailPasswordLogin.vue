@@ -133,7 +133,7 @@ onMounted(() => refreshImageCaptcha());
     </div>
     <label class="flex items-start gap-2 text-sm text-(--muted-foreground)">
       <input class="flex mt-0.5 size-4 rounded border-(--border) accent-(--primary)" required type="checkbox">
-      <span>我已阅读并同意<a href="#" class="text-(--primary) transition-colors hover:opacity-80">《墨库用户协议》</a>、<a href="#" class="text-(--primary) transition-colors hover:opacity-80">《隐私政策》</a>，并授权墨库使用该墨库账号信息（如昵称、头像、个性签名）进行统一管理</span>
+      <span>我已阅读并同意<a href="/terms" class="text-(--primary) transition-colors hover:opacity-80">《墨库用户协议》</a>、<a href="/privacy" class="text-(--primary) transition-colors hover:opacity-80">《隐私政策》</a>，并授权墨库使用该墨库账号信息（如昵称、头像、个性签名）进行统一管理</span>
     </label>
   </form>
 </template>
