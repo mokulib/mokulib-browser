@@ -1,10 +1,59 @@
 <script setup lang="ts">
 
 import { ArrowLeft, RefreshCw } from "@lucide/vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.ts";
+import axios from "axios";
+import { onMounted, ref } from "vue";
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const canvasWidth = 120;
+const canvasHeight = 30;
+
+// 表单数据
+const loginForm = ref({
+  email: '',
+  imageToken: '',
+  imageCaptcha: '',
+})
+
+const refreshImageCaptcha = () => {
+  axios.get("/api/captcha").then(response => {
+    // 记录验证码 token
+    loginForm.value.imageToken = response.data.data.token;
+    // 清空验证码
+    loginForm.value.imageCaptcha = '';
+
+    // 绘制图片
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    // 获取 Canvas
+    if (!ctx)
+      throw new Error('无法获取 Canvas 上下文');
+    // 清空画布
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // 创建 Image 对象
+    const img = new Image();
+    // 设置加载完成回调函数
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+    };
+    // 设置加载失败回调函数
+    img.onerror = function() {
+      console.error('图片加载失败');
+    };
+    // 加载图片
+    img.src = "data:image/png;base64," + response.data.data.image;
+  });
+}
+
+onMounted(() => refreshImageCaptcha());
 </script>
 
 <template>
-  <form v-if="true" class="flex flex-col gap-5">
+  <form v-if="true" class="flex flex-col gap-5" @submit.prevent="">
     <div class="flex flex-col gap-2">
       <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="email">邮箱</label>
       <input id="email" data-slot="input" placeholder="you@example.com" autocomplete="email" required class="h-8 w-full min-w-0 rounded-lg border border-(--input) bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--foreground) placeholder:text-(--muted-foreground) focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-(--input)/50 disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 md:text-sm dark:bg-(--input)/30 dark:disabled:bg-(--input)/80 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40" type="email"></div>
@@ -12,11 +61,11 @@ import { ArrowLeft, RefreshCw } from "@lucide/vue";
       <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="captcha">验证码</label>
       <div class="flex items-center gap-3">
         <input id="captcha" data-slot="input" inputmode="text" placeholder="请输入验证码" autocomplete="off" required class="h-8 w-full min-w-0 rounded-lg border border-(--input) bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--foreground) placeholder:text-(--muted-foreground) focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-(--input)/50 disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 md:text-sm dark:bg-(--input)/30 dark:disabled:bg-(--input)/80 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 flex-1" type="text">
-        <button type="button" aria-label="验证码 NPVY，点击刷新" title="点击刷新验证码" class="group relative shrink-0 overflow-hidden rounded-md border border-(--border) transition-opacity hover:opacity-90">
-          <canvas width="120" height="30" class="block h-[30px] w-[120px]"></canvas>
+        <button type="button" @click="refreshImageCaptcha()" aria-label="验证码 NPVY，点击刷新" title="点击刷新验证码" class="group relative shrink-0 overflow-hidden rounded-md border border-(--border) transition-opacity hover:opacity-90">
+          <canvas id="canvas" :width="canvasWidth" :height="canvasHeight" :class="['block', `w-[${canvasWidth}px]`, `h-[${canvasHeight}px]`]"></canvas>
         </button>
       </div>
-      <button type="button" class="flex w-fit items-center gap-1 text-xs text-(--muted-foreground) transition-colors hover:text-(--primary)">
+      <button type="button" @click="refreshImageCaptcha()" class="flex w-fit items-center gap-1 text-xs text-(--muted-foreground) transition-colors hover:text-(--primary)">
         <RefreshCw class="size-3"/>看不清？点击图片刷新
       </button>
     </div>
@@ -39,5 +88,52 @@ import { ArrowLeft, RefreshCw } from "@lucide/vue";
 </template>
 
 <style scoped>
+/* input 自动补全背景色修复 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  box-shadow: 0 0 0 1000px var(--background) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground) !important;
+}
 
+/* 复选框背景色修复 */
+input[type="checkbox"] {
+  /* 移除原生样式 */
+  appearance: none;
+  -webkit-appearance: none;
+
+  /* 设置尺寸 */
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+
+  /* 未选中时的背景色 */
+  background-color: var(--background);  /* 改成你想要的任何颜色 */
+  border: 2px solid var(--border);
+  border-radius: 4px;
+
+  /* 勾选标记居中 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+/* 复选框选中时的样式 */
+input[type="checkbox"]:checked {
+  background-color: var(--primary);  /* 选中背景色 */
+  border-color: var(--primary);
+}
+
+/* 复选框勾选标记 */
+input[type="checkbox"]:checked::after {
+  content: "·";
+  color: var(--background);
+  font-size: 16px;
+  font-weight: bold;
+}
 </style>
