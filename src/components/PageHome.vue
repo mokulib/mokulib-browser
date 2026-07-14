@@ -4,7 +4,7 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
 </script>
 
 <template>
-  <main>
+  <main flex-1>
     <section class="mx-auto max-w-6xl px-4 pb-4 pt-12 md:px-8 md:pt-16">
       <p class="text-sm tracking-[0.2em] text-(--muted-foreground)">
         晚上好，读者
