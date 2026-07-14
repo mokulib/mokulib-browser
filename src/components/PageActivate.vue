@@ -59,7 +59,7 @@ onMounted(async () => {
     <div class="mt-6 pt-1 px-1 border-t border-(--border) text-center text-sm text-(--muted-foreground)">
       <p v-if="status === 'ACTIVATING'">正在激活，请稍候...</p>
       <p v-if="status === 'OK'">激活成功！<a class="text-(--primary) transition-colors hover:opacity-80" href="/login">立即登录</a></p>
-      <p v-if="status === 'ERROR'">激活码过期？ <a class="text-(--primary) transition-colors hover:opacity-80" href="/register">重新注册</a></p>
+      <p v-if="status === 'ERROR'">激活码过期？ <a class="text-(--primary) transition-colors hover:opacity-80" href="/login">重新注册</a></p>
       <p v-if="status === 'NETWORK_ERROR'">请检查网络连接，<a class="text-(--primary) transition-colors hover:opacity-80" href="javascript:void(0)" onclick="location.reload()">刷新重试</a></p>
     </div>
   </main>
