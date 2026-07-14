@@ -57,7 +57,6 @@ const loginLoading = ref(false)
 const handleLogin = async () => {
   // 验证邮箱
   if (!loginForm.value.username) {
-    // 这里用你的提示方式，比如 Element Plus 的 ElMessage
     console.error('请输入邮箱')
     return
   }
@@ -82,13 +81,14 @@ const handleLogin = async () => {
     imageToken: loginForm.value.imageToken,
     imageCaptcha: loginForm.value.imageCaptcha,
   });
-  if (data.status !== 'OK') { // 登录失败
+  // 失败
+  if (data.status !== 'OK') {
     ElMessage.error(data.message);
     refreshImageCaptcha() // 刷新验证码
     loginLoading.value = false
     return
   }
-  // 登录成功
+  // 成功
   ElMessage.success(data.message);
   await router.push({ name: 'home' })
   loginLoading.value = false
