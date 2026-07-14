@@ -21,13 +21,13 @@ const router = createRouter({
       },
       // 局部路由守卫
       async beforeEnter(to, from, next) {
-        const authStore = useAuthStore()
+        const authStore = useAuthStore();
         const isLoggedIn: boolean = await authStore.ping(); // 使用 await 等待异步函数返回结果
 
         if (isLoggedIn) {
-          next({name: 'user'})
+          next({ name: 'home' });
         } else {
-          next()
+          next();
         }
       }
     },
@@ -37,6 +37,15 @@ const router = createRouter({
       name: 'activate',
       component: () => import('@/views/ActivateView.vue'),
       props: true, // 将路径参数作为 props 传递给组件
+      // 局部路由守卫
+      async beforeEnter(to, from, next) {
+        const authStore = useAuthStore();
+
+        if (authStore.isLoggedIn) // 强制登出
+          authStore.logout();
+
+        next();
+      }
     },
     {
       path: '/about',
