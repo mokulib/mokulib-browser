@@ -10,7 +10,10 @@ import { computed, ref, watch } from "vue";
  * </ul>
  */
 export const useThemeStore = defineStore('theme', () => {
-  let isDark = ref(false);
+
+  // 从系统偏好初始化主题
+  let isDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   const isSun = computed(() => !isDark.value);
 
   const setSun = () => {
@@ -25,7 +28,7 @@ export const useThemeStore = defineStore('theme', () => {
       document.documentElement.classList.add('dark')
     else
       document.documentElement.classList.remove('dark')
-  })
+  }, { immediate: true });
 
   return {
     isSun: isSun,
@@ -33,4 +36,5 @@ export const useThemeStore = defineStore('theme', () => {
     setSun,
     setMoon,
   };
+
 })
