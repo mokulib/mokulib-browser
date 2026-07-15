@@ -45,6 +45,7 @@ const themeStore = useThemeStore();
         </button>
         <!-- 宽屏菜单 -->
         <div v-if="headerStore.isExpanded" role="menu" class="hidden sm:block absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-lg animate-in fade-in-0 zoom-in-95">
+          <!-- 信息 -->
           <div class="flex items-center gap-3 px-4 py-4">
             <img alt="王先生的头像" class="size-11 shrink-0 rounded-full border border-(--border) object-cover" src="@/assets/mr-wang.png">
             <div class="min-w-0 self-stretch flex flex-col justify-between">
@@ -56,20 +57,22 @@ const themeStore = useThemeStore();
             </div>
           </div>
           <div class="mb-1 border-t border-(--border)"></div>
+          <!-- 个人中心 -->
           <div class="px-2 py-1">
-            <a href="/profile" class="flex items-center justify-between rounded-md px-2 hover:bg-(--muted) hover:text-(--accent-foreground)">
-              <div class="flex items-center gap-2.5 py-2 text-sm text-(--foreground) transition-colors">
-                <User class="size-4 text-(--muted-foreground)"/>
+            <a href="/profile" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+              <div class="flex items-center gap-2.5 py-2 text-sm">
+                <User class="size-4"/>
                 个人中心
               </div>
-              <ArrowRight class="size-4 text-(--muted-foreground)"/>
+              <ArrowRight class="size-4"/>
             </a>
           </div>
           <div class="my-1 border-t border-(--border)"></div>
+          <!-- 主题切换 -->
           <div class="px-2 py-1">
-            <a href="/" @click.prevent="themeStore.toggle" class="flex items-center justify-between rounded-md px-2 hover:bg-(--muted) hover:text-(--accent-foreground)">
-              <div class="flex items-center gap-2.5 py-2 text-sm text-(--foreground) transition-colors">
-                <SunMoon class="size-4 text-(--muted-foreground)"/>
+            <a href="/" @click.prevent="themeStore.toggle" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+              <div class="flex items-center gap-2.5 py-2 text-sm">
+                <SunMoon class="size-4"/>
                 主题切换
               </div>
               <Sun v-if="themeStore.isSun" class="size-3.5"/>
@@ -77,11 +80,14 @@ const themeStore = useThemeStore();
             </a>
           </div>
           <div class="my-1 border-t border-(--border)"></div>
+          <!-- 退出登录 -->
           <div class="px-2 pb-2 pt-1">
-            <button type="button" @click="authStore.logout" class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-(--destructive) transition-colors hover:bg-(--destructive)/10">
-              <LogOut class="size-4"/>
-              退出登录
-            </button>
+            <a href="/" @click.prevent="authStore.logout" class="flex items-center rounded-md px-2 text-(--destructive) hover:bg-(--destructive)/10 transition-colors">
+              <div class="flex items-center gap-2.5 py-2 text-sm">
+                <LogOut class="size-4"/>
+                退出登录
+              </div>
+            </a>
           </div>
         </div>
       </div>
