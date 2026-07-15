@@ -46,8 +46,9 @@ export const useUserStore = defineStore('user', () => {
   let user_avatar = computed(() => {
     // 获取 API 服务器的 baseURL
     const baseURL: string = axios.defaults.baseURL ? axios.defaults.baseURL : '';
+    console.log("baseURL: " + axios.defaults.baseURL)
     // 拼接用户头像的 URL
-    return new URL(`/avatar/${user_id.value}.png?timestamp=${user_avatar_timestamp.value}`, baseURL).toString()
+    return new URL(`/avatars/${user_id.value}.png?timestamp=${user_avatar_timestamp.value}`, baseURL).toString()
   })
 
   /////////////////////////////////////////////

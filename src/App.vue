@@ -48,7 +48,7 @@ const hideFooter = computed(() => route.meta.hideFooter ?? false);
       <div class="pt-2 pb-[20%]">
         <!-- 信息 -->
         <div class="flex items-center gap-3 px-4 py-4">
-          <img alt="王先生的头像" class="size-11 shrink-0 rounded-full border border-(--border) object-cover" src="@/assets/mr-wang.png">
+          <img :src="userStore.user_avatar" :alt="userStore.user_username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
           <div class="min-w-0 self-stretch flex flex-col justify-between">
             <div class="flex items-center gap-2">
               <p class="truncate font-serif text-base font-semibold text-(--foreground)">{{ userStore.user_username }}</p>
