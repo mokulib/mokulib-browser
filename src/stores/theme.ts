@@ -22,12 +22,15 @@ export const useThemeStore = defineStore('theme', () => {
   const setMoon = () => {
     isDark.value = true;
   }
+  const toggle = () => {
+    isDark.value = !isDark.value;
+  }
 
   watch(isDark, (newValue) => {
     if (newValue)
-      document.documentElement.classList.add('dark')
+      document.body.classList.add('dark')
     else
-      document.documentElement.classList.remove('dark')
+      document.body.classList.remove('dark')
   }, { immediate: true });
 
   return {
@@ -35,6 +38,7 @@ export const useThemeStore = defineStore('theme', () => {
     isMoon: isDark,
     setSun,
     setMoon,
+    toggle
   };
 
 })
