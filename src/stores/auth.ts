@@ -37,10 +37,18 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('jwt', token); // 持久化存储
   }
 
-  // 清除 JWT，即退出登录
   function clearJwt() {
     setJwt("");
     localStorage.removeItem('jwt'); // 清除持久化存储
+  }
+
+  const router = useRouter();
+
+  function logout() {
+    // 技术登出
+    clearJwt();
+    // 跳转到首页
+    router.push({ name: 'home' });
   }
 
   /////////////////////////////////////////////
@@ -107,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
     setJwt,
     clearJwt,
     login,
-    logout: clearJwt,
+    logout,
     ping,
     pingOrRedirect
   };
