@@ -4,8 +4,9 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
 </script>
 
 <template>
-  <main flex-1>
-    <section class="mx-auto max-w-6xl px-4 pb-4 pt-12 md:px-8 md:pt-16">
+  <main class="flex-1">
+    <!-- 欢迎 -->
+    <section class="mx-auto max-w-6xl px-4 pt-12 md:px-8 md:pt-16">
       <p class="text-sm tracking-[0.2em] text-(--muted-foreground)">
         晚上好，读者
       </p>
@@ -17,8 +18,11 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
       <p class="mt-4 max-w-lg text-pretty leading-relaxed text-(--muted-foreground)">
         今天想读点什么？从你正在读的书继续，或从书架上寻一本素未谋面的新友。
       </p>
+    </section>
 
-      <dl class="mt-10 grid grid-cols-3 gap-4 border-t border-(--border) pt-8">
+    <!-- 统计 -->
+    <section class="mx-auto max-w-6xl mt-10 px-4 pb-4 md:px-8">
+      <dl class="grid grid-cols-3 gap-4 border-t border-(--border) pt-8">
         <div class="flex flex-col gap-2">
           <Library class="size-5 text-(--primary)"/>
           <dd class="font-serif text-3xl font-medium md:text-4xl">342</dd>
@@ -37,19 +41,20 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
       </dl>
     </section>
 
+    <!-- 继续阅读 -->
     <section class="mx-auto max-w-6xl px-4 py-12 md:px-8">
-
+      <!-- 标题 -->
       <div class="mb-6 flex items-end justify-between">
         <div>
           <h2 class="font-serif text-2xl font-medium md:text-3xl">继续阅读</h2>
-          <p class="mt-1 text-sm text-(--muted-foreground)">你手边正翻开的 <!-- -->3<!-- --> 本书</p>
+          <p class="mt-1 text-sm text-(--muted-foreground)">你手边正翻开的 3 本书</p>
         </div>
         <a href="#" class="hidden items-center gap-1 text-sm text-(--muted-foreground) transition-colors hover:text-(--primary) sm:flex">
           查看全部
           <ArrowRight class="size-4" aria-hidden="true"/>
         </a>
       </div>
-
+      <!-- 内容 -->
       <div class="grid gap-4 md:grid-cols-3">
         <article class="group flex gap-4 rounded-lg border border-(--border) bg-(--card) p-4 transition-colors hover:border-(--primary)/40">
           <div class="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-sm shadow-sm">
@@ -63,9 +68,9 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
               <div class="mb-1.5 flex items-center justify-between text-xs">
                 <span class="flex items-center gap-1 text-(--muted-foreground)">
                   <CalendarClock class="size-3.5"/>
-                  应还 <!-- -->7月18日
+                  应还 7月18日
                 </span>
-                <span class="font-medium text-(--foreground)">剩 <!-- -->5<!-- --> 天</span>
+                <span class="font-medium text-(--foreground)">剩 5 天</span>
               </div>
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-(--muted)" role="progressbar" aria-valuenow="29" aria-valuemin="0" aria-valuemax="100" aria-label="《百年孤独》归还进度">
                 <div class="h-full rounded-full bg-(--primary)" style="width:29%"></div>
@@ -84,9 +89,9 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
               <div class="mb-1.5 flex items-center justify-between text-xs">
                 <span class="flex items-center gap-1 text-(--muted-foreground)">
                   <CalendarClock class="size-3.5"/>
-                  应还 <!-- -->7月14日
+                  应还 7月14日
                 </span>
-                <span class="font-medium text-(--foreground)">剩 <!-- -->3<!-- --> 天</span>
+                <span class="font-medium text-(--foreground)">剩 3 天</span>
               </div>
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-(--muted)" role="progressbar" aria-valuenow="29" aria-valuemin="0" aria-valuemax="100" aria-label="《百年孤独》归还进度">
                 <div class="h-full rounded-full bg-(--primary)" style="width:29%"></div>
@@ -106,9 +111,9 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
               <div class="mb-1.5 flex items-center justify-between text-xs">
                 <span class="flex items-center gap-1 text-(--muted-foreground)">
                   <CalendarClock class="size-3.5"/>
-                  应还 <!-- -->7月12日
+                  应还 7月12日
                 </span>
-                <span class="font-medium text-(--destructive)">剩 <!-- -->1<!-- --> 天</span>
+                <span class="font-medium text-(--destructive)">剩 1 天</span>
               </div>
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-(--muted)" role="progressbar" aria-valuenow="29" aria-valuemin="0" aria-valuemax="100" aria-label="《百年孤独》归还进度">
                 <div class="h-full rounded-full bg-(--destructive)" style="width:29%"></div>
@@ -119,6 +124,7 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
       </div>
     </section>
 
+    <!-- 书架 -->
     <section class="mx-auto max-w-6xl px-4 py-12 md:px-8">
       <div class="flex flex-col gap-16">
         <div>
@@ -208,7 +214,9 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
       </div>
     </section>
 
+    <!-- 结尾 -->
     <section class="mx-auto grid max-w-6xl gap-12 px-4 py-12 md:grid-cols-5 md:px-8">
+      <!-- 心愿单 -->
       <div class="md:col-span-3">
         <h2 class="mb-6 font-serif text-2xl font-medium md:text-3xl">心愿单</h2>
         <ul class="flex flex-col divide-y divide-(--border)">
@@ -244,21 +252,22 @@ import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } f
           </li>
         </ul>
       </div>
+      <!-- 阅读挑战 -->
       <div class="md:col-span-2">
         <div class="rounded-lg border border-(--border) bg-(--card) p-6">
           <div class="flex items-center gap-2 text-(--primary)">
             <Target class="size-5" aria-hidden="true"/>
-            <h2 class="font-serif text-xl font-medium">2026<!-- --> 年阅读挑战</h2>
+            <h2 class="font-serif text-xl font-medium">2026 年阅读挑战</h2>
           </div>
           <p class="mt-4 font-serif text-5xl font-medium">
             37
-            <span class="text-2xl text-(--muted-foreground)"> / <!-- -->52<!-- --> 本</span>
+            <span class="text-2xl text-(--muted-foreground)"> / 52 本</span>
           </p>
           <div class="mt-5 h-2 w-full overflow-hidden rounded-full bg-(--muted)" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100" aria-label="年度阅读挑战进度">
             <div class="h-full rounded-full bg-(--primary)" style="width:71%"></div>
           </div>
           <p class="mt-4 text-sm leading-relaxed text-(--muted-foreground)">
-            已完成年度目标的 <!-- -->71<!-- -->%，保持这个节奏，你会在年底前轻松达成。再读 <!-- -->15<!-- --> 本即可。
+            已完成年度目标的 71%，保持这个节奏，你会在年底前轻松达成。再读 15 本即可。
           </p>
         </div>
       </div>
