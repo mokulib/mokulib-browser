@@ -66,6 +66,12 @@ const router = createRouter({
       },
     },
     {
+      path: '/book/:id',
+      name: 'book',
+      component: () => import('@/views/BookView.vue'),
+      props: true, // 将路径参数作为 props 传递给组件
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('@/views/AboutView.vue'),
