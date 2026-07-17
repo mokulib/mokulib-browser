@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
+import { useLocalStorage } from "@vueuse/core";
 
 /**
  * <h3>Theme Store</h3>
@@ -12,7 +13,7 @@ import { computed, ref, watch } from "vue";
 export const useThemeStore = defineStore('theme', () => {
 
   // 从系统偏好初始化主题
-  let isDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches);
+  let isDark = useLocalStorage('mk-theme', window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const isSun = computed(() => !isDark.value);
 
