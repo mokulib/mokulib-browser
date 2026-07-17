@@ -63,6 +63,7 @@ const router = createRouter({
       component: () => import('@/views/ProfileView.vue'),
       meta: {
         requiresAuth: true,
+        redirectToHomeOnLogout: true,
       },
     },
     {

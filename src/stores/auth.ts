@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import type { Response } from "@/types";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.ts";
 import { callApi } from "@/utils/callApi.ts";
 
@@ -42,13 +42,16 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('jwt'); // 清除持久化存储
   }
 
+  const route = useRoute();
   const router = useRouter();
 
   function logout() {
     // 技术登出
     clearJwt();
     // 跳转到首页
-    router.push({ name: 'home' });
+    console.log(route)
+    if (route.meta.redirectToHomeOnLogout)
+      router.push({ name: 'home' });
   }
 
   /////////////////////////////////////////////
