@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import type { Response } from "@/types";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.ts";
 import { callApi } from "@/utils/callApi.ts";
+import { useLocalStorage } from "@vueuse/core";
 
 /**
  * <h3>Auth Store</h3>
@@ -22,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   /////////////////////////////////////////////
 
   // 从 localStorage 初始化。初始化后，不得为 null 或 undefined
-  const jwt = ref<string>(localStorage.getItem('jwt') || '');
+  const jwt = useLocalStorage('mk-jwt', '');
   // 用于构造 Authorization Header
   const authorizationHeader = computed(() => `Bearer ${jwt.value}`);
   // 对外暴露，缓存当前登录状态
@@ -34,12 +35,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setJwt(token: string) {
     jwt.value = token;
-    localStorage.setItem('jwt', token); // 持久化存储
   }
 
   function clearJwt() {
     setJwt("");
-    localStorage.removeItem('jwt'); // 清除持久化存储
   }
 
   const route = useRoute();
@@ -49,7 +48,6 @@ export const useAuthStore = defineStore('auth', () => {
     // 技术登出
     clearJwt();
     // 跳转到首页
-    console.log(route)
     if (route.meta.redirectToHomeOnLogout)
       router.push({ name: 'home' });
   }
@@ -98,7 +96,7 @@ export const useAuthStore = defineStore('auth', () => {
       return true
 
     // 如果无效则跳转到登录页面
-    await useRouter().push({ name: 'login' });
+    await router.push({ name: 'login' });
     return false;
   }
 
