@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', () => {
       case 'ADMIN':
         return '管理员';
       default:
-        return '未知角色';
+        return '游客';
     }
   });
   // 头像
