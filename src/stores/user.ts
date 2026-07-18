@@ -44,10 +44,7 @@ export const useUserStore = defineStore('user', () => {
   // 头像
   let user_avatar_timestamp = ref(0) // 用于强制刷新头像
   let user_avatar = computed(() => {
-    // 获取 API 服务器的 baseURL
-    const baseURL: string = axios.defaults.baseURL ? axios.defaults.baseURL : '';
-    // 拼接用户头像的 URL
-    return new URL(`/avatars/${user_id.value}.png?timestamp=${user_avatar_timestamp.value}`, baseURL).toString()
+    return `/avatars/${user_id.value}.png?timestamp=${user_avatar_timestamp.value}`
   })
 
   /////////////////////////////////////////////

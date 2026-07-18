@@ -20,7 +20,6 @@ app.use(ElementPlus)
 // Axios 配置
 //////////////////////////////////////////////////////////////
 
-axios.defaults.baseURL = 'http://192.168.1.110:8080'
 axios.defaults.timeout = 5000
 
 // 全局响应拦截器
