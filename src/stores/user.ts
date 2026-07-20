@@ -23,11 +23,11 @@ export const useUserStore = defineStore('user', () => {
   /////////////////////////////////////////////
 
   // 用户信息
-  let user_id = ref('');
-  let user_email = ref('');
-  let user_role = ref('');
-  let user_username = ref('');
-  let user_bio = ref('');
+  let user_id = ref<number>(-1);
+  let user_email = ref<string>('');
+  let user_role = ref<string>('');
+  let user_username = ref<string>('');
+  let user_bio = ref<string>('');
   // 常用状态
   let user_is_user = computed(() => user_role.value === 'USER');
   let user_is_admin = computed(() => user_role.value === 'ADMIN');
@@ -63,7 +63,7 @@ export const useUserStore = defineStore('user', () => {
       user_username.value = user.username
       user_bio.value = user.bio
     } else {
-      user_id.value = '';
+      user_id.value = -1;
       user_email.value = '';
       user_role.value = '';
       user_username.value = '';
