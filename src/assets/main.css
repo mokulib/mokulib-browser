@@ -2,6 +2,8 @@
 @import 'tailwindcss';
 @plugin "tailwindcss-animate";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 #app {
   /* max-width: 1280px; */
   /* margin: 0 auto; */
