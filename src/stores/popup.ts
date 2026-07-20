@@ -68,4 +68,5 @@ export const usePopupStore = defineStore('popup', () => {
 export type PopupKey =
   "header" |
   "deleteBookReviewConfirm" |
+  "addTag"
   ;
