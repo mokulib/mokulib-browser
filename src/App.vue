@@ -3,7 +3,7 @@ import { RouterView, useRoute } from 'vue-router';
 import PageHeader from "@/components/PageHeader.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import { computed } from "vue";
-import HeaderBottomSheet from "@/components/popup/HeaderBottomSheet.vue";
+import HeaderBottomSheet from "@/components/popup/variants/HeaderBottomSheet.vue";
 
 const route = useRoute();
 

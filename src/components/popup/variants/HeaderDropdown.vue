@@ -2,17 +2,17 @@
 import { User, ArrowRight, SunMoon, Sun, Moon, LogOut } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
-import { useHeaderStore } from "@/stores/header.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 import { useThemeStore } from "@/stores/theme.ts";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
-const headerStore = useHeaderStore();
+const popupStore = usePopupStore();
 const themeStore = useThemeStore();
 </script>
 
 <template>
-  <div v-if="headerStore.isExpanded" role="menu" class="hidden sm:block absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-lg animate-in fade-in-0 zoom-in-95">
+  <div v-if="popupStore.isOpen('header') && authStore.isLoggedIn" role="menu" class="hidden sm:block absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-lg animate-in fade-in-0 zoom-in-95">
     <!-- 信息 -->
     <div class="flex items-center gap-3 px-4 py-4">
       <img :src="userStore.user_avatar" :alt="userStore.user_username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
