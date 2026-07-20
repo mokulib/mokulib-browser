@@ -9,6 +9,9 @@ const route = useRoute();
 
 const hideHeader = computed(() => route.meta.hideHeader ?? false);
 const hideFooter = computed(() => route.meta.hideFooter ?? false);
+
+const popupComponents = Object.values(import.meta.glob('./components/popup/presets/*.vue', { eager: true }))
+  .map((mod: any) => mod.default);
 </script>
 
 <template>
@@ -24,6 +27,9 @@ const hideFooter = computed(() => route.meta.hideFooter ?? false);
     </footer>
   </div>
 
+  <!-- 挂载预设 Popup -->
+  <component v-for="(component, index) in popupComponents" :key="index" :is="component"/>
+  <!-- 手动注册变种弹窗 -->
   <HeaderBottomSheet/>
 </template>
 
