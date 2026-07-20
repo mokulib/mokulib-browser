@@ -114,6 +114,7 @@ Done in 57.9s using pnpm v11.10.0
 - [x] `pnpm add element-plus`
 - [x] `pnpm add js-base64`
 - [x] `pnpm add tailwindcss`
+- [x] `pnpm add tailwindcss-animate`
 - [x] `pnpm add mockjs -D`
 - [x] `pnpm add vite-plugin-mock -D`
 

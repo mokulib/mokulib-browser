@@ -8,6 +8,7 @@
 ![js-base64](https://img.shields.io/badge/js--base64-v3.8.0-5A29E4)
 ![pinia](https://img.shields.io/badge/pinia-v3.0.4-4FC08D)
 ![tailwindcss](https://img.shields.io/badge/tailwindcss-v4.3.2-409EFF)
+![tailwindcss-animate](https://img.shields.io/badge/tailwindcss--animate-v1.0.7-409EFF)
 ![vue](https://img.shields.io/badge/vue-v3.5.38-4FC08D)
 ![vue-router](https://img.shields.io/badge/vue--router-v5.1.0-4FC08D)
 
