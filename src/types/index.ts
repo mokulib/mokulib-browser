@@ -3,3 +3,5 @@ export { type Role, type User } from "./user.ts"
 export { type Book } from "./book.ts"
 export { type BookCopy } from "./book-copy.ts"
 export { type BookReview } from './book-review.ts'
+export { type Category } from './category.ts'
+export { type Tag } from './tag.ts'

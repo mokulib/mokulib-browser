@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { Upload, Tag, Heart, Pencil, X, Plus, Lock, Star, RefreshCw, BookUp, Undo2, ArrowDownToLine, ArrowUpFromLine, Trash2 } from "@lucide/vue";
+import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, Undo2, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book, BookCopy, BookReview } from "@/types";
-import { callApi } from "@/utils/callApi.ts";
+import type { Book, BookCopy, BookReview, Category, Tag } from "@/types";
+import api from "@/api"
 
 const { id } = defineProps(['id']);
 
@@ -14,12 +14,12 @@ const userStore = useUserStore();
 const popupStore = usePopupStore();
 
 const book = ref<Book>();
-const bookCopies = ref<BookCopy[]>([]);
-const category = ref<string>('历史');
-const tags = ref<string[]>(['畅销', '人类学', '科普', '值得重读']);
+const category = ref<Category>();
+const tags = ref<Tag[]>();
+const bookCopies = ref<BookCopy[]>();
 const bookReviews = ref<BookReview[]>([]);
 
-const isBorrowedByMe = computed(() => bookCopies.value.some(bookCopy => bookCopy.is_borrowed_by_me));
+const isBorrowedByMe = computed(() => bookCopies.value?.some(bookCopy => bookCopy.is_borrowed_by_me) ?? false);
 const isInWishlist = ref(false);
 const isWishlistEnabled = computed(() => authStore.isLoggedIn && !isBorrowedByMe.value)
 const hasWrittenBookReview = computed(() => bookReviews.value.some(bookReview => userStore.user_id === bookReview.user_id));
@@ -56,31 +56,19 @@ const removeStatusToString = (removeStatus: string) => {
 
 onMounted(async () => {
   // 请求图书信息
-  const bookData = await callApi({
-    method: 'get',
-    url: '/api/book/' + id,
-  });
-  book.value = bookData.data ?? {};
+  book.value = (await api.get<Book>('/api/books/' + id)).data ?? {};
+  // 请求分类信息
+  category.value = (await api.get<Category>('/api/categories/' + book.value.categoryId)).data ?? {};
+  // 请求标签信息
+  tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
   // 请求心愿单信息
-  const isInWishlistData = await callApi({
-    method: 'get',
-    url: '/api/wishlist/' + id,
-  });
-  isInWishlist.value = isInWishlistData.data ?? false;
+  if (authStore.isLoggedIn)
+    isInWishlist.value = (await api.get('/api/wishlist/' + id)).data ?? false;
   // 仅用户或管理员可以请求馆藏信息
-  if (authStore.isLoggedIn) {
-    const bookCopiesData = await callApi({
-      method: 'get',
-      url: '/api/book-copy/' + id,
-    });
-    bookCopies.value = bookCopiesData.data ?? [];
-  }
+  if (authStore.isLoggedIn)
+    bookCopies.value = (await api.get('/api/book-copy/' + id)).data ?? [];
   // 书评信息
-  const bookReviewsData = await callApi({
-    method: 'get',
-    url: '/api/book-review/' + id,
-  });
-  bookReviews.value = bookReviewsData.data ?? [];
+  bookReviews.value = (await api.get('/api/book-review/' + id)).data ?? [];
   // 处理书评信息
   if (authStore.isLoggedIn && bookReviews.value.length > 0) {
     const bookReviewIndex = bookReviews.value.findIndex(bookReview => userStore.user_id === bookReview.user_id);
@@ -104,9 +92,9 @@ onMounted(async () => {
     <section v-if="book" class="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <div class="flex flex-col gap-8 md:flex-row">
         <!-- 封面 -->
-        <div class="mx-auto w-full max-w-62.5 shrink-0 md:mx-0">
-          <div class="relative aspect-2/3 overflow-hidden rounded-lg shadow-md ring-1 ring-(--border)">
-            <img :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" :src="'/books/' + book.id + '.png'">
+        <div class="mx-auto w-full max-w-64 shrink-0 md:mx-0">
+          <div class="relative aspect-3/4 overflow-hidden rounded-lg shadow-md ring-1 ring-(--border)">
+            <img :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover" :src="'/books/' + book.id + '.png'">
             <div class="absolute right-2 bottom-2 flex flex-col gap-2">
               <button v-if="userStore.user_is_admin" type="button" class="
                 px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all
@@ -133,7 +121,7 @@ onMounted(async () => {
         <!-- 图书信息 -->
         <div class="min-w-0 flex-1">
           <span class="inline-flex items-center gap-1 rounded-full bg-(--accent) px-2.5 py-0.5 text-xs font-medium text-(--accent-foreground)">
-            {{ category }}
+            {{ category?.name }}
             <button v-if="userStore.user_is_admin" type="button" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground)">
               <Pencil class="size-3"/>
             </button>
@@ -186,11 +174,11 @@ onMounted(async () => {
           <p class="mt-5 text-pretty leading-relaxed text-(--muted-foreground)">{{ book.description }}</p>
           <div class="mt-5 flex flex-wrap items-center gap-2">
             <!-- 标签图标 -->
-            <Tag class="size-4 text-(--muted-foreground)"/>
+            <TagIcon class="size-4 text-(--muted-foreground)"/>
             <!-- 标签列表 -->
-            <template v-for="tag in tags">
+            <template v-for="tag in tags" :key="tag.id">
               <span class="inline-flex items-center gap-1 rounded-full bg-(--secondary) px-2.5 py-0.5 text-xs text-(--secondary-foreground)">
-                {{ tag }}
+                {{ tag.name }}
                 <button v-if="userStore.user_is_admin" type="button" class="text-(--secondary-foreground)/60 hover:text-(--destructive)">
                   <X class="size-3"/>
                 </button>
@@ -212,7 +200,7 @@ onMounted(async () => {
         <div class="flex items-baseline justify-between">
           <div class="flex items-center gap-4">
             <h2 class="font-serif text-2xl font-semibold">馆藏状态</h2>
-            <span v-if="authStore.isLoggedIn" class="text-sm text-(--muted-foreground)">共 {{ bookCopies.length }} 本</span>
+            <span v-if="authStore.isLoggedIn" class="text-sm text-(--muted-foreground)">共 {{ bookCopies?.length ?? 0 }} 本</span>
           </div>
           <button v-if="userStore.user_is_admin" type="button" class="group/button inline-flex items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 border-(--border) bg-(--muted)/30 hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&amp;_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
             <Plus class="size-3"/>
