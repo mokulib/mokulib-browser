@@ -4,8 +4,7 @@ import { Base64 } from "js-base64";
 import { ElMessage } from "element-plus";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useRouter } from "vue-router";
-import axios from "axios";
-import { callApi } from "@/utils/callApi.ts";
+import api from "@/api";
 import type { User } from "@/types";
 
 /**
@@ -75,15 +74,11 @@ export const useUserStore = defineStore('user', () => {
     // 构造 FileReader
     const reader = new FileReader()
     reader.onload = async function () {
-      const data = await callApi({
-        method: 'post',
-        url: '/api/user/avatar',
-        data: reader.result, // 读取的文件内容
+      const data = await api.post('/api/user/avatar', reader.result, {
         headers: {
-          'Authorization': useAuthStore().authorizationHeader,
           'Content-Type': 'application/octet-stream'
         }
-      })
+      });
       if (data.status === 'OK') {
         ElMessage.success('头像上传成功')
         // 延迟更新头像时间戳，确保头像刷新
@@ -98,51 +93,35 @@ export const useUserStore = defineStore('user', () => {
     reader.readAsArrayBuffer(newFile)
   }
 
-  function updateUsername(newUsername: string) {
-    axios({
-      method: 'post',
-      url: '/api/user/username',
+  async function updateUsername(newUsername: string) {
+    const data = await api.post('/api/user/username', null, {
       params: {
         newUsername: newUsername
       },
-      headers: {
-        'Authorization': useAuthStore().authorizationHeader,
-      }
-    }).then((response) => {
-      if (response.data.status === 'OK') {
-        ElMessage.success('用户名更新成功');
-      } else {
-        ElMessage.error('用户名更新失败: ' + response.data.message);
-      }
-    }).catch(() => {
-      ElMessage.error('网络错误，请稍后再试');
     });
+    if (data.status === 'OK') {
+      ElMessage.success('用户名更新成功');
+    } else {
+      ElMessage.error('用户名更新失败: ' + data.message);
+    }
   }
 
   const router = useRouter();
 
-  function modifyPassword(params: any) {
-    axios({
-      method: 'post',
-      url: '/api/user/password',
+  async function modifyPassword(params: any) {
+    const data = await api.post('/api/user/password', null, {
       params: params,
-      headers: {
-        'Authorization': useAuthStore().authorizationHeader,
-      }
-    }).then((response) => {
-      if (response.data.status === 'OK') {
-        ElMessage.success(response.data.message);
-        // 清除用户信息，强制用户重新登录
-        setTimeout(() => {
-          useAuthStore().logout();
-          router.push({ name: 'login' })
-        }, 500);
-      } else {
-        ElMessage.error(response.data.message);
-      }
-    }).catch(() => {
-      ElMessage.error('网络错误，请稍后再试');
-    })
+    });
+    if (data.status === 'OK') {
+      ElMessage.success(data.message);
+      // 清除用户信息，强制用户重新登录
+      setTimeout(() => {
+        useAuthStore().logout();
+        router.push({ name: 'login' })
+      }, 500);
+    } else {
+      ElMessage.error(data.message);
+    }
   }
 
   return {

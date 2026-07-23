@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { RefreshCw } from "@lucide/vue";
-import axios from "axios";
 import { useAuthStore } from "@/stores/auth.ts";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
+import api from "@/api";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -21,9 +21,9 @@ const loginForm = ref({
 })
 
 const refreshImageCaptcha = () => {
-  axios.get("/api/captcha").then(response => {
+  api.get<{ token: string, image: any }>("/api/captcha").then(data => {
     // 记录验证码 token
-    loginForm.value.imageToken = response.data.data.token;
+    loginForm.value.imageToken = data.data.token;
     // 清空验证码
     loginForm.value.imageCaptcha = '';
 
@@ -46,7 +46,7 @@ const refreshImageCaptcha = () => {
       console.error('图片加载失败');
     };
     // 加载图片
-    img.src = "data:image/png;base64," + response.data.data.image;
+    img.src = "data:image/png;base64," + data.data.image;
   });
 }
 

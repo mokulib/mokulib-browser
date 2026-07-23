@@ -3,8 +3,8 @@ import { computed, watch } from "vue";
 import type { Response } from "@/types";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.ts";
-import { callApi } from "@/utils/callApi.ts";
 import { useLocalStorage } from "@vueuse/core";
+import api from "@/api";
 
 /**
  * <h3>Auth Store</h3>
@@ -57,12 +57,8 @@ export const useAuthStore = defineStore('auth', () => {
   /////////////////////////////////////////////
 
   // 登录
-  async function login(params: {}): Promise<Response> {
-    const data = await callApi({
-      method: "post",
-      url: "/api/auth/login",
-      params: params
-    })
+  async function login(params: {}): Promise<Response<any>> {
+    const data = await api.post("/api/auth/login", null, { params: params });
     if (data.status !== 'OK')
       clearJwt();
     return data;
@@ -74,13 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
       return false;
 
     // 发送请求
-    const isValid = (await callApi({
-      method: 'get',
-      url: '/api/auth/ping',
-      headers: {
-        Authorization: `Bearer ${jwt.value}`,
-      },
-    })).status === 'OK';
+    const isValid = (await api.get('/api/auth/ping')).status === 'OK';
 
     // 验证失败清除保存的 JWT
     if (!isValid)

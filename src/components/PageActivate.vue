@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { ElLoading } from "element-plus";
 import { CircleAlert, CircleCheck, CircleX, GlobeX } from "@lucide/vue";
-import { callApi } from "@/utils/callApi.ts";
+import api from "@/api";
 
 const { token } = defineProps(['token'])
 
@@ -17,10 +17,7 @@ onMounted(async () => {
     background: 'rgba(0, 0, 0, 0.5)',
   })
   // 请求
-  const data = await callApi({
-    method: 'post',
-    url: '/api/auth/activate/' + token,
-  });
+  const data = await api.post('/api/auth/activate/' + token);
   // 处理（增加延迟以避免屏幕闪烁）
   setTimeout(() => {
     status.value = data.status as 'OK' | 'ERROR' | 'NETWORK_ERROR'

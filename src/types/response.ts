@@ -1,6 +1,6 @@
-export interface Response {
+export interface Response<T> {
   status: string;
   businessType: string;
   message: string;
-  data: any;
+  data: T;
 }
