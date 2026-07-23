@@ -30,7 +30,7 @@
     "@vue/tsconfig": "^0.9.1",
     "mockjs": "^1.1.0",
     "npm-run-all2": "^9.0.2",
-    "typescript": "~6.0.0",
+    "typescript": "~7.0.2",
     "vite": "^8.0.16",
     "vite-plugin-mock": "^3.0.2",
     "vite-plugin-vue-devtools": "^8.1.2",
