@@ -33,7 +33,7 @@ export const useUserStore = defineStore('user', () => {
   let user_role_name = computed(() => {
     switch (user_role.value) {
       case 'USER':
-        return '用户';
+        return '读者';
       case 'ADMIN':
         return '管理员';
       default:
