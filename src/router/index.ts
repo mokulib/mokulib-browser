@@ -64,6 +64,45 @@ const router = createRouter({
         requiresAuth: true,
         redirectToHomeOnLogout: true,
       },
+      children: [
+        {
+          path: '',
+          redirect: { name: 'profile-home' },
+        },
+        {
+          path: 'borrowing',
+          name: 'profile-home',
+          component: () => import('@/views/profile/ProfileHomeView.vue'),
+          meta: {
+            label: '借阅中'
+          }
+        },
+        {
+          path: 'wishlist',
+          name: 'profile-wishlist',
+          component: () => import('@/views/profile/ProfileWishlistView.vue'),
+          meta: {
+            label: '心愿单'
+          }
+        },
+        {
+          path: 'history',
+          name: 'profile-history',
+          component: () => import('@/views/profile/ProfileHistoryView.vue'),
+          meta: {
+            label: '历史借阅'
+          }
+        },
+      ],
+    },
+    {
+      path: '/security',
+      name: 'security',
+      component: () => import('@/views/SecurityView.vue'),
+      meta: {
+        requiresAuth: true,
+        redirectToHomeOnLogout: true,
+      },
     },
     {
       path: '/book/:id',

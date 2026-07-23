@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { User, ArrowRight, SunMoon, Sun, Moon, LogOut } from "@lucide/vue";
+import { User, ArrowRight, Key, SunMoon, Sun, Moon, LogOut } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
@@ -27,13 +27,23 @@ const themeStore = useThemeStore();
     <div class="mb-1 border-t border-(--border)"></div>
     <!-- 个人中心 -->
     <div class="px-2 py-1">
-      <a href="/profile" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+      <RouterLink :to="{ name: 'profile' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
         <div class="flex items-center gap-2.5 py-2 text-sm">
           <User class="size-4"/>
           个人中心
         </div>
         <ArrowRight class="size-4"/>
-      </a>
+      </RouterLink>
+    </div>
+    <!-- 安全中心 -->
+    <div class="px-2 py-1">
+      <RouterLink :to="{ name: 'security' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-2 text-sm">
+          <Key class="size-4"/>
+          安全中心
+        </div>
+        <ArrowRight class="size-4"/>
+      </RouterLink>
     </div>
     <div class="my-1 border-t border-(--border)"></div>
     <!-- 主题切换 -->
