@@ -16,12 +16,10 @@ const emit = defineEmits<{
 const slots = useSlots();
 
 const popupStore = usePopupStore();
-
-const show = computed(() => popupStore.isOpen(popupKey.value));
 </script>
 
 <template>
-  <div v-if="show" class="fixed inset-0 z-70 flex items-end justify-center sm:items-center">
+  <div v-if="popupStore.isOpen(popupKey)" class="fixed inset-0 z-70 flex items-end justify-center sm:items-center">
     <!-- 遮罩 -->
     <div @click="popupStore.close" class="absolute inset-0 bg-(--foreground)/40 animate-in fade-in-0"></div>
     <!-- Popup -->
