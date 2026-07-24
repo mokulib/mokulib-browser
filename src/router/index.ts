@@ -67,6 +67,7 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'profile-empty',
           redirect: { name: 'profile-home' },
         },
         {
