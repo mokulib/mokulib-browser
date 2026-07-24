@@ -8,7 +8,7 @@ const popupStore = usePopupStore();
 
 const book = ref<any>();
 
-async function formHandler() {
+async function confirmCallback() {
   // 提交请求
   const data = await api.put('/api/books/' + book.value.id, book.value);
   // 关闭弹窗，返回数据
@@ -16,7 +16,7 @@ async function formHandler() {
 }
 
 // 监听弹窗状态
-watch(() => popupStore.popups, (newValue) => {
+watch(() => popupStore.popups, (newValue: string) => {
   // 本弹窗打开时，重新刷新数据（深拷贝以避免影响原始数据）
   if (newValue === 'editBook') {
     book.value = JSON.parse(JSON.stringify(popupStore.payload || {}));
@@ -25,7 +25,7 @@ watch(() => popupStore.popups, (newValue) => {
 </script>
 
 <template>
-  <Popup popup-key="editBook" title="编辑图书信息" confirm="保存" @confirm="formHandler">
+  <Popup popup-key="editBook" title="编辑图书信息" confirm="保存" @confirm="confirmCallback">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
