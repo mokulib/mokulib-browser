@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from "@/stores/auth.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -127,6 +128,9 @@ const router = createRouter({
 
 // 全局路由守卫
 router.beforeEach(async (to) => {
+  // 关闭弹窗
+  usePopupStore().close();
+  // 根据需要验证登录状态
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // 需要登录，进行验证
     const authStore = useAuthStore()
