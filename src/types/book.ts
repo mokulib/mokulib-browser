@@ -1,14 +1,14 @@
 export interface Book {
   id: number;
   isbn: string;
-  categoryId: number;
+  category_id: number;
   title: string;
   subtitle: string;
   author: string;
   publisher: string;
-  publishDate: string;
+  publish_date: string;
   edition: string;
-  pageCount: number;
+  page_count: number;
   language: string;
   description: string;
   price: number;

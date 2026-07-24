@@ -179,7 +179,7 @@ onMounted(async () => {
             </div>
             <div class="flex gap-2 text-sm">
               <span class="w-20 shrink-0 text-(--muted-foreground)">出版日期</span>
-              <span class="text-(--foreground)">{{ book.publishDate }}</span>
+              <span class="text-(--foreground)">{{ book.publish_date }}</span>
             </div>
             <div class="flex gap-2 text-sm">
               <span class="w-20 shrink-0 text-(--muted-foreground)">版次</span>
@@ -187,7 +187,7 @@ onMounted(async () => {
             </div>
             <div class="flex gap-2 text-sm">
               <span class="w-20 shrink-0 text-(--muted-foreground)">页数</span>
-              <span class="text-(--foreground)">{{ book.pageCount }} 页</span>
+              <span class="text-(--foreground)">{{ book.page_count }} 页</span>
             </div>
             <div class="flex gap-2 text-sm">
               <span class="w-20 shrink-0 text-(--muted-foreground)">语言</span>
