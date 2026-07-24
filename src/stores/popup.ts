@@ -50,8 +50,8 @@ export const usePopupStore = defineStore('popup', () => {
    */
   function close(data?: Response<any>) {
     popups.value = undefined;
-    // 如果回调函数，则调用
-    if (callback.value)
+    // 如果回调函数存在（基本要求），且返回数据存在（返回数据不存在，代表调用者无需关心，通常意味着用户点击弹窗内的取消或者 X 按钮；返回数据存在，代表调用者需要处理，通常意味着用户点击弹窗内的 confirm 按钮），则调用
+    if (callback.value && data)
       callback.value(data);
   }
 
