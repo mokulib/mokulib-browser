@@ -81,5 +81,6 @@ export type PopupKey =
   "header" |
   "deleteBookReviewConfirm" |
   "addTag" |
-  "editBook"
+  "editBook" |
+  "addBookCopy"
   ;

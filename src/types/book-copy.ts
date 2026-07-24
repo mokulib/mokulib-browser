@@ -42,3 +42,10 @@ type BookCopyUser = BookCopyBase & { role: 'USER' } & (BookCopyAvailable | BookC
 type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & (BookCopyAvailable | BookCopyUnavailableAdmin | BookCopyWithdrawn) & BookCopyAdminAddition;
 
 export type BookCopy = BookCopyUser | BookCopyAdmin;
+
+export interface AddBookCopyRequest {
+  book_id: number;
+  purchase_price: number;
+  purchase_date: string;
+  source: string;
+}
