@@ -59,6 +59,10 @@ const removeStatusToString = (removeStatus: string) => {
 // 请求
 /////////////////////////////////////////////
 
+async function fetchCategory() {
+  category.value = (await api.get<Category>('/api/categories/' + book.value?.category_id)).data ?? {};
+}
+
 async function fetchTags() {
   tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
 }
@@ -66,6 +70,18 @@ async function fetchTags() {
 /////////////////////////////////////////////
 // 回调
 /////////////////////////////////////////////
+
+async function editCategoryCallback(data: Response<Book>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    // 刷新数据
+    book.value = data.data;
+    // 更新分类名
+    await fetchCategory();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
 
 async function deleteTagHandler(tagId: number) {
   // 提交请求
@@ -117,7 +133,7 @@ onMounted(async () => {
   // 请求图书信息
   book.value = (await api.get<Book>('/api/books/' + id)).data ?? {};
   // 请求分类信息
-  category.value = (await api.get<Category>('/api/categories/' + book.value.category_id)).data ?? {};
+  await fetchCategory();
   // 请求标签信息
   await fetchTags();
   // 请求心愿单信息
@@ -181,7 +197,7 @@ onMounted(async () => {
         <div class="min-w-0 flex-1">
           <span class="inline-flex items-center gap-1 rounded-full bg-(--accent) px-2.5 py-0.5 text-xs font-medium text-(--accent-foreground)">
             {{ category?.name }}
-            <button v-if="userStore.user_is_admin" type="button" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground)">
+            <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('editCategory', { book, category }, editCategoryCallback)" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground)">
               <Pencil class="size-3"/>
             </button>
           </span>
