@@ -19,14 +19,14 @@ const router = createRouter({
         hideFooter: true,
       },
       // 局部路由守卫
-      async beforeEnter(to, from, next) {
+      async beforeEnter() {
         const authStore = useAuthStore();
         const isLoggedIn: boolean = await authStore.ping(); // 使用 await 等待异步函数返回结果
 
         if (isLoggedIn) {
-          next({ name: 'home' });
+          return { name: 'home' };
         } else {
-          next();
+          return true;
         }
       }
     },
@@ -47,13 +47,13 @@ const router = createRouter({
       component: () => import('@/views/ActivateView.vue'),
       props: true, // 将路径参数作为 props 传递给组件
       // 局部路由守卫
-      async beforeEnter(to, from, next) {
+      async beforeEnter() {
         const authStore = useAuthStore();
 
         if (authStore.isLoggedIn) // 强制登出
           authStore.logout();
 
-        next();
+        return true;
       }
     },
     {
@@ -125,18 +125,18 @@ const router = createRouter({
 })
 
 // 全局路由守卫
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // 需要登录，进行验证
     const authStore = useAuthStore()
     const isLoggedIn: boolean = await authStore.ping();
 
     if (!isLoggedIn) { // 如果未登录
-      next({ name: 'login' }) // 跳转到登录页
+      return { name: 'login' }; // 跳转到登录页
     }
   }
   // 允许导航
-  next()
+  return true;
 })
 
 export default router
