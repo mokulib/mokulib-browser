@@ -56,13 +56,45 @@ const removeStatusToString = (removeStatus: string) => {
 }
 
 /////////////////////////////////////////////
+// 请求
+/////////////////////////////////////////////
+
+async function fetchTags() {
+  tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
+}
+
+/////////////////////////////////////////////
 // 回调
 /////////////////////////////////////////////
 
+async function deleteTagHandler(tagId: number) {
+  // 提交请求
+  const data = await api.delete('/api/books/' + id + '/tags/' + tagId);
+  // 处理数据
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    // 刷新数据
+    await fetchTags();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
 function editBookCallback(data: Response<Book>) {
   if (data.status === 'OK') {
-    book.value = data.data;
     ElMessage.success(data.message);
+    // 刷新数据
+    book.value = data.data;
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
+async function addTagCallback(data: Response<undefined>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    // 刷新数据
+    await fetchTags();
   } else {
     ElMessage.error(data.message);
   }
@@ -85,9 +117,9 @@ onMounted(async () => {
   // 请求图书信息
   book.value = (await api.get<Book>('/api/books/' + id)).data ?? {};
   // 请求分类信息
-  category.value = (await api.get<Category>('/api/categories/' + book.value.categoryId)).data ?? {};
+  category.value = (await api.get<Category>('/api/categories/' + book.value.category_id)).data ?? {};
   // 请求标签信息
-  tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
+  await fetchTags();
   // 请求心愿单信息
   if (authStore.isLoggedIn)
     isInWishlist.value = (await api.get('/api/wishlist/' + id)).data ?? false;
@@ -206,13 +238,13 @@ onMounted(async () => {
             <template v-for="tag in tags" :key="tag.id">
               <span class="inline-flex items-center gap-1 rounded-full bg-(--secondary) px-2.5 py-0.5 text-xs text-(--secondary-foreground)">
                 {{ tag.name }}
-                <button v-if="userStore.user_is_admin" type="button" class="text-(--secondary-foreground)/60 hover:text-(--destructive)">
+                <button v-if="userStore.user_is_admin" type="button" @click="deleteTagHandler(tag.id)" class="text-(--secondary-foreground)/60 hover:text-(--destructive)">
                   <X class="size-3"/>
                 </button>
               </span>
             </template>
             <!-- 添加标签 -->
-            <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('addTag')" class="inline-flex items-center gap-1 rounded-full border border-dashed border-(--border) px-2.5 py-0.5 text-xs text-(--muted-foreground) transition-colors hover:border-(--primary) hover:text-(--primary)">
+            <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('addTag', { id, tags }, addTagCallback)" class="inline-flex items-center gap-1 rounded-full border border-dashed border-(--border) px-2.5 py-0.5 text-xs text-(--muted-foreground) transition-colors hover:border-(--primary) hover:text-(--primary)">
               <Plus class="size-3"/>
               添加标签
             </button>
