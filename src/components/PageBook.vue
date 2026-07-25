@@ -188,15 +188,15 @@ onMounted(async () => {
           <div class="relative aspect-3/4 overflow-hidden rounded-lg shadow-md ring-1 ring-(--border)">
             <img :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover" :src="'/books/' + book.id + '.png'">
             <div class="absolute right-2 bottom-2 flex flex-col gap-2">
-              <button v-if="userStore.user_is_admin" type="button" class="
-                px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all
+              <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('uploadBookImage', id)" class="
+                px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all border border-(--border)
                 hover:bg-(--background)
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
                 active:not-aria-[haspopup]:translate-y-px">
                 <Upload class="size-4 shrink-0 pointer-events-none"/>
               </button>
               <button type="button" @click="wishlistHandler" :disabled="!isWishlistEnabled" :data-is-in-wishlist="isInWishlist" class="
-                px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all
+                px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all border border-(--border)
                 hover:not-disabled:bg-(--background)
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
                 active:not-disabled:not-aria-[haspopup]:translate-y-px
