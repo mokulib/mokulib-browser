@@ -58,8 +58,8 @@ axios.interceptors.response.use(
       // 重新认证
       const authStore = useAuthStore();
       // 越权访问在正常的设计流程中不应触发，因此在正常情况下，必然是由凭证过期引起，则必然跳转
-      await authStore.pingOrRedirect();
-      // 越权访问静默返回，而不是继续抛出
+      authStore.logout();
+      // 静默返回
       return error.response;
     }
     // 网络错误
