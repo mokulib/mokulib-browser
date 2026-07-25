@@ -4,7 +4,7 @@ import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, Re
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book, BookCopy, BookReview, Category, Tag, Response } from "@/types";
+import type { Book, BookCopy, BookReview, Category, Tag, Response, Wishlist } from "@/types";
 import api from "@/api"
 import { ElMessage } from "element-plus";
 
@@ -56,7 +56,7 @@ const removeStatusToString = (removeStatus: string) => {
 }
 
 /////////////////////////////////////////////
-// 请求
+// 页面展示用数据请求
 /////////////////////////////////////////////
 
 async function fetchCategory() {
@@ -68,16 +68,17 @@ async function fetchTags() {
 }
 
 /////////////////////////////////////////////
-// 回调
+// 业务操作请求
 /////////////////////////////////////////////
 
-async function editCategoryCallback(data: Response<Book>) {
+async function wishlistHandler() {
+  // 根据当前状态决定请求类型
+  const data = isInWishlist.value ? await api.delete<Wishlist>('/api/wishlists/' + id) : await api.post<Wishlist>('/api/wishlists/' + id);
+  // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
     // 刷新数据
-    book.value = data.data;
-    // 更新分类名
-    await fetchCategory();
+    isInWishlist.value = data.data.is_in_wishlist;
   } else {
     ElMessage.error(data.message);
   }
@@ -91,6 +92,22 @@ async function deleteTagHandler(tagId: number) {
     ElMessage.success(data.message);
     // 刷新数据
     await fetchTags();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
+/////////////////////////////////////////////
+// 弹窗回调
+/////////////////////////////////////////////
+
+async function editCategoryCallback(data: Response<Book>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    // 刷新数据
+    book.value = data.data;
+    // 更新分类名
+    await fetchCategory();
   } else {
     ElMessage.error(data.message);
   }
@@ -138,7 +155,7 @@ onMounted(async () => {
   await fetchTags();
   // 请求心愿单信息
   if (authStore.isLoggedIn)
-    isInWishlist.value = (await api.get('/api/wishlist/' + id)).data ?? false;
+    isInWishlist.value = (await api.get<Wishlist>('/api/wishlists/' + id)).data.is_in_wishlist ?? false;
   // 仅用户或管理员可以请求馆藏信息
   if (authStore.isLoggedIn)
     bookCopies.value = (await api.get('/api/book-copy/' + id)).data ?? [];
@@ -178,7 +195,7 @@ onMounted(async () => {
                 active:not-aria-[haspopup]:translate-y-px">
                 <Upload class="size-4 shrink-0 pointer-events-none"/>
               </button>
-              <button type="button" @click="isInWishlist = !isInWishlist" :disabled="!isWishlistEnabled" :data-is-in-wishlist="isInWishlist" class="
+              <button type="button" @click="wishlistHandler" :disabled="!isWishlistEnabled" :data-is-in-wishlist="isInWishlist" class="
                 px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all
                 hover:not-disabled:bg-(--background)
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50

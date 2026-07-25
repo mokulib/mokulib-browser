@@ -5,3 +5,4 @@ export * from "./book-copy.ts"
 export * from './book-review.ts'
 export * from './category.ts'
 export * from './tag.ts'
+export * from './wishlist.ts'
