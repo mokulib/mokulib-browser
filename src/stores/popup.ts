@@ -20,7 +20,7 @@ export const usePopupStore = defineStore('popup', () => {
   // 存储回调函数
   // 注意，推荐的 confirm 处理流程是：
   // 在弹窗中点击 confirm 后，如果需要提交表单，应在弹窗组件中进行处理，不要把表单数据通过此回调函数发回调用者让调用者处理，在弹窗组件中处理完毕后，可以通过此回调函数向调用者发回表单提交结果，进行更进一步处理
-  const callback = ref<((data?: Response<any>) => void) | undefined>();
+  const callback = ref<((data: Response<any>) => void) | undefined>();
 
   /**
    * 判断弹窗是否打开，如果没有指定弹窗名称，则判断是否有任一弹窗正处于打开状态
@@ -39,7 +39,7 @@ export const usePopupStore = defineStore('popup', () => {
    * @param payload_ 弹窗数据
    * @param callback_ 回调函数
    */
-  function open<T>(key: PopupKey, payload_?: any, callback_?: (data?: Response<T>) => void) {
+  function open<T>(key: PopupKey, payload_?: any, callback_?: (data: Response<T>) => void) {
     popups.value = key;
     payload.value = payload_;
     callback.value = callback_;
