@@ -1,6 +1,14 @@
+import type { BorrowRecord } from "@/types";
+
+export interface MyBorrow {
+  is_renewed: boolean;
+  due_time: string;
+}
+
 interface BookCopyBase {
   id: number;
-  is_borrowed_by_me: boolean;
+  status: 'AVAILABLE' | 'UNAVAILABLE' | 'WITHDRAWN';
+  my_borrow: MyBorrow | null;
 }
 
 interface BookCopyAdminAddition {
@@ -8,38 +16,15 @@ interface BookCopyAdminAddition {
   purchase_date: string;
   source: string;
   entry_by: number;
-  entry_by_name: string;
+  withdrawn_reason: 'LOST' | 'DAMAGED' | 'OTHER' | null
   create_time: string;
-}
-
-interface BookCopyAvailable {
-  status: 'AVAILABLE';
-}
-
-interface BookCopyUnavailableUser {
-  status: 'UNAVAILABLE';
-  due_time: string;
-  is_renewed: boolean;
-}
-
-interface BookCopyUnavailableAdmin {
-  status: 'UNAVAILABLE';
-  borrow_by: number;
-  borrow_by_name: string;
-  borrow_time: string;
-  due_time: string;
-  is_renewed: boolean;
-}
-
-interface BookCopyWithdrawn {
-  status: 'WITHDRAWN';
-  remove_status: 'LOST' | 'DAMAGED' | 'OTHER';
-  remove_time: string;
+  withdrawn_time: string | null;
+  current_borrow_record: BorrowRecord | null;
 }
 
 // 泛型合并
-type BookCopyUser = BookCopyBase & { role: 'USER' } & (BookCopyAvailable | BookCopyUnavailableUser | BookCopyWithdrawn);
-type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & (BookCopyAvailable | BookCopyUnavailableAdmin | BookCopyWithdrawn) & BookCopyAdminAddition;
+type BookCopyUser = BookCopyBase & { role: 'USER' };
+type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & BookCopyAdminAddition;
 
 export type BookCopy = BookCopyUser | BookCopyAdmin;
 
