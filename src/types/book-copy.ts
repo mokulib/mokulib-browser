@@ -1,14 +1,9 @@
 import type { BorrowRecord } from "@/types";
 
-export interface MyBorrow {
-  is_renewed: boolean;
-  due_time: string;
-}
-
 interface BookCopyBase {
   id: number;
   status: 'AVAILABLE' | 'UNAVAILABLE' | 'WITHDRAWN';
-  my_borrow: MyBorrow | null;
+  current_borrow_record: BorrowRecord | null;
 }
 
 interface BookCopyAdminAddition {
@@ -19,7 +14,6 @@ interface BookCopyAdminAddition {
   withdrawn_reason: 'LOST' | 'DAMAGED' | 'OTHER' | null
   create_time: string;
   withdrawn_time: string | null;
-  current_borrow_record: BorrowRecord | null;
 }
 
 // 泛型合并
