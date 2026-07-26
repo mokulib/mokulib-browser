@@ -349,7 +349,7 @@ onMounted(async () => {
           </button>
         </div>
         <!-- 用户/管理员 -->
-        <div v-if="authStore.isLoggedIn" class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div v-if="authStore.isLoggedIn" class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[1152px]:!grid-cols-3">
           <template v-for="bookCopy in bookCopies" :key="bookCopy.id">
             <div class="rounded-xl border p-4 transition-colors border-(--border)" :class="{
               'bg-(--card)': !bookCopy.my_borrow,
