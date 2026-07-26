@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from "vue";
+import { useSlots } from "vue";
 import { X } from "@lucide/vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 
@@ -21,7 +21,7 @@ const popupStore = usePopupStore();
 <template>
   <div v-if="popupStore.isOpen(popupKey)" class="fixed inset-0 z-70 flex items-end justify-center sm:items-center">
     <!-- 遮罩 -->
-    <div @click="popupStore.close" class="absolute inset-0 bg-(--foreground)/40 animate-in fade-in-0"></div>
+    <div @click="() => popupStore.close()" class="absolute inset-0 bg-(--foreground)/40 animate-in fade-in-0"></div>
     <!-- Popup -->
     <div class="relative z-10 w-full max-w-md rounded-t-2xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-2xl animate-in slide-in-from-bottom sm:rounded-2xl sm:zoom-in-95">
       <!-- 标题 -->
