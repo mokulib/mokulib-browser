@@ -5,6 +5,10 @@ import Popup from "@/components/popup/Popup.vue";
 import type { Tag } from "@/types";
 import api from "@/api";
 
+interface TagWithStatus extends Tag {
+  status: 'exists' | 'active' | 'none';
+}
+
 const popupStore = usePopupStore();
 
 const bookId = ref<number>(0);
@@ -24,7 +28,7 @@ function toggle(tag: TagWithStatus) {
 
 async function confirmCallback() {
   // 存放要添加的标签
-  const addTags = [];
+  const addTags: number[] = [];
   // 对自定义标签集去重
   const customTagsWithoutDuplicates = [...new Set(customTags.value)];
   // 先创建新的自定义标签
@@ -69,14 +73,6 @@ watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
 });
 </script>
 
-<script lang="ts">
-import type { Tag } from "@/types";
-
-interface TagWithStatus extends Tag {
-  status: 'exists' | 'active' | 'none';
-}
-</script>
-
 <template>
   <Popup popup-key="addTag" title="添加标签" confirm="添加" @confirm="confirmCallback">
     <template #content>
@@ -84,36 +80,34 @@ interface TagWithStatus extends Tag {
     </template>
     <template #default>
       <div class="space-y-4">
-        <div>
-          <label data-slot="label" class="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 mb-2 block">从标签库选择</label>
-          <div class="flex flex-wrap gap-2">
-            <template v-for="tag in tags">
-              <button type="button" @click="toggle(tag)" :disabled="tag.status === 'exists'" :data-active="tag.status === 'active'" class="rounded-full border border-(--border) px-2.5 py-0.5 text-xs text-(--foreground) transition-colors
-               hover:border-(--primary) hover:text-(--primary)
-               disabled:bg-(--muted) disabled:text-(--muted-foreground) disabled:border-none
-               data-[active=true]:bg-(--primary) data-[active=true]:text-(--primary-foreground) data-[active=true]:border-transparent">
-                {{ tag.name }}
-              </button>
-            </template>
-          </div>
+        <label data-slot="label" class="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 mb-2 block">从标签库选择</label>
+        <div class="flex flex-wrap gap-2">
+          <template v-for="tag in tags">
+            <button type="button" @click="toggle(tag)" :disabled="tag.status === 'exists'" :data-active="tag.status === 'active'" class="rounded-full border border-(--border) px-2.5 py-0.5 text-xs text-(--foreground) transition-colors
+             hover:border-(--primary) hover:text-(--primary)
+             disabled:bg-(--muted) disabled:text-(--muted-foreground) disabled:border-none
+             data-[active=true]:bg-(--primary) data-[active=true]:text-(--primary-foreground) data-[active=true]:border-transparent">
+              {{ tag.name }}
+            </button>
+          </template>
         </div>
-        <div class="space-y-1.5">
-          <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="custom-tag">
-            自定义标签
-          </label>
-          <input v-model="customTagInput" data-slot="input" placeholder="输入标签名，多个标签间使用空格分隔" class="h-8 w-full min-w-0 rounded-lg border border-(--input) bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--foreground) placeholder:text-(--muted-foreground) focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-(--input)/50 disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 md:text-sm dark:bg-(--input)/30 dark:disabled:bg-(--input)/80 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40" value="">
-        </div>
-        <div v-if="customTags.length" class="space-y-1.5">
-          <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="custom-tag">
-            自定义标签预览
-          </label>
-          <div class="flex flex-wrap gap-2">
-            <template v-for="tag in customTags">
-              <button type="button" class="rounded-full border border-transparent px-2.5 py-0.5 text-xs text-(--primary-foreground) transition-colors bg-(--primary)">
-                {{ tag }}
-              </button>
-            </template>
-          </div>
+      </div>
+      <div class="space-y-1.5">
+        <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="custom-tag">
+          自定义标签
+        </label>
+        <input v-model="customTagInput" data-slot="input" placeholder="输入标签名，多个标签间使用空格分隔" class="h-8 w-full min-w-0 rounded-lg border border-(--input) bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--foreground) placeholder:text-(--muted-foreground) focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-(--input)/50 disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 md:text-sm dark:bg-(--input)/30 dark:disabled:bg-(--input)/80 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40" value="">
+      </div>
+      <div v-if="customTags.length" class="space-y-1.5">
+        <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="custom-tag">
+          自定义标签预览
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <template v-for="tag in customTags">
+            <button type="button" class="rounded-full border border-transparent px-2.5 py-0.5 text-xs text-(--primary-foreground) transition-colors bg-(--primary)">
+              {{ tag }}
+            </button>
+          </template>
         </div>
       </div>
     </template>
