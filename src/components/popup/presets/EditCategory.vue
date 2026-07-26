@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/Popup.vue";
-import { usePopupStore } from "@/stores/popup.ts";
+import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import api from "@/api";
 import { computed, ref, watch } from "vue";
 import type { Book, Category } from "@/types";
@@ -29,7 +29,7 @@ async function confirmCallback() {
   popupStore.close(data);
 }
 
-watch(() => popupStore.popups, async (newValue: string) => {
+watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
   // 本弹窗打开时，重新刷新数据
   if (newValue === 'editCategory') {
     // 获取所有分类

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { usePopupStore } from "@/stores/popup.ts";
+import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import Popup from "@/components/popup/Popup.vue";
 import type { Tag } from "@/types";
 import api from "@/api";
@@ -46,7 +46,7 @@ async function confirmCallback() {
 }
 
 // 监听弹窗状态
-watch(() => popupStore.popups, async (newValue: string) => {
+watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
   // 本弹窗打开时，重新刷新数据
   if (newValue === 'addTag') {
     // 获取所有标签

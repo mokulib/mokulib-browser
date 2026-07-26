@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/Popup.vue";
-import { usePopupStore } from "@/stores/popup.ts";
+import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { ref, watch } from "vue";
 
 const popupStore = usePopupStore();
@@ -15,7 +15,7 @@ async function confirmCallback() {
 }
 
 // 监听弹窗状态
-watch(() => popupStore.popups, (newValue: string) => {
+watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   // 本弹窗打开时，重新刷新数据（深拷贝以避免影响原始数据）
   if (newValue === 'editBook') {
     bookId.value = JSON.parse(JSON.stringify(popupStore.payload || -1)) as number;
