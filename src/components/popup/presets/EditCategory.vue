@@ -11,7 +11,7 @@ const book = ref<Book>();
 const originalCategory = ref<Category>();
 
 const allCategories = ref<Category[]>([]);
-const selectedCategory = ref<Category>();
+const selectedCategory = ref<Category>({ id: -1, name: '' });
 
 const customCategoryInput = ref<string>("");
 const customCategory = computed(() => (customCategoryInput.value as string).split(' ')[0]);
