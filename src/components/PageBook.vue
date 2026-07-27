@@ -4,7 +4,17 @@ import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, Re
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book, BookCopy, BookReview, Category, Tag, Response, Wishlist, BorrowRecord } from "@/types";
+import type {
+  Book,
+  BookCopy,
+  BookReview,
+  Category,
+  Tag,
+  Response,
+  Wishlist,
+  BorrowRecord,
+  BookCopyAdmin
+} from "@/types";
 import api from "@/api"
 import { ElMessage } from "element-plus";
 
@@ -23,7 +33,7 @@ const bookReviews = ref<BookReview[]>([]);
 const isBorrowedByMe = computed(() => bookCopies.value?.some(bookCopy => isMyBorrowRecord(bookCopy.current_borrow_record)) ?? false);
 const isInWishlist = ref(false);
 const isWishlistEnabled = computed(() => authStore.isLoggedIn && !isBorrowedByMe.value)
-const usernames = ref<Record<number,string>>({});
+const idUsernameMapping = ref<Record<number,string>>({});
 const availableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'AVAILABLE').length);
 const unavailableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'UNAVAILABLE').length);
 const withdrawnCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'WITHDRAWN').length);
@@ -79,6 +89,34 @@ async function fetchTags() {
   tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
 }
 
+async function fetchIdUsernameMapping() {
+  // 收集需要查询的用户名（未去重）
+  const ids = bookCopies.value?.flatMap(bookCopy => {
+    console.log(bookCopy);
+    if (bookCopy.role === 'ADMIN' && !bookCopy.current_borrow_record)
+      return [bookCopy.entry_by];
+    if (bookCopy.role === 'ADMIN' && !!bookCopy.current_borrow_record)
+      return [bookCopy.entry_by, bookCopy.current_borrow_record.user_id];
+    return [];
+  });
+  // 去重
+  const uniqueIds = [...new Set(ids)];
+  // 去掉已查询过的
+  const requestIds = uniqueIds.filter(id => !idUsernameMapping.value[id]);
+  // 需要请求的用户名不为空时再请求
+  if (requestIds.length) {
+    // 请求新映射
+    const newIdUsernameMapping = (await api.get<{ id: number, username: string }[]>('/api/users/usernames', {
+      params: { ids: requestIds.join(',') }
+    })).data.reduce((acc, item) => { // 转换类型，便于模板中使用 usernames[user_id] 直接查询
+      acc[item.id] = item.username;
+      return acc;
+    }, {} as Record<number, string>);
+    // 合并到已有映射
+    idUsernameMapping.value = { ...idUsernameMapping.value, ...newIdUsernameMapping };
+  }
+}
+
 async function fetchBookCopies() {
   bookCopies.value = (await api.get('/api/books/' + id + '/book-copies')).data ?? [];
   // 置顶我的借阅
@@ -87,30 +125,9 @@ async function fetchBookCopies() {
     if (!isMyBorrowRecord(a.current_borrow_record) && isMyBorrowRecord(b.current_borrow_record)) return 1   // b 是我借的，a 不是，b 排前面
     return 0  // 其他情况顺序不变
   })
-  // 管理员能看到详细信息，需要再次从详细信息中的用户 id 请求用户 username
-  if (userStore.user_is_admin) {
-    // 存放需要请求的用户名（未去重）
-    const ids: number[] = [];
-    // 收集需要请求的用户名
-    bookCopies.value?.forEach(bookCopy => {
-      if (bookCopy.role === 'ADMIN') {
-        ids.push(bookCopy.entry_by);
-        if (!!bookCopy.current_borrow_record)
-          ids.push(bookCopy.current_borrow_record.user_id)
-      }
-    })
-    // 去重
-    const uniqueIds = [...new Set(ids)];
-    // 需要请求的用户名不为空再请求
-    if (uniqueIds.length) {
-      usernames.value = (await api.get<{ id: number, username: string }[]>('/api/users/usernames', {
-        params: { ids: uniqueIds.join(',') }
-      })).data.reduce((acc, item) => { // 转换类型，便于模板中使用 usernames[user_id] 直接查询
-        acc[item.id] = item.username;
-        return acc;
-      }, {} as Record<number, string>);
-    }
-  }
+  // 管理员能看到详细信息，其中包含用户 id，需要刷新 id-username 映射
+  if (userStore.user_is_admin)
+    await fetchIdUsernameMapping();
 }
 
 /////////////////////////////////////////////
@@ -123,7 +140,6 @@ async function wishlistHandler() {
   // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    // 刷新数据
     isInWishlist.value = data.data.is_in_wishlist;
   } else {
     ElMessage.error(data.message);
@@ -136,8 +152,19 @@ async function deleteTagHandler(tagId: number) {
   // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    // 刷新数据
     await fetchTags();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
+async function renew(borrowRecordId: number) {
+  // 提交请求
+  const data = await api.post<BorrowRecord>('/api/borrow-records/' + borrowRecordId + '/renew');
+  // 处理数据
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    (bookCopies.value.find(bookCopy => bookCopy.current_borrow_record?.id === data.data.id) as BookCopy).current_borrow_record = data.data; // 刷新借阅记录
   } else {
     ElMessage.error(data.message);
   }
@@ -150,10 +177,8 @@ async function deleteTagHandler(tagId: number) {
 async function editCategoryCallback(data: Response<Book>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    // 刷新数据
     book.value = data.data;
-    // 更新分类名
-    await fetchCategory();
+    await fetchCategory(); // 更新分类名
   } else {
     ElMessage.error(data.message);
   }
@@ -162,7 +187,6 @@ async function editCategoryCallback(data: Response<Book>) {
 function editBookCallback(data: Response<Book>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    // 刷新数据
     book.value = data.data;
   } else {
     ElMessage.error(data.message);
@@ -172,17 +196,27 @@ function editBookCallback(data: Response<Book>) {
 async function addTagCallback(data: Response<undefined>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    // 刷新数据
     await fetchTags();
   } else {
     ElMessage.error(data.message);
   }
 }
 
-function addBookCopyCallback(data: Response<BookCopy>) {
+async function addBookCopyCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    bookCopies.value?.push(data.data);
     ElMessage.success(data.message);
+    bookCopies.value?.push(data.data);
+    await fetchIdUsernameMapping();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
+async function borrowCallback(data: Response<BookCopyAdmin>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
+    await fetchIdUsernameMapping();
   } else {
     ElMessage.error(data.message);
   }
@@ -335,13 +369,18 @@ onMounted(async () => {
     <section class="border-t border-(--border) bg-(--muted)/30">
       <div class="mx-auto max-w-6xl px-4 py-10 md:px-8">
         <!-- 标题 -->
-        <div class="flex items-baseline justify-between">
-          <div class="flex items-center gap-4">
-            <h2 class="font-serif text-2xl font-semibold">馆藏状态</h2>
-            <span v-if="authStore.isLoggedIn" class="text-sm text-(--muted-foreground)">共 {{ bookCopies?.length ?? 0 }} 本</span>
-            <span v-if="authStore.isLoggedIn" class="text-sm text-(--muted-foreground)"> · 可借阅 {{ availableCount }} 本</span>
-            <span v-if="authStore.isLoggedIn" class="text-sm text-(--muted-foreground)"> · 已借出 {{ unavailableCount }} 本</span>
-            <span v-if="userStore.user_is_admin" class="text-sm text-(--muted-foreground)"> · 已下架 {{ withdrawnCount }} 本</span>
+        <div class="flex items-center justify-between">
+          <div class="flex items-baseline gap-4">
+            <h2 class="font-serif text-2xl font-semibold">全部馆藏</h2>
+            <div class="flex items-center">
+              <span v-if="authStore.isLoggedIn && !bookCopies.length" class="text-sm text-(--muted-foreground)">暂无馆藏</span>
+              <span v-if="authStore.isLoggedIn && bookCopies.length" class="text-sm text-(--muted-foreground)">共 {{ bookCopies.length }} 本</span>
+              <div class="hidden md:flex md:items-center">
+                <span v-if="authStore.isLoggedIn && availableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 可借阅 {{ availableCount }} 本</span>
+                <span v-if="authStore.isLoggedIn && unavailableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 已借出 {{ unavailableCount }} 本</span>
+                <span v-if="userStore.user_is_admin && withdrawnCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 已下架 {{ withdrawnCount }} 本</span>
+              </div>
+            </div>
           </div>
           <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('addBookCopy', id, addBookCopyCallback)" class="group/button inline-flex items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 border-(--border) bg-(--muted)/30 hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&amp;_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
             <Plus class="size-3"/>
@@ -404,7 +443,7 @@ onMounted(async () => {
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅人</span>
                   <!-- TODO 冗余的 v-if，仅为类型推导，可改进 -->
                   <span v-if="bookCopy.current_borrow_record" class="min-w-0 text-(--foreground)">
-                    <a class="text-(--primary) underline-offset-2 hover:underline" href="#">{{ usernames[bookCopy.current_borrow_record.user_id] }}</a>
+                    <a class="text-(--primary) underline-offset-2 hover:underline" href="#">{{ idUsernameMapping[bookCopy.current_borrow_record.user_id] }}</a>
                   </span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
@@ -454,7 +493,7 @@ onMounted(async () => {
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">入库人</span>
                   <span class="min-w-0 text-(--foreground)">
-                    <a class="text-(--primary) underline-offset-2 hover:underline" :href="'/user/' + bookCopy.entry_by">{{ usernames[bookCopy.entry_by] }}</a>
+                    <a class="text-(--primary) underline-offset-2 hover:underline" :href="'/user/' + bookCopy.entry_by">{{ idUsernameMapping[bookCopy.entry_by] }}</a>
                   </span>
                 </div>
                 <div class="flex gap-2 text-sm">
@@ -469,7 +508,7 @@ onMounted(async () => {
               <!-- 操作按钮 -->
               <div class="mt-4 flex flex-wrap gap-2">
                 <!-- 可借阅状态按钮 - 借出 -->
-                <button v-if="bookCopy.status === 'AVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" type="button" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-(--primary) text-(--primary-foreground) [a]:hover:bg-(--primary)/80 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                <button v-if="bookCopy.status === 'AVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" type="button" @click="popupStore.open('borrow', bookCopy.id, borrowCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-(--primary) text-(--primary-foreground) [a]:hover:bg-(--primary)/80 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <BookUp class="size-3.5"/>
                   借出
                 </button>
@@ -479,7 +518,7 @@ onMounted(async () => {
                   下架
                 </button>
                 <!-- 已借出状态按钮 - 续借 -->
-                <button v-if="bookCopy.status === 'UNAVAILABLE' && bookCopy.current_borrow_record" type="button" :data-disabled="bookCopy.current_borrow_record.is_renewed" tabindex="0" :disabled="bookCopy.current_borrow_record.is_renewed" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                <button v-if="bookCopy.status === 'UNAVAILABLE' && bookCopy.current_borrow_record" type="button" @click="renew(bookCopy.current_borrow_record.id)" :data-disabled="bookCopy.current_borrow_record.is_renewed" tabindex="0" :disabled="bookCopy.current_borrow_record.is_renewed" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <RefreshCw class="size-3.5"/>
                   {{ bookCopy.current_borrow_record.is_renewed ? '已续借' : '续借' }}
                 </button>
