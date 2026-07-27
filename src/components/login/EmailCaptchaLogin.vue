@@ -66,11 +66,11 @@ const handleEmailSubmit = async () => {
 
   // 验证验证码
   if (!loginForm.value.imageCaptcha) {
-    console.error('请输入验证码')
-    return
+    console.error('请输入验证码');
+    return;
   }
 
-  emailSubmitLoading.value = true
+  emailSubmitLoading.value = true;
 
   let data = await api.get<{ codePrefix: string, coolingTime: string }>("/api/auth/login", {
     params: {
@@ -79,17 +79,24 @@ const handleEmailSubmit = async () => {
       imageCaptcha: loginForm.value.imageCaptcha,
     },
   });
-  // 失败
-  if (data.status !== 'OK') {
+  // 成功
+  if (data.status === 'OK') {
+    codePrefix.value = data.data.codePrefix;
+    currentStep.value = 'CAPTCHA_INPUT';
+    emailSubmitLoading.value = false;
+    return;
+  }
+  // 请求频繁
+  if (data.status === 'TOO_FREQUENT') {
     ElMessage.error(data.message);
     refreshImageCaptcha() // 刷新验证码
-    emailSubmitLoading.value = false
+    emailSubmitLoading.value = false;
     return
   }
-  // 成功
-  codePrefix.value = data.data.codePrefix;
-  currentStep.value = 'CAPTCHA_INPUT';
-  emailSubmitLoading.value = false
+  // 失败
+  ElMessage.error(data.message);
+  refreshImageCaptcha() // 刷新验证码
+  emailSubmitLoading.value = false;
 }
 
 const loginLoading = ref(false)
@@ -122,6 +129,13 @@ const handleLogin = async () => {
   loginLoading.value = false
 }
 
+function backToStep1() {
+  // 跳转到步骤 1
+  currentStep.value = 'EMAIL_INPUT';
+  // 刷新验证码
+  refreshImageCaptcha();
+}
+
 onMounted(() => refreshImageCaptcha());
 </script>
 
@@ -146,7 +160,7 @@ onMounted(() => refreshImageCaptcha());
   </form>
 
   <form v-else class="flex flex-col gap-5" @submit.prevent="handleLogin">
-    <button type="button" class="flex w-fit items-center gap-1 text-sm text-(--muted-foreground) transition-colors hover:text-(--primary)">
+    <button type="button" @click="backToStep1" class="flex w-fit items-center gap-1 text-sm text-(--muted-foreground) transition-colors hover:text-(--primary)">
       <ArrowLeft class="size-4"/>返回上一步
     </button>
     <div class="flex flex-col gap-2">
