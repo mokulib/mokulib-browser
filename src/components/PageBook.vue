@@ -441,15 +441,13 @@ onMounted(async () => {
                 <!-- 已借出详情（仅管理显示） -->
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅人</span>
-                  <!-- TODO 冗余的 v-if，仅为类型推导，可改进 -->
-                  <span v-if="bookCopy.current_borrow_record" class="min-w-0 text-(--foreground)">
+                  <span class="min-w-0 text-(--foreground)">
                     <a class="text-(--primary) underline-offset-2 hover:underline" href="#">{{ idUsernameMapping[bookCopy.current_borrow_record.user_id] }}</a>
                   </span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">是否续借</span>
-                  <!-- TODO 冗余的 v-if，仅为类型推导，可改进 -->
-                  <span v-if="bookCopy.current_borrow_record" class="min-w-0 text-(--foreground)">{{ isRenewedToString(bookCopy.current_borrow_record.is_renewed) }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ isRenewedToString(bookCopy.current_borrow_record.is_renewed) }}</span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅时间</span>
@@ -462,8 +460,7 @@ onMounted(async () => {
                 <!-- 已下架（仅管理显示） -->
                 <div v-if="bookCopy.status === 'WITHDRAWN' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">下架原因</span>
-                  <!-- TODO 冗余的 v-if，仅为类型推导，可改进 -->
-                  <span v-if="bookCopy.withdrawn_reason" class="min-w-0 text-(--foreground)">{{ removeStatusToString(bookCopy.withdrawn_reason) }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ removeStatusToString(bookCopy.withdrawn_reason) }}</span>
                 </div>
                 <div v-if="bookCopy.status === 'WITHDRAWN' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">下架时间</span>

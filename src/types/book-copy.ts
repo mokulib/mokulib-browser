@@ -1,24 +1,44 @@
 import type { BorrowRecord } from "@/types";
 
-interface BookCopyBase {
+export type BookCopyUser = {
   id: number;
+  role: 'USER';
   status: 'AVAILABLE' | 'UNAVAILABLE' | 'WITHDRAWN';
   current_borrow_record: BorrowRecord | null;
-}
+};
 
-interface BookCopyAdminAddition {
+type BookCopyAdminBase = {
+  id: number;
+  role: 'ADMIN';
   purchase_price: number;
   purchase_date: string;
   source: string;
   entry_by: number;
-  withdrawn_reason: 'LOST' | 'DAMAGED' | 'OTHER' | null
   create_time: string;
-  withdrawn_time: string | null;
-}
+};
 
-// 泛型合并
-export type BookCopyUser = BookCopyBase & { role: 'USER' };
-export type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & BookCopyAdminAddition;
+type BookCopyAdminAvailable = BookCopyAdminBase & {
+  status: 'AVAILABLE';
+  current_borrow_record: null;
+  withdrawn_reason: null;
+  withdrawn_time: null;
+};
+
+type BookCopyAdminUnavailable = BookCopyAdminBase & {
+  status: 'UNAVAILABLE';
+  current_borrow_record: BorrowRecord;
+  withdrawn_reason: null;
+  withdrawn_time: null;
+};
+
+type BookCopyAdminWithdrawn = BookCopyAdminBase & {
+  status: 'WITHDRAWN';
+  current_borrow_record: null;
+  withdrawn_reason: 'LOST' | 'DAMAGED' | 'OTHER';
+  withdrawn_time: string;
+};
+
+export type BookCopyAdmin = BookCopyAdminAvailable | BookCopyAdminUnavailable | BookCopyAdminWithdrawn;
 
 export type BookCopy = BookCopyUser | BookCopyAdmin;
 
