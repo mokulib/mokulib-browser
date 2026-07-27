@@ -156,13 +156,18 @@ input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
 
+  /* 颜色渐变动画 - from tailwind css class transition-colors */
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
   /* 设置尺寸 */
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 
-  /* 未选中时的背景色 */
-  background-color: var(--background);  /* 改成你想要的任何颜色 */
+  /* 未选中时 */
+  background-color: var(--background);
   border: 2px solid var(--border);
   border-radius: 4px;
 
@@ -171,20 +176,38 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: center;
 
-  cursor: pointer;
+  /* 辅助 after 元素定位 */
+  position: relative;
+}
+
+input[type="checkbox"]:active {
+  border-color: var(--primary);
+}
+
+input[type="checkbox"]:checked:active {
+  background-color: var(--destructive);
+  border-color: var(--destructive);
 }
 
 /* 复选框选中时的样式 */
 input[type="checkbox"]:checked {
-  background-color: var(--primary);  /* 选中背景色 */
+  background-color: var(--primary);
   border-color: var(--primary);
 }
 
 /* 复选框勾选标记 */
 input[type="checkbox"]:checked::after {
-  content: "·";
-  color: var(--background);
-  font-size: 16px;
-  font-weight: bold;
+  content: "";
+  width: 12px;
+  height: 12px;
+  background-image: url("@/assets/circle-small.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  /* 居中 */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>
