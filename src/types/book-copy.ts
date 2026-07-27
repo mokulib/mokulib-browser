@@ -17,8 +17,8 @@ interface BookCopyAdminAddition {
 }
 
 // 泛型合并
-type BookCopyUser = BookCopyBase & { role: 'USER' };
-type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & BookCopyAdminAddition;
+export type BookCopyUser = BookCopyBase & { role: 'USER' };
+export type BookCopyAdmin = BookCopyBase & { role: 'ADMIN' } & BookCopyAdminAddition;
 
 export type BookCopy = BookCopyUser | BookCopyAdmin;
 

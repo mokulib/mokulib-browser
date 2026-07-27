@@ -2,7 +2,7 @@
 import Popup from "@/components/popup/Popup.vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { ref, watch } from "vue";
-import type { AddBookCopyRequest } from "@/types";
+import type { AddBookCopyRequest, BookCopyAdmin } from "@/types";
 import api from "@/api";
 
 const popupStore = usePopupStore();
@@ -11,7 +11,7 @@ const addBookCopyRequest = ref<any>();
 
 async function confirmCallback() {
   // 提交请求
-  const data = await api.post('/api/book-copies', addBookCopyRequest.value);
+  const data = await api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest.value);
   // 关闭弹窗，返回数据
   popupStore.close(data);
 }
