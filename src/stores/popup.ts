@@ -85,5 +85,6 @@ export type PopupKey =
   "addBookCopy" |
   "editCategory" |
   "uploadBookImage" |
-  "borrow"
+  "borrow" |
+  "returnBook"
   ;
