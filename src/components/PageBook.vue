@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, Undo2, Upload, X } from "@lucide/vue";
+import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
@@ -45,19 +45,6 @@ const hasWrittenBookReview = computed(() => bookReviews.value.some(bookReview =>
 
 const isMyBorrowRecord = (borrowRecord: BorrowRecord | null) => {
   return borrowRecord?.user_id === userStore.user_id;
-}
-
-const statusToString = (status: string) => {
-  switch (status) {
-    case 'AVAILABLE':
-      return '可借阅';
-    case 'UNAVAILABLE':
-      return '已借出';
-    case 'WITHDRAWN':
-      return '已下架';
-    default:
-      return '未知';
-  }
 }
 
 const isRenewedToString = (isRenewed: boolean) => {
@@ -407,35 +394,38 @@ onMounted(async () => {
         <!-- 用户/管理员 -->
         <div v-if="authStore.isLoggedIn" class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[1152px]:grid-cols-3!">
           <template v-for="bookCopy in bookCopies" :key="bookCopy.id">
-            <div class="rounded-xl border p-4 transition-colors border-(--border)" :class="{
+            <div class="flex flex-col rounded-xl border p-4 transition-colors border-(--border)" :class="{
               'bg-(--card)': !isMyBorrowRecord(bookCopy.current_borrow_record),
               'bg-linear-to-b from-(--primary)/1 to-(--card) ring-1 ring-(--primary)/40': isMyBorrowRecord(bookCopy.current_borrow_record),
             }">
-              <!-- 我借阅的 + 查看全部借阅记录 -->
-              <div class="flex justify-between">
-                <div v-if="isMyBorrowRecord(bookCopy.current_borrow_record)" class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-(--primary) px-2.5 py-0.5 text-xs font-medium text-(--primary-foreground)">
-                  <Star class="size-3"/>
-                  我借阅的
-                </div>
-                <a v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="mb-3 inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline" href="/borrow_record/999"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link size-3" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>查看全部借阅记录</a>
-              </div>
+              <!-- 查看全部借阅记录 -->
+              <a v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="mb-3 inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline" href="/borrow_record/999">
+                <ExternalLink class="size-3"/>
+                查看全部借阅记录
+              </a>
               <!-- 标题 -->
               <div class="flex items-start justify-between gap-3">
                 <div><p class="font-serif text-base font-medium">编号 #{{ bookCopy.id }}</p></div>
-                <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
-                      :class="{'text-(--chart-2)': bookCopy.status === 'AVAILABLE',
-                               'bg-(--chart-2)/15': bookCopy.status === 'AVAILABLE',
-                               'text-(--primary)': bookCopy.status === 'UNAVAILABLE',
-                               'bg-(--primary)/15': bookCopy.status === 'UNAVAILABLE',
-                               'text-(--muted-foreground)': bookCopy.status === 'WITHDRAWN',
-                               'bg-(--muted)': bookCopy.status === 'WITHDRAWN' }">
-                  {{ statusToString(bookCopy.status) }}
+                <span v-if="bookCopy.status === 'AVAILABLE'" class="inline-flex leading-none rounded-full px-2.5 py-1 text-xs font-medium text-(--chart-2) bg-(--chart-2)/15">
+                  可借阅
+                </span>
+                <span v-if="bookCopy.status === 'UNAVAILABLE' && !isMyBorrowRecord(bookCopy.current_borrow_record)" class="inline-flex leading-none rounded-full px-2.5 py-1 text-xs font-medium text-(--primary) bg-(--primary)/15">
+                  已借出
+                </span>
+                <div v-if="bookCopy.status === 'UNAVAILABLE' && isMyBorrowRecord(bookCopy.current_borrow_record)" class="inline-flex items-center leading-none gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-(--primary-foreground) bg-(--primary)">
+                  <Star class="size-3"/>
+                  我的借阅
+                </div>
+                <span v-if="bookCopy.status === 'WITHDRAWN'" class="inline-flex leading-none rounded-full px-2.5 py-1 text-xs font-medium text-(--muted-foreground) bg-(--muted)">
+                  已下架
                 </span>
               </div>
               <!-- 状态描述 -->
-              <div class="mt-3 space-y-1.5">
+              <div class="flex-1 mt-3 space-y-1.5">
                 <!-- 可借阅欢迎语（仅用户显示） -->
                 <p v-if="bookCopy.status === 'AVAILABLE' && userStore.user_is_user && bookCopy.role === 'USER'" class="text-sm text-(--muted-foreground)">当前可借阅，欢迎到馆借阅。</p>
+                <!-- 可借阅提示语（仅管理显示） -->
+                <p v-if="bookCopy.status === 'AVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="text-sm text-(--muted-foreground)">当前可借阅。</p>
                 <!-- 已借出欢迎语（仅用户显示）（非当前用户借阅时） -->
                 <p v-if="bookCopy.status === 'UNAVAILABLE' && !bookCopy.current_borrow_record && userStore.user_is_user && bookCopy.role === 'USER'" class="text-sm text-(--muted-foreground)">这一本被人借走啦。</p>
                 <!-- 已借出详情（仅用户显示）（当前用户借阅时） -->
@@ -506,10 +496,6 @@ onMounted(async () => {
                   <span class="w-24 shrink-0 text-(--muted-foreground)">入库时间</span>
                   <span class="min-w-0 text-(--foreground)">{{ bookCopy.create_time }}</span>
                 </div>
-                <div v-if="bookCopy.status === 'WITHDRAWN'" class="flex gap-2 text-sm">
-                  <span class="w-24 shrink-0 text-(--muted-foreground)">出库时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.withdrawn_time }}</span>
-                </div>
               </div>
               <!-- 操作按钮 -->
               <div class="mt-4 flex flex-wrap gap-2">
@@ -523,18 +509,18 @@ onMounted(async () => {
                   <ArrowDownToLine class="size-3.5"/>
                   下架
                 </button>
+                <!-- 已借出状态按钮 - 归还 -->
+                <button v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN' && bookCopy.status === 'UNAVAILABLE'" type="button" @click="popupStore.open('returnBook', bookCopy.current_borrow_record.id, returnBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                  <BookDown class="size-3.5"/>
+                  归还
+                </button>
                 <!-- 已借出状态按钮 - 续借 -->
                 <button v-if="bookCopy.status === 'UNAVAILABLE' && bookCopy.current_borrow_record" type="button" @click="renew(bookCopy.current_borrow_record.id)" :data-disabled="bookCopy.current_borrow_record.is_renewed" tabindex="0" :disabled="bookCopy.current_borrow_record.is_renewed" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <RefreshCw class="size-3.5"/>
                   {{ bookCopy.current_borrow_record.is_renewed ? '已续借' : '续借' }}
                 </button>
-                <!-- 已借出状态按钮 - 归还 -->
-                <button v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN' && bookCopy.status === 'UNAVAILABLE'" type="button" @click="popupStore.open('returnBook', bookCopy.current_borrow_record.id, returnBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
-                  <Undo2 class="size-3.5"/>
-                  归还
-                </button>
                 <!-- 已下架状态按钮 - 重新上架 -->
-                <button v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN' && bookCopy.status === 'WITHDRAWN' && bookCopy.withdrawn_reason === 'OTHER'" type="button" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                <button v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN' && bookCopy.status === 'WITHDRAWN'" type="button" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <ArrowUpFromLine class="size-3.5"/>
                   重新上架
                 </button>
