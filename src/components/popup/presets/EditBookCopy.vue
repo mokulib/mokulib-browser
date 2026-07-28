@@ -16,7 +16,7 @@ async function confirmCallback() {
   // 提交请求
   const data = await api.put<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}`, { purchase_price: purchasePrice.value, purchase_date: purchaseDate.value, source: source.value });
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('editBookCopy', data);
 }
 
 // 监听弹窗打开

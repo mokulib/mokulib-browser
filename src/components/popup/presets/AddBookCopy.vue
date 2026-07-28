@@ -13,7 +13,7 @@ async function confirmCallback() {
   // 提交请求
   const data = await api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest.value);
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('addBookCopy', data);
 }
 
 // 监听弹窗打开

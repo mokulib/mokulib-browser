@@ -3,6 +3,7 @@ import Popup from "@/components/popup/Popup.vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { ref, watch } from "vue";
 import api from "@/api";
+import type { Book } from "@/types";
 
 const popupStore = usePopupStore();
 
@@ -10,9 +11,9 @@ const book = ref<any>();
 
 async function confirmCallback() {
   // 提交请求
-  const data = await api.put('/api/books/' + book.value.id, book.value);
+  const data = await api.put<Book>('/api/books/' + book.value.id, book.value);
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('editBook', data);
 }
 
 // 监听弹窗打开

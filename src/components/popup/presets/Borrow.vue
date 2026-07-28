@@ -4,7 +4,7 @@ import Popup from "@/components/popup/Popup.vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { computed, ref, watch } from "vue";
 import api from "@/api";
-import type { BookCopy } from "@/types";
+import type { BookCopyAdmin } from "@/types";
 
 const popupStore = usePopupStore();
 
@@ -18,9 +18,9 @@ const userNotFound = computed(() => !!delayRequest.value || !user.value); // 用
 
 async function confirmCallback() {
   // 提交请求
-  const data = await api.post<BookCopy>('/api/book-copies/' + bookCopyId.value + '/borrow', { user_id: user.value.id, is_renewed: isRenewedInput.value });
+  const data = await api.post<BookCopyAdmin>('/api/book-copies/' + bookCopyId.value + '/borrow', { user_id: user.value.id, is_renewed: isRenewedInput.value });
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('borrow', data);
 }
 
 // 监听输入

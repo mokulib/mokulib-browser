@@ -44,9 +44,9 @@ async function confirmCallback() {
   // 配置需要添加的标签（已在标签库的）
   tags.value?.filter(value => value.status === 'active').forEach(tag => addTags.push(tag.id));
   // 提交请求
-  const data = await api.post('/api/books/' + bookId.value + '/tags', addTags);
+  const data = await api.post<undefined>('/api/books/' + bookId.value + '/tags', addTags);
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('addTag', data);
 }
 
 // 监听弹窗打开

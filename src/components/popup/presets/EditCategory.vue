@@ -26,7 +26,7 @@ async function confirmCallback() {
   // 提交请求
   const data = await api.put<Book>('/api/books/' + book.value?.id, { ...book.value, category_id: category?.id });
   // 刷新分类列表
-  popupStore.close(data);
+  popupStore.safeClose('editCategory', data);
 }
 
 // 监听弹窗打开

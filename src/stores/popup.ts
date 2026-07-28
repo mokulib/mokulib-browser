@@ -1,48 +1,82 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { Book, Category, Response, Tag } from "@/types";
+import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
 
 /**
  * 定义弹窗的 Key 和 payload 类型
  */
 export interface PopupMap {
-  uploadBookImage:         { id: number; };
-  editCategory:            { book: Book; category: Category; };
-  editBook:                { book: Book; };
-  addTag:                  { id: number; tags: Tag[]; };
-  addBookCopy:             { id: number; };
-  editBookCopy:            { bookCopyId: number; purchasePrice: number; purchaseDate: string; source: string };
-  borrow:                  { id: number; };
-  returnBook:              { id: number; };
-  deleteBookReviewConfirm: { user_name: string; };
-  header:                  undefined;
+  uploadBookImage: {
+    payload: { id: number; };
+    response: void;
+  };
+  editCategory: {
+    payload: { book: Book; category: Category; };
+    response: Response<Book>;
+  };
+  editBook: {
+    payload: { book: Book; };
+    response: Response<Book>;
+  };
+  addTag: {
+    payload: { id: number; tags: Tag[]; };
+    response: Response<undefined>;
+  };
+  addBookCopy: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  editBookCopy: {
+    payload: { bookCopyId: number; purchasePrice: number; purchaseDate: string; source: string; };
+    response: Response<BookCopyAdmin>;
+  };
+  borrow: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  returnBook: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  deleteBookReviewConfirm: {
+    payload: { user_name: string; };
+    response: void;
+  };
+  header: {
+    payload: undefined;
+    response: void;
+  };
 }
 
-// 自动提取 PopupKey 类型
+// 提取 PopupKey 类型
 export type PopupKey = keyof PopupMap;
 
 // 工具类型：根据 PopupKey 获取对应的 payload 类型
-export type PopupPayload<K extends PopupKey> = PopupMap[K];
+export type PopupPayload<K extends PopupKey> = PopupMap[K]['payload'];
+
+// 工具类型：根据 PopupKey 获取对应的 response 类型
+export type PopupResponse<K extends PopupKey> = PopupMap[K]['response'];
 
 /**
  * <h3>Popup Store</h3>
  *
  * <ul>
+ *   <li>提供弹窗类型及负载类型</li>
  *   <li>保存弹窗状态</li>
  *   <li>提供判断弹窗是否打开的方法</li>
  *   <li>提供弹窗打开、关闭、切换状态的方法</li>
- *   <li>提供弹窗名称的常量</li>
+ *   <li>提供获取经过深拷贝的 safePayload 工具方法</li>
  * </ul>
  */
 export const usePopupStore = defineStore('popup', () => {
-  // 存储当前打开的弹窗名称，若没有弹窗处于打开状态，存储 undefined
+  // 存储当前打开的弹窗 Key，若没有弹窗处于打开状态，存储 undefined
   const popups = ref<PopupKey | undefined>(undefined);
-  // 存储调用者发给弹窗的附加数据
+  // 存储调用者发给弹窗的负载
   const payload = ref<any>(undefined);
   // 存储回调函数
   // 注意，推荐的 confirm 处理流程是：
   // 在弹窗中点击 confirm 后，如果需要提交表单，应在弹窗组件中进行处理，不要把表单数据通过此回调函数发回调用者让调用者处理，在弹窗组件中处理完毕后，可以通过此回调函数向调用者发回表单提交结果，进行更进一步处理
-  const callback = ref<((data: Response<any>) => void) | undefined>();
+  const callback = ref<((response: any) => void) | undefined>();
 
   /**
    * 判断弹窗是否打开，如果没有指定弹窗名称，则判断是否有任一弹窗正处于打开状态
@@ -63,8 +97,8 @@ export const usePopupStore = defineStore('popup', () => {
   function open<K extends PopupKey>(
     key: K,
     ...args: PopupPayload<K> extends undefined
-      ? [payload_?: undefined, callback_?: (data: Response<any>) => void]
-      : [payload_: PopupPayload<K>, callback_?: (data: Response<any>) => void]
+      ? [payload_?: undefined, callback_?: (response: PopupResponse<K>) => void]
+      : [payload_: PopupPayload<K>, callback_?: (response: PopupResponse<K>) => void]
   ): void {
     const [payload_, callback_] = args;
     popups.value = key;
@@ -73,13 +107,25 @@ export const usePopupStore = defineStore('popup', () => {
   }
 
   /**
-   * 关闭弹窗
+   * 关闭弹窗。通常用于用户点击弹窗内的取消或者 X 按钮
    */
-  function close(data?: Response<any>) {
+  function close() {
     popups.value = undefined;
-    // 如果回调函数存在（基本要求），且返回数据存在（返回数据不存在，代表调用者无需关心，通常意味着用户点击弹窗内的取消或者 X 按钮；返回数据存在，代表调用者需要处理，通常意味着用户点击弹窗内的 confirm 按钮），则调用
-    if (callback.value && data)
-      callback.value(data);
+  }
+
+  /**
+   * 安全关闭弹窗
+   * @param key 弹窗名称
+   * @param response 弹窗返回数据
+   */
+  function safeClose<K extends PopupKey>(key: K, response: PopupResponse<K>) {
+    if (key !== popups.value)
+      return;
+
+    popups.value = undefined;
+    // 如果回调函数存在（基本要求），则调用。通常用于用户点击弹窗内的 confirm 按钮
+    if (callback.value)
+      callback.value(response);
   }
 
   /**
@@ -112,6 +158,7 @@ export const usePopupStore = defineStore('popup', () => {
     isOpen,
     open,
     close,
+    safeClose,
     toggle,
     safePayload,
   };

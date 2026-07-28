@@ -16,7 +16,7 @@ async function confirmCallback() {
   // 提交请求
   const data = await api.post<BookCopyAdmin>('/api/borrow-records/' + borrowRecordId.value + '/return', { close_status: closeStatusInput.value, close_time: closeTimeInput.value + ':00' });
   // 关闭弹窗，返回数据
-  popupStore.close(data);
+  popupStore.safeClose('returnBook', data);
 }
 
 // 监听弹窗打开
