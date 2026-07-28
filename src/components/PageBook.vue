@@ -199,6 +199,15 @@ async function addBookCopyCallback(data: Response<BookCopyAdmin>) {
   }
 }
 
+async function editBookCopyCallback(data: Response<BookCopyAdmin>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
 async function borrowCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -470,7 +479,7 @@ onMounted(async () => {
               <div v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="mt-3 space-y-1.5 rounded-lg bg-(--muted)/50 p-3">
                 <div class="flex items-center justify-between mb-1">
                   <p class="text-xs font-medium uppercase tracking-wide text-(--muted-foreground)">入库信息</p>
-                  <button type="button" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground) active:not-aria-[haspopup]:translate-y-px transition-all">
+                  <button type="button" @click="popupStore.open('editBookCopy', bookCopy, editBookCopyCallback)" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground) active:not-aria-[haspopup]:translate-y-px transition-all">
                     <Pencil class="size-3"/>
                   </button>
                 </div>
