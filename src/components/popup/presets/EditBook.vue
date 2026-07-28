@@ -9,11 +9,8 @@ const popupStore = usePopupStore();
 
 const book = ref<any>();
 
-async function confirmCallback() {
-  // 提交请求
-  const data = await api.put<Book>('/api/books/' + book.value.id, book.value);
-  // 关闭弹窗，返回数据
-  popupStore.safeClose('editBook', data);
+function confirmHandler() {
+  return api.put<Book>('/api/books/' + book.value.id, book.value);
 }
 
 // 监听弹窗打开
@@ -24,7 +21,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="editBook" title="编辑图书信息" confirm="保存" @confirm="confirmCallback">
+  <Popup popup-key="editBook" title="编辑图书信息" confirm-text="保存" :confirm-handler="confirmHandler">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

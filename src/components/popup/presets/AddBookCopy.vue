@@ -9,11 +9,8 @@ const popupStore = usePopupStore();
 
 const addBookCopyRequest = ref<any>();
 
-async function confirmCallback() {
-  // 提交请求
-  const data = await api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest.value);
-  // 关闭弹窗，返回数据
-  popupStore.safeClose('addBookCopy', data);
+function confirmHandler() {
+  return api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest.value);
 }
 
 // 监听弹窗打开
@@ -30,7 +27,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="addBookCopy" title="添加馆藏" confirm="添加" @confirm="confirmCallback">
+  <Popup popup-key="addBookCopy" title="添加馆藏" confirm-text="添加" :confirm-handler="confirmHandler">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

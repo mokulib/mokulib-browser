@@ -16,7 +16,7 @@ const selectedCategory = ref<Category>({ id: -1, name: '' });
 const customCategoryInput = ref<string>("");
 const customCategory = computed(() => (customCategoryInput.value as string).split(' ')[0]);
 
-async function confirmCallback() {
+async function confirmHandler() {
   let category;
   // 创建分类
   if (customCategory.value)
@@ -24,9 +24,7 @@ async function confirmCallback() {
   else
     category = selectedCategory.value;
   // 提交请求
-  const data = await api.put<Book>('/api/books/' + book.value?.id, { ...book.value, category_id: category?.id });
-  // 刷新分类列表
-  popupStore.safeClose('editCategory', data);
+  return api.put<Book>('/api/books/' + book.value?.id, { ...book.value, category_id: category?.id });
 }
 
 // 监听弹窗打开
@@ -47,7 +45,7 @@ watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="editCategory" title="编辑分类" confirm="保存" @confirm="confirmCallback">
+  <Popup popup-key="editCategory" title="编辑分类" confirm-text="保存" :confirm-handler="confirmHandler">
     <div class="space-y-4">
       <div>
         <label data-slot="label" class="items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 mb-2 block">

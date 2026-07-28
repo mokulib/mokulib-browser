@@ -7,11 +7,7 @@ const popupStore = usePopupStore();
 
 const bookId = ref<number>(-1);
 
-async function confirmCallback() {
-  // 提交请求
-
-  // 关闭弹窗，返回数据
-  popupStore.close();
+async function confirmHandler() {
 }
 
 // 监听弹窗打开
@@ -22,7 +18,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="uploadBookImage" title="重新上传封面" confirm="保存" @confirm="confirmCallback">
+  <Popup popup-key="uploadBookImage" title="重新上传封面" confirm-text="保存" :confirm-handler="confirmHandler">
     <template #content>
       选择一张新的封面图片替换当前封面。
     </template>

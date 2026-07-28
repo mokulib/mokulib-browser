@@ -12,11 +12,8 @@ const borrowRecordId = ref<any>();
 const closeTimeInput = ref<string>(new Date().toISOString().slice(0, 16));
 const closeStatusInput = ref<string>('CLOSE');
 
-async function confirmCallback() {
-  // 提交请求
-  const data = await api.post<BookCopyAdmin>('/api/borrow-records/' + borrowRecordId.value + '/return', { close_status: closeStatusInput.value, close_time: closeTimeInput.value + ':00' });
-  // 关闭弹窗，返回数据
-  popupStore.safeClose('returnBook', data);
+function confirmHandler() {
+  return api.post<BookCopyAdmin>('/api/borrow-records/' + borrowRecordId.value + '/return', { close_status: closeStatusInput.value, close_time: closeTimeInput.value + ':00' });
 }
 
 // 监听弹窗打开
@@ -31,7 +28,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="returnBook" title="归还馆藏" confirm="确认归还" @confirm="confirmCallback">
+  <Popup popup-key="returnBook" title="归还馆藏" confirm-text="确认归还" :confirm-handler="confirmHandler">
     <form class="space-y-4">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="return-time-102">

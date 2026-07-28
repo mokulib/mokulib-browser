@@ -16,11 +16,8 @@ const user = ref<any>(); // 查询结果
 const delayRequest = ref<ReturnType<typeof setTimeout> | undefined>(undefined); // 需要查询（延迟请求）
 const userNotFound = computed(() => !!delayRequest.value || !user.value); // 用户未找到状态，用于控制能否提交
 
-async function confirmCallback() {
-  // 提交请求
-  const data = await api.post<BookCopyAdmin>('/api/book-copies/' + bookCopyId.value + '/borrow', { user_id: user.value.id, is_renewed: isRenewedInput.value });
-  // 关闭弹窗，返回数据
-  popupStore.safeClose('borrow', data);
+function confirmHandler() {
+  return api.post<BookCopyAdmin>('/api/book-copies/' + bookCopyId.value + '/borrow', { user_id: user.value.id, is_renewed: isRenewedInput.value });
 }
 
 // 监听输入
@@ -76,7 +73,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="borrow" title="借出馆藏" confirm="确认借出" :confirm-disabled="userNotFound" @confirm="confirmCallback">
+  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="confirmHandler">
     <div class="space-y-3">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

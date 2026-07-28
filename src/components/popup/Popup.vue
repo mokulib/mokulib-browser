@@ -1,31 +1,41 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="K extends PopupKey">
 import { useSlots } from "vue";
 import { X } from "@lucide/vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { type PopupKey, type PopupResponse, usePopupStore } from "@/stores/popup.ts";
 
-// 接收传参
-const popupKey = defineModel<PopupKey>("popupKey", { required: true });
-const title = defineModel<string>("title", { required: false, default: '标题' });
-const confirm = defineModel<string>("confirm", { required: false, default: '确定' });
-const confirmType = defineModel<'default' | 'danger'>("confirmType", { required: false, default: 'default' });
-// 接收只读参数
-defineProps({
-  confirmDisabled: Boolean,
-})
-// 定义事件（向外发送）
-const emit = defineEmits<{
-  confirm: [];
-}>();
+// 接收参数
+const props = withDefaults(defineProps<{
+  popupKey: K;
+  title?: string;
+  confirmText?: string;
+  confirmType?: 'default' | 'danger';
+  confirmDisabled?: boolean;
+  confirmHandler?: () => Promise<PopupResponse<K>>;
+}>(), {
+  title: '标题',
+  confirmText: '确定',
+  confirmType: 'default',
+});
 
 const slots = useSlots();
 
 const popupStore = usePopupStore();
+
+// 确认按钮点击
+async function confirm() {
+  // 无 confirmHandler 时直接忽略
+  if (!props.confirmHandler) return;
+  // 等待弹窗请求数据并返回结果
+  const response = await props.confirmHandler();
+  // 关闭弹窗，返回数据
+  popupStore.safeClose(props.popupKey, response);
+}
 </script>
 
 <template>
   <div v-if="popupStore.isOpen(popupKey)" class="fixed inset-0 z-70 flex items-end justify-center sm:items-center">
     <!-- 遮罩 -->
-    <div @click="() => popupStore.close()" class="absolute inset-0 bg-(--foreground)/40 animate-in fade-in-0"></div>
+    <div @click="popupStore.close()" class="absolute inset-0 bg-(--foreground)/40 animate-in fade-in-0"></div>
     <!-- Popup -->
     <div class="relative z-10 w-full max-w-md rounded-t-2xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-2xl animate-in slide-in-from-bottom sm:rounded-2xl sm:zoom-in-95">
       <!-- 标题 -->
@@ -49,20 +59,20 @@ const popupStore = usePopupStore();
         <button type="button" @click="popupStore.close()" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:hover:bg-(--muted)/50 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2">
           取消
         </button>
-        <button v-if="confirmType === 'default'" type="button" @click="emit('confirm')" :disabled="confirmDisabled" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none
+        <button v-if="confirmType === 'default'" type="button" @click="confirm()" :disabled="confirmDisabled" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none
           focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
           active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4
           bg-(--primary) text-(--primary-foreground) hover:bg-(--primary)/80
           h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2">
-          {{ confirm }}
+          {{ confirmText }}
         </button>
-        <button v-if="confirmType === 'danger'" type="button" @click="emit('confirm')" :disabled="confirmDisabled" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none
+        <button v-if="confirmType === 'danger'" type="button" @click="confirm()" :disabled="confirmDisabled" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none
           focus-visible:border-(--destructive)/40 focus-visible:ring-3 focus-visible:ring-(--destructive)/20
           active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4
           bg-(--destructive)/10 text-(--destructive) hover:bg-(--destructive)/20
           dark:bg-(--destructive)/20 dark:hover:bg-(--destructive)/30 dark:focus-visible:ring-(--destructive)/40
           h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2">
-          {{ confirm }}
+          {{ confirmText }}
         </button>
       </div>
     </div>

@@ -26,7 +26,7 @@ function toggle(tag: TagWithStatus) {
   tag.status = tag.status === 'active' ? 'none' : 'active';
 }
 
-async function confirmCallback() {
+async function confirmHandler() {
   // 存放要添加的标签
   const addTags: number[] = [];
   // 对自定义标签集去重
@@ -44,9 +44,7 @@ async function confirmCallback() {
   // 配置需要添加的标签（已在标签库的）
   tags.value?.filter(value => value.status === 'active').forEach(tag => addTags.push(tag.id));
   // 提交请求
-  const data = await api.post<undefined>('/api/books/' + bookId.value + '/tags', addTags);
-  // 关闭弹窗，返回数据
-  popupStore.safeClose('addTag', data);
+  return api.post<undefined>('/api/books/' + bookId.value + '/tags', addTags);
 }
 
 // 监听弹窗打开
@@ -73,7 +71,7 @@ watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
 </script>
 
 <template>
-  <Popup popup-key="addTag" title="添加标签" confirm="添加" @confirm="confirmCallback">
+  <Popup popup-key="addTag" title="添加标签" confirm-text="添加" :confirm-handler="confirmHandler">
     <template #content>
       从标签库中选择，或自定义一个新标签。
     </template>
