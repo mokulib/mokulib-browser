@@ -1,6 +1,28 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { Response } from "@/types";
+import type { Book, Category, Response, Tag } from "@/types";
+
+/**
+ * 定义弹窗的 Key 和 payload 类型
+ */
+export interface PopupMap {
+  uploadBookImage:         { id: number; };
+  editCategory:            { book: Book; category: Category; };
+  editBook:                { book: Book; };
+  addTag:                  { id: number; tags: Tag[]; };
+  addBookCopy:             { id: number; };
+  editBookCopy:            { bookCopyId: number; purchasePrice: number; purchaseDate: string; source: string };
+  borrow:                  { id: number; };
+  returnBook:              { id: number; };
+  deleteBookReviewConfirm: { user_name: string; };
+  header:                  undefined;
+}
+
+// 自动提取 PopupKey 类型
+export type PopupKey = keyof PopupMap;
+
+// 工具类型：根据 PopupKey 获取对应的 payload 类型
+export type PopupPayload<K extends PopupKey> = PopupMap[K];
 
 /**
  * <h3>Popup Store</h3>
@@ -36,10 +58,15 @@ export const usePopupStore = defineStore('popup', () => {
   /**
    * 打开弹窗，并关闭所有其他弹窗
    * @param key 弹窗名称
-   * @param payload_ 弹窗数据
-   * @param callback_ 回调函数
+   * @param args 弹窗数据
    */
-  function open<T>(key: PopupKey, payload_?: any, callback_?: (data: Response<T>) => void) {
+  function open<K extends PopupKey>(
+    key: K,
+    ...args: PopupPayload<K> extends undefined
+      ? [payload_?: undefined, callback_?: (data: Response<any>) => void]
+      : [payload_: PopupPayload<K>, callback_?: (data: Response<any>) => void]
+  ): void {
+    const [payload_, callback_] = args;
     popups.value = key;
     payload.value = payload_;
     callback.value = callback_;
@@ -58,13 +85,25 @@ export const usePopupStore = defineStore('popup', () => {
   /**
    * 切换弹窗状态
    * @param key 弹窗名称
-   * @param data 弹窗数据
+   * @param args 弹窗数据
    */
-  function toggle(key: PopupKey, data?: any) {
+  function toggle<K extends PopupKey>(
+    key: K,
+    ...args: PopupPayload<K> extends undefined ? [] : [payload_: PopupPayload<K>]
+  ): void {
     if (isOpen(key))
       close();
-    else
-      open(key, data);
+    else {
+      const [payload_] = args;
+      open(key, payload_ as any);
+    }
+  }
+
+  /**
+   * 获取经过深拷贝的 payload，类型安全
+   */
+  function safePayload<K extends PopupKey>(): PopupPayload<K> {
+    return JSON.parse(JSON.stringify(payload.value)) as PopupPayload<K>;
   }
 
   return {
@@ -73,19 +112,7 @@ export const usePopupStore = defineStore('popup', () => {
     isOpen,
     open,
     close,
-    toggle
+    toggle,
+    safePayload,
   };
 });
-
-export type PopupKey =
-  "header" |
-  "deleteBookReviewConfirm" |
-  "addTag" |
-  "editBook" |
-  "addBookCopy" |
-  "editCategory" |
-  "uploadBookImage" |
-  "borrow" |
-  "returnBook" |
-  "editBookCopy"
-  ;

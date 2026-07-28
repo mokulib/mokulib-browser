@@ -49,14 +49,13 @@ async function confirmCallback() {
   popupStore.close(data);
 }
 
-// 监听弹窗状态
+// 监听弹窗打开
 watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，重新刷新数据
   if (newValue === 'addTag') {
     // 获取所有标签
     allTags.value = (await api.get<Tag[]>('/api/tags')).data;
     // 刷新 payload（深拷贝以避免影响原始数据）
-    const payload = JSON.parse(JSON.stringify(popupStore.payload || [])) as { id: number, tags: Tag[] };
+    const payload = popupStore.safePayload<'addTag'>();
     bookId.value = payload.id;
     existsTags.value = payload.tags;
     // 刷新标签状态

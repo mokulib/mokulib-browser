@@ -19,12 +19,10 @@ async function confirmCallback() {
   popupStore.close(data);
 }
 
-// 监听弹窗状态
+// 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，刷新数据
   if (newValue === 'returnBook') {
-    // 刷新传入数据（深拷贝以避免影响原始数据）
-    borrowRecordId.value = JSON.parse(JSON.stringify(popupStore.payload || -1));
+    borrowRecordId.value = popupStore.safePayload<'returnBook'>().id;
     // 刷新弹窗输入
     closeTimeInput.value = new Date().toISOString().slice(0, 16);
     closeStatusInput.value = 'CLOSE';

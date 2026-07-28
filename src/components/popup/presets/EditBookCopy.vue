@@ -19,14 +19,13 @@ async function confirmCallback() {
   popupStore.close(data);
 }
 
-// 监听弹窗状态
+// 监听弹窗打开
 watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，重新刷新数据（深拷贝以避免影响原始数据）
   if (newValue === 'editBookCopy') {
-    const payload = JSON.parse(JSON.stringify(popupStore.payload || {})) as BookCopyAdmin;
-    bookCopyId.value = payload.id;
-    purchasePrice.value = payload.purchase_price;
-    purchaseDate.value = payload.purchase_date;
+    const payload = popupStore.safePayload<'editBookCopy'>();
+    bookCopyId.value = payload.bookCopyId;
+    purchasePrice.value = payload.purchasePrice;
+    purchaseDate.value = payload.purchaseDate;
     source.value = payload.source;
   }
 });

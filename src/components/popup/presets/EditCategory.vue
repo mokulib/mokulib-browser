@@ -29,13 +29,13 @@ async function confirmCallback() {
   popupStore.close(data);
 }
 
+// 监听弹窗打开
 watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，重新刷新数据
   if (newValue === 'editCategory') {
     // 获取所有分类
     allCategories.value = (await api.get<Category[]>('/api/categories')).data;
     // 刷新 payload（深拷贝以避免影响原始数据）
-    const payload = JSON.parse(JSON.stringify(popupStore.payload || [])) as { book: Book, category: Category };
+    const payload = popupStore.safePayload<'editCategory'>();
     book.value = payload.book;
     originalCategory.value = payload.category;
     // 刷新选中状态

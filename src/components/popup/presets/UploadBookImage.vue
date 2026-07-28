@@ -14,12 +14,10 @@ async function confirmCallback() {
   popupStore.close();
 }
 
-// 监听弹窗状态
+// 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，重新刷新数据（深拷贝以避免影响原始数据）
-  if (newValue === 'editBook') {
-    bookId.value = JSON.parse(JSON.stringify(popupStore.payload || -1)) as number;
-  }
+  if (newValue === 'editBook')
+    bookId.value = popupStore.safePayload<'uploadBookImage'>().id;
 })
 </script>
 

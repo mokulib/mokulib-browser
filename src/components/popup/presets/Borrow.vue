@@ -68,11 +68,10 @@ watch(userIdOrEmailInput, (newValue) => {
   user.value = null;
 }, { immediate: false });
 
-// 监听弹窗状态
+// 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  // 本弹窗打开时，重新刷新数据（深拷贝以避免影响原始数据）
   if (newValue === 'borrow')
-    bookCopyId.value = JSON.parse(JSON.stringify(popupStore.payload || -1));
+    bookCopyId.value = popupStore.safePayload<'borrow'>().id;
 })
 </script>
 
