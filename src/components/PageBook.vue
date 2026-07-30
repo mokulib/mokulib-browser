@@ -373,15 +373,16 @@ onMounted(async () => {
     <section class="border-t border-(--border) bg-(--muted)/30">
       <div class="mx-auto max-w-6xl px-4 py-10 md:px-8">
         <!-- 标题 -->
-        <div class="flex items-center justify-between">
+        <div v-if="authStore.isLoggedIn" class="flex items-center justify-between">
           <div class="flex items-baseline gap-4">
             <h2 class="font-serif text-2xl font-semibold">全部馆藏</h2>
             <div class="flex items-center">
-              <span v-if="authStore.isLoggedIn && !bookCopies.length" class="text-sm text-(--muted-foreground)">暂无馆藏</span>
-              <span v-if="authStore.isLoggedIn && bookCopies.length" class="text-sm text-(--muted-foreground)">共 {{ bookCopies.length }} 本</span>
+              <span v-if="!bookCopies.length" class="text-sm text-(--muted-foreground)">暂无馆藏</span>
+              <span v-if="bookCopies.length" class="text-sm text-(--muted-foreground)">共 {{ bookCopies.length }} 本</span>
+              <!-- 宽屏时显示详细统计 -->
               <div class="hidden md:flex md:items-center">
-                <span v-if="authStore.isLoggedIn && availableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 可借阅 {{ availableCount }} 本</span>
-                <span v-if="authStore.isLoggedIn && unavailableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 已借出 {{ unavailableCount }} 本</span>
+                <span v-if="availableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 可借阅 {{ availableCount }} 本</span>
+                <span v-if="unavailableCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 已借出 {{ unavailableCount }} 本</span>
                 <span v-if="userStore.user_is_admin && withdrawnCount" class="text-sm text-(--muted-foreground) whitespace-pre-wrap"> · 已下架 {{ withdrawnCount }} 本</span>
               </div>
             </div>
@@ -392,7 +393,7 @@ onMounted(async () => {
           </button>
         </div>
         <!-- 游客 -->
-        <div v-if="!authStore.isLoggedIn" class="mt-4 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-(--border) py-14 text-center">
+        <div v-if="!authStore.isLoggedIn" class="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-(--border) py-14 text-center">
           <Lock class="size-7 text-(--muted-foreground)"/>
           <p class="text-(--muted-foreground)">登录后可查看馆藏状态</p>
           <button type="button" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-(--primary) text-(--primary-foreground) [a]:hover:bg-(--primary)/80 h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5">
@@ -544,13 +545,8 @@ onMounted(async () => {
     <section class="mx-auto max-w-6xl px-4 py-10 md:px-8">
       <h2 class="font-serif text-2xl font-semibold">书评</h2>
       <div class="mt-5 space-y-4">
-        <!-- 游客 -->
-        <div v-if="!authStore.isLoggedIn" class="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-(--border) py-10 text-center">
-          <Lock class="size-6 text-(--muted-foreground)"/>
-          <p class="text-(--muted-foreground)">登录后可发表评论</p>
-        </div>
-        <!-- 未发表过书评 -->
-        <form v-if="!hasWrittenBookReview" class="rounded-xl border border-(--border) bg-(--card) p-4">
+        <!-- 已登录，且未发表过书评 -->
+        <form v-if="authStore.isLoggedIn && !hasWrittenBookReview" class="rounded-xl border border-(--border) bg-(--card) p-4">
           <p class="text-sm font-medium">发表书评</p>
           <div class="mt-3 flex items-center gap-2">
             <span class="text-sm text-(--muted-foreground)">评分</span>
