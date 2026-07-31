@@ -601,7 +601,7 @@ onMounted(async () => {
             <div class="flex items-start justify-between gap-3">
               <div class="flex items-center gap-3">
                 <div class="relative size-10 overflow-hidden rounded-full ring-1 ring-(--border)">
-                  <img alt="history_fan 的头像" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-1.png">
+                  <img :src="'/avatars/' + bookReview.user_id" alt="history_fan 的头像" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent">
                 </div>
                 <div class="self-stretch flex flex-col justify-between">
                   <p class="flex items-center gap-2 text-sm font-medium">
