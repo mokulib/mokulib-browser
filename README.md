@@ -6,6 +6,7 @@
 ![axios](https://img.shields.io/badge/axios-v1.18.1-5A29E4)
 ![element-plus](https://img.shields.io/badge/element--plus-v2.14.2-409EFF)
 ![js-base64](https://img.shields.io/badge/js--base64-v3.8.0-5A29E4)
+![luxon](https://img.shields.io/badge/luxon-v3.7.2-5A29E4)
 ![pinia](https://img.shields.io/badge/pinia-v3.0.4-4FC08D)
 ![tailwindcss](https://img.shields.io/badge/tailwindcss-v4.3.2-409EFF)
 ![tailwindcss-animate](https://img.shields.io/badge/tailwindcss--animate-v1.0.7-409EFF)
