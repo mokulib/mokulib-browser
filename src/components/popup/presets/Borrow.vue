@@ -67,8 +67,11 @@ watch(userIdOrEmailInput, (newValue) => {
 
 // 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'borrow')
+  if (newValue === 'borrow') {
     bookCopyId.value = popupStore.safePayload<'borrow'>().id;
+    // 清空输入
+    userIdOrEmailInput.value = null;
+  }
 })
 </script>
 
