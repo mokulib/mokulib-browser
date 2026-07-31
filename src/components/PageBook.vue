@@ -486,11 +486,11 @@ onMounted(async () => {
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅时间</span>
-                  <span class="min-w-0 text-(--foreground)">2026-07-05</span>
+                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.current_borrow_record.create_time }}</span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">应还时间</span>
-                  <span class="min-w-0 text-(--foreground)">2026-07-12</span>
+                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.current_borrow_record.due_time }}</span>
                 </div>
                 <!-- 已下架（仅管理显示） -->
                 <div v-if="bookCopy.status === 'WITHDRAWN' && userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
