@@ -34,10 +34,18 @@ export interface PopupMap {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
   };
+  withdrawn: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  }
   returnBook: {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
   };
+  relist: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  }
   deleteBookReviewConfirm: {
     payload: { user_name: string; };
     response: void;
