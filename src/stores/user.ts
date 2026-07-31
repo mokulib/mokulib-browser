@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
   // 头像
   let user_avatar_timestamp = ref(0) // 用于强制刷新头像
   let user_avatar = computed(() => {
-    return `/avatars/${user_id.value}.png?timestamp=${user_avatar_timestamp.value}`
+    return `/avatars/${user_id.value}?timestamp=${user_avatar_timestamp.value}`
   })
 
   /////////////////////////////////////////////
@@ -74,11 +74,7 @@ export const useUserStore = defineStore('user', () => {
     // 构造 FileReader
     const reader = new FileReader()
     reader.onload = async function () {
-      const data = await api.post('/api/user/avatar', reader.result, {
-        headers: {
-          'Content-Type': 'application/octet-stream'
-        }
-      });
+      const data = await api.post('/api/users/' + user_id.value + '/avatar', reader.result, { headers: { 'Content-Type': 'application/octet-stream' } });
       if (data.status === 'OK') {
         ElMessage.success('头像上传成功')
         // 延迟更新头像时间戳，确保头像刷新
@@ -94,11 +90,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function updateUsername(newUsername: string) {
-    const data = await api.post('/api/user/username', null, {
-      params: {
-        newUsername: newUsername
-      },
-    });
+    const data = await api.post('/api/users/' + user_id.value + '/username', { newUsername: newUsername });
     if (data.status === 'OK') {
       ElMessage.success('用户名更新成功');
     } else {
@@ -108,10 +100,8 @@ export const useUserStore = defineStore('user', () => {
 
   const router = useRouter();
 
-  async function modifyPassword(params: any) {
-    const data = await api.post('/api/user/password', null, {
-      params: params,
-    });
+  async function modifyPassword(dataIn: any) {
+    const data = await api.post('/api/users/' + user_id.value + '/password', dataIn);
     if (data.status === 'OK') {
       ElMessage.success(data.message);
       // 清除用户信息，强制用户重新登录

@@ -270,7 +270,7 @@ onMounted(async () => {
         <!-- 封面 -->
         <div class="mx-auto w-full max-w-64 shrink-0 md:mx-0">
           <div class="relative aspect-3/4 overflow-hidden rounded-lg shadow-md ring-1 ring-(--border)">
-            <img :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover" :src="'/books/' + book.id + '.png'">
+            <img :src="'/books/' + book.id" :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover">
             <div class="absolute right-2 bottom-2 flex flex-col gap-2">
               <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('uploadBookImage', id)" class="
                 px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all border border-(--border)
@@ -289,8 +289,6 @@ onMounted(async () => {
               >
                 <Heart class="size-4 shrink-0 pointer-events-none"/>
               </button>
-              <!-- <p v-if="!authStore.isLoggedIn" class="mt-2 text-xs text-(&#45;&#45;muted-foreground)">登录后可将图书加入心愿单。</p> -->
-              <!-- <p v-else-if="isBorrowedByMe" class="mt-2 text-xs text-(&#45;&#45;muted-foreground)">您正在借阅本书的副本，暂不可加入心愿单。</p> -->
             </div>
           </div>
         </div>
