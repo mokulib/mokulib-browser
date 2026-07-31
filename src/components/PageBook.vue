@@ -30,6 +30,8 @@ const tags = ref<Tag[]>([]);
 const bookCopies = ref<BookCopy[]>([]);
 const bookReviews = ref<BookReview[]>([]);
 
+const bookCoverTimestamp = ref<number>(Date.now());
+const bookCoverSrc = computed<string>(() => '/books/' + id + '?timestamp=' + bookCoverTimestamp.value);
 const isBorrowedByMe = computed(() => bookCopies.value?.some(bookCopy => isMyBorrowRecord(bookCopy.current_borrow_record)) ?? false);
 const isInWishlist = ref(false);
 const isWishlistEnabled = computed(() => authStore.isLoggedIn && !isBorrowedByMe.value)
@@ -160,6 +162,15 @@ async function renew(borrowRecordId: number) {
 // 弹窗回调
 /////////////////////////////////////////////
 
+async function uploadBookCoverCallback(data: Response<any>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    bookCoverTimestamp.value = Date.now(); // 刷新封面
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
 async function editCategoryCallback(data: Response<Book>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -270,9 +281,9 @@ onMounted(async () => {
         <!-- 封面 -->
         <div class="mx-auto w-full max-w-64 shrink-0 md:mx-0">
           <div class="relative aspect-3/4 overflow-hidden rounded-lg shadow-md ring-1 ring-(--border)">
-            <img :src="'/books/' + book.id" :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover">
+            <img :src="bookCoverSrc" :alt="book.title + '封面'" loading="lazy" decoding="async" data-nimg="fill" class="absolute h-full w-full top-0 right-0 bottom-0 left-0 text-transparent object-cover">
             <div class="absolute right-2 bottom-2 flex flex-col gap-2">
-              <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('uploadBookImage', id)" class="
+              <button v-if="userStore.user_is_admin" type="button" @click="popupStore.open('uploadBookCover', { id }, uploadBookCoverCallback)" class="
                 px-2 py-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all border border-(--border)
                 hover:bg-(--background)
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50

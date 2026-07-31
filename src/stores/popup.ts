@@ -6,9 +6,9 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
  * 定义弹窗的 Key 和 payload 类型
  */
 export interface PopupMap {
-  uploadBookImage: {
+  uploadBookCover: {
     payload: { id: number; };
-    response: void;
+    response: Response<any>;
   };
   editCategory: {
     payload: { book: Book; category: Category; };
