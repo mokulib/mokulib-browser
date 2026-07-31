@@ -4,12 +4,13 @@ import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { ref, watch } from "vue";
 import api from "@/api";
 import type { BookCopyAdmin } from "@/types";
+import { DateTime } from "luxon";
 
 const popupStore = usePopupStore();
 
 const borrowRecordId = ref<any>();
 
-const closeTimeInput = ref<string>(new Date().toISOString().slice(0, 16));
+const closeTimeInput = ref<string>(DateTime.now().toISO().slice(0, 16));
 const closeStatusInput = ref<string>('CLOSE');
 
 function confirmHandler() {
@@ -21,7 +22,7 @@ watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'returnBook') {
     borrowRecordId.value = popupStore.safePayload<'returnBook'>().id;
     // 刷新弹窗输入
-    closeTimeInput.value = new Date().toISOString().slice(0, 16);
+    closeTimeInput.value = DateTime.now().toISO().slice(0, 16);
     closeStatusInput.value = 'CLOSE';
   }
 })
