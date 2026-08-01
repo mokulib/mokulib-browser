@@ -3,7 +3,22 @@ import { type Ref, ref } from "vue";
 import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
 
 /**
- * 定义弹窗的 Key 和 payload 类型
+ * ### PopupMap
+ * 定义弹窗的键、负载类型，以及返回数据类型。
+ *
+ * #### 类型设计说明（响应式兼容）
+ * Vue 3 的响应式系统会自动处理对象嵌套：
+ * 1. 当 `payload.value` 被赋值一个对象时，Vue 内部会调用 `reactive()` 转换该对象
+ * 2. `reactive()` 会自动将内部的 `ref` 属性解包
+ *
+ * 这导致同一个 payload 在**传入前后**类型不一致：
+ * - **传入时**（payloadIn）：如果需要传递响应式参数，可能传递 `{ Ref<number> }`
+ * - **取出时**（payloadOut）：`payload.value` 已被转换为 `Reactive` 类型，其内部属性已被解包为 `number`
+ *
+ * #### 定义规则
+ * - 只有 `payload`：普通数据，传入传出类型一致（如 `{ id: number }`）
+ * - 同时有 `payloadIn` 和 `payloadOut`：传入传出类型不同，通常因为传入了 `{ Ref<any> }` 类型的属性
+ * - `payloadIn` 和 `payloadOut` 必须成对出现，且不能与 `payload` 同时存在
  */
 export interface PopupMap {
   uploadBookCover: {
@@ -51,7 +66,8 @@ export interface PopupMap {
     response: void;
   };
   header: {
-    payload: { top: Ref<number>; right: Ref<number>; left: Ref<number>; bottom: Ref<number>; width: Ref<number>; height: Ref<number>; };
+    payloadIn: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
+    payloadOut: { top: number; right: number; height: number; };
     response: void;
   };
 }
@@ -59,22 +75,22 @@ export interface PopupMap {
 // 提取 PopupKey 类型
 export type PopupKey = keyof PopupMap;
 
-// 工具类型：根据 PopupKey 获取对应的 payload 类型
-export type PopupPayload<K extends PopupKey> = PopupMap[K]['payload'];
+// 工具类型：根据 PopupKey 获取对应的 payloadIn 类型
+export type PopupPayloadIn<K extends PopupKey> = 'payloadIn' extends keyof PopupMap[K] ? PopupMap[K]['payloadIn'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
+
+// 工具类型：根据 PopupKey 获取对应的 payloadOut 类型
+export type PopupPayloadOut<K extends PopupKey> = 'payloadOut' extends keyof PopupMap[K] ? PopupMap[K]['payloadOut'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
 
 // 工具类型：根据 PopupKey 获取对应的 response 类型
 export type PopupResponse<K extends PopupKey> = PopupMap[K]['response'];
 
 /**
- * <h3>Popup Store</h3>
- *
- * <ul>
- *   <li>提供弹窗类型及负载类型</li>
- *   <li>保存弹窗状态</li>
- *   <li>提供判断弹窗是否打开的方法</li>
- *   <li>提供弹窗打开、关闭、切换状态的方法</li>
- *   <li>提供获取经过深拷贝的 safePayload 工具方法</li>
- * </ul>
+ * ### Popup Store
+ * - 提供完整的类型定义
+ * - 保存弹窗状态
+ * - 提供判断弹窗是否打开的方法
+ * - 提供弹窗打开、关闭、切换状态的方法
+ * - 提供获取经过深拷贝的 safePayload 工具方法
  */
 export const usePopupStore = defineStore('popup', () => {
   // 存储当前打开的弹窗 Key，若没有弹窗处于打开状态，存储 undefined
@@ -104,9 +120,9 @@ export const usePopupStore = defineStore('popup', () => {
    */
   function open<K extends PopupKey>(
     key: K,
-    ...args: PopupPayload<K> extends undefined
+    ...args: PopupPayloadIn<K> extends undefined
       ? [payload_?: undefined, callback_?: (response: PopupResponse<K>) => void]
-      : [payload_: PopupPayload<K>, callback_?: (response: PopupResponse<K>) => void]
+      : [payload_: PopupPayloadIn<K>, callback_?: (response: PopupResponse<K>) => void]
   ): void {
     const [payload_, callback_] = args;
     popups.value = key;
@@ -143,7 +159,7 @@ export const usePopupStore = defineStore('popup', () => {
    */
   function toggle<K extends PopupKey>(
     key: K,
-    ...args: PopupPayload<K> extends undefined ? [] : [payload_: PopupPayload<K>]
+    ...args: PopupPayloadIn<K> extends undefined ? [] : [payload_: PopupPayloadIn<K>]
   ): void {
     if (isOpen(key))
       close();
@@ -153,15 +169,15 @@ export const usePopupStore = defineStore('popup', () => {
     }
   }
 
-  function unsafePayload<K extends PopupKey>(): PopupPayload<K> {
-    return payload.value as PopupPayload<K>;
+  function unsafePayload<K extends PopupKey>(): PopupPayloadOut<K> {
+    return payload.value as PopupPayloadOut<K>;
   }
 
   /**
    * 获取经过深拷贝的 payload，类型安全
    */
-  function safePayload<K extends PopupKey>(): PopupPayload<K> {
-    return JSON.parse(JSON.stringify(payload.value)) as PopupPayload<K>;
+  function safePayload<K extends PopupKey>(): PopupPayloadOut<K> {
+    return JSON.parse(JSON.stringify(payload.value)) as PopupPayloadOut<K>;
   }
 
   return {

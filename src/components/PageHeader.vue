@@ -11,10 +11,10 @@ const userStore = useUserStore();
 const popupStore = usePopupStore();
 
 const button = ref();
-const { top, right, left, bottom, width, height } = useElementBounding(button);
+const { top, right, height } = useElementBounding(button);
 
 function toggle() {
-  popupStore.toggle('header', { top, right, left, bottom, width, height });
+  popupStore.toggle('header', { top, right, height });
 }
 </script>
 
