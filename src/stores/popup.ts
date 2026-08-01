@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { type Ref, ref } from "vue";
 import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
 
 /**
@@ -51,7 +51,7 @@ export interface PopupMap {
     response: void;
   };
   header: {
-    payload: undefined;
+    payload: { top: Ref<number>; right: Ref<number>; left: Ref<number>; bottom: Ref<number>; width: Ref<number>; height: Ref<number>; };
     response: void;
   };
 }
@@ -153,6 +153,10 @@ export const usePopupStore = defineStore('popup', () => {
     }
   }
 
+  function unsafePayload<K extends PopupKey>(): PopupPayload<K> {
+    return payload.value as PopupPayload<K>;
+  }
+
   /**
    * 获取经过深拷贝的 payload，类型安全
    */
@@ -166,6 +170,7 @@ export const usePopupStore = defineStore('popup', () => {
     isOpen,
     open,
     close,
+    unsafePayload,
     safeClose,
     toggle,
     safePayload,

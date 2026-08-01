@@ -2,17 +2,28 @@
 import { User, ArrowRight, Key, SunMoon, Sun, Moon, LogOut } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
-import { usePopupStore } from "@/stores/popup.ts";
+import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { useThemeStore } from "@/stores/theme.ts";
+import { computed, type Reactive, ref, watch } from "vue";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const popupStore = usePopupStore();
 const themeStore = useThemeStore();
+
+let payload = ref<Reactive<any> | undefined>();
+let right = computed(() => document.documentElement.clientWidth - payload.value.right); // document.documentElement.clientWidth 相比 window.innerWidth，减去了滚动条宽度
+let top = computed(() => payload.value.top + payload.value.height);
+
+watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
+  if (newValue === 'header')
+    payload.value = popupStore.unsafePayload<'header'>();
+})
 </script>
 
 <template>
-  <div v-if="popupStore.isOpen('header') && authStore.isLoggedIn" role="menu" class="hidden sm:block absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-lg animate-in fade-in-0 zoom-in-95">
+  <div v-if="popupStore.isOpen('header')" class="hidden sm:block absolute z-50 mt-2 w-72 origin-top-right rounded-xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-lg animate-in fade-in-0 zoom-in-95"
+       :style="{ top: top + 'px', right: right + 'px' }">
     <!-- 信息 -->
     <div class="flex items-center gap-3 px-4 py-4">
       <img :src="userStore.user_avatar" :alt="userStore.user_username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
@@ -53,8 +64,8 @@ const themeStore = useThemeStore();
           <SunMoon class="size-4"/>
           主题切换
         </div>
-        <Sun v-if="themeStore.isSun" class="size-3.5"/>
-        <Moon v-if="themeStore.isMoon" class="size-3.5"/>
+        <Sun v-if="themeStore.isSun" class="size-4"/>
+        <Moon v-if="themeStore.isMoon" class="size-4"/>
       </a>
     </div>
     <div class="my-1 border-t border-(--border)"></div>
