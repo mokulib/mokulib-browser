@@ -9,19 +9,15 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
  *
  * #### 类型设计说明（响应式兼容）
  *
- * Vue 3 的响应式系统会自动处理对象嵌套：
- * 1. 当 `payload.value` 被赋值一个对象时，Vue 内部会调用 `reactive()` 转换该对象
- * 2. `reactive()` 会自动将内部的 `ref` 属性解包
+ * Vue 3 的响应式系统会自动处理含响应式类型的对象：
+ * 1. 当 `payload.value` 被赋值一个普通对象 `{ ... }` 时，Vue 内部会调用 `reactive()` 转换该对象
+ * 2. `reactive()` 会自动将内部的 `ref` 类型属性解包
  *
  * 这导致同一个 payload 在**传入前后**类型不一致：
  * - **传入时**（payloadIn）：如果需要传递响应式参数，可能传递 `{ Ref<number> }`
  * - **取出时**（payloadOut）：`payload.value` 已被转换为 `Reactive` 类型，其内部属性已被解包为 `number`
  *
- * #### 定义规则
- *
- * - 只有 `payload`：普通数据，传入传出类型一致（如 `{ id: number }`）
- * - 同时有 `payloadIn` 和 `payloadOut`：传入传出类型不同，通常因为传入了 `{ Ref<any> }` 类型的属性
- * - `payloadIn` 和 `payloadOut` 必须成对出现，且不能与 `payload` 同时存在
+ * 需要注意的是，`reactive()` 不会将内部嵌套的 `Ref` 类型的属性解包：`{ x: { Ref<number> } }` 其中的 `Ref` 不会被解包。
  */
 export interface PopupMap {
   uploadBookCover: {
@@ -69,8 +65,7 @@ export interface PopupMap {
     response: void;
   };
   header: {
-    payloadIn: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
-    payloadOut: { top: number; right: number; height: number; };
+    payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
     response: void;
   };
 }
@@ -78,13 +73,16 @@ export interface PopupMap {
 // 提取 PopupKey 类型
 export type PopupKey = keyof PopupMap;
 
-// 工具类型：根据 PopupKey 获取对应的 payloadIn 类型，如果没有 payloadIn，则返回 payload
-export type PopupPayloadIn<K extends PopupKey> = 'payloadIn' extends keyof PopupMap[K] ? PopupMap[K]['payloadIn'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
+// 入参类型：根据 PopupKey 获取对应的 payloadIn 类型
+export type PopupPayloadIn<K extends PopupKey> = PopupMap[K]['payload'];
 
-// 工具类型：根据 PopupKey 获取对应的 payloadOut 类型，如果没有 payloadOut，则返回 payload
-export type PopupPayloadOut<K extends PopupKey> = 'payloadOut' extends keyof PopupMap[K] ? PopupMap[K]['payloadOut'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
+// 工具类型：解包响应式
+type UnwrapRef<T> = T extends Ref<infer V> ? V : T extends object ? { [K in keyof T]: UnwrapRef<T[K]> } : T;
 
-// 工具类型：根据 PopupKey 获取对应的 response 类型
+// 出参类型：根据 PopupKey 以及 UnwarpRef 计算对应的 payloadOut 类型
+export type PopupPayloadOut<K extends PopupKey> = UnwrapRef<PopupPayloadIn<K>>
+
+// 响应类型：根据 PopupKey 获取对应的 response 类型
 export type PopupResponse<K extends PopupKey> = PopupMap[K]['response'];
 
 /**
