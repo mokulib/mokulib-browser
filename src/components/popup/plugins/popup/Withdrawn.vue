@@ -1,27 +1,19 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 import api from "@/api";
 import type { BookCopyAdmin } from "@/types";
-import { ref, watch } from "vue";
-
-const popupStore = usePopupStore();
+import { onMounted, ref } from "vue";
 
 const bookCopyId = ref<number>(-1);
 
-function confirmHandler() {
-  return api.post<BookCopyAdmin>('/api/book-copies/' + bookCopyId.value + '/withdrawn');
-}
-
-// 监听弹窗打开
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'withdrawn')
-    bookCopyId.value = popupStore.clonePayload<'withdrawn'>().id;
+onMounted(() => {
+  usePopupStore().registerInitHook('withdrawn', ({ clone }) => bookCopyId.value = clone.id)
 })
 </script>
 
 <template>
-  <Popup popup-key="withdrawn" title="下架图书" confirm-text="确认下架" :confirm-handler="confirmHandler">
+  <Popup popup-key="withdrawn" title="下架图书" confirm-text="确认下架" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/withdrawn`)">
     <div>确定要下架此图书吗？</div>
   </Popup>
 </template>

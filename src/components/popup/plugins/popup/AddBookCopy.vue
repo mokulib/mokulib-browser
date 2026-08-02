@@ -1,33 +1,25 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
-import { ref, watch } from "vue";
+import { usePopupStore } from "@/stores/popup.ts";
+import { onMounted, ref } from "vue";
 import type { AddBookCopyRequest, BookCopyAdmin } from "@/types";
 import api from "@/api";
+import { DateTime } from "luxon";
 
-const popupStore = usePopupStore();
+const addBookCopyRequest = ref<AddBookCopyRequest>({ book_id: 0, purchase_price: 0, purchase_date: '', source: '' });
 
-const addBookCopyRequest = ref<any>();
-
-function confirmHandler() {
-  return api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest.value);
-}
-
-// 监听弹窗打开
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'addBookCopy') {
-    addBookCopyRequest.value = {
-      book_id: popupStore.clonePayload<'addBookCopy'>().id,
-      purchase_price: 0,
-      purchase_date: new Date().toISOString().slice(0, 10),
-      source: '',
-    } as AddBookCopyRequest;
-  }
+onMounted(() => {
+  usePopupStore().registerInitHook('addBookCopy', ({ clone }) => {
+    addBookCopyRequest.value.book_id = clone.id;
+    addBookCopyRequest.value.purchase_price = 0;
+    addBookCopyRequest.value.purchase_date = DateTime.now().toISO().slice(0, 10);
+    addBookCopyRequest.value.source = '';
+  })
 })
 </script>
 
 <template>
-  <Popup popup-key="addBookCopy" title="添加馆藏" confirm-text="添加" :confirm-handler="confirmHandler">
+  <Popup popup-key="addBookCopy" title="添加馆藏" confirm-text="添加" :confirm-handler="() => api.post<BookCopyAdmin>('/api/book-copies', addBookCopyRequest)">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

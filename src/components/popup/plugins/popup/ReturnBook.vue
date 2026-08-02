@@ -1,35 +1,29 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
-import { ref, watch } from "vue";
+import { usePopupStore } from "@/stores/popup.ts";
+import { onMounted, ref } from "vue";
 import api from "@/api";
 import type { BookCopyAdmin } from "@/types";
 import { DateTime } from "luxon";
-
-const popupStore = usePopupStore();
 
 const borrowRecordId = ref<any>();
 
 const closeTimeInput = ref<string>(DateTime.now().toISO().slice(0, 16));
 const closeStatusInput = ref<string>('CLOSE');
 
-function confirmHandler() {
-  return api.post<BookCopyAdmin>('/api/borrow-records/' + borrowRecordId.value + '/return', { close_status: closeStatusInput.value, close_time: closeTimeInput.value + ':00' });
-}
-
-// 监听弹窗打开
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'returnBook') {
-    borrowRecordId.value = popupStore.clonePayload<'returnBook'>().id;
+onMounted(() => {
+  usePopupStore().registerInitHook('returnBook', ({ clone }) => {
+    // 刷新 payload
+    borrowRecordId.value = clone.id;
     // 刷新弹窗输入
     closeTimeInput.value = DateTime.now().toISO().slice(0, 16);
     closeStatusInput.value = 'CLOSE';
-  }
+  })
 })
 </script>
 
 <template>
-  <Popup popup-key="returnBook" title="归还馆藏" confirm-text="确认归还" :confirm-handler="confirmHandler">
+  <Popup popup-key="returnBook" title="归还馆藏" confirm-text="确认归还" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/borrow-records/${borrowRecordId.value}/return`, { close_status: closeStatusInput, close_time: closeTimeInput + ':00' })">
     <form class="space-y-4">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="return-time-102">

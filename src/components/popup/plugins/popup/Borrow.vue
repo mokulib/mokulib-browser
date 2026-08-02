@@ -1,24 +1,18 @@
 <script setup lang="ts">
-import { Search, Loader } from "@lucide/vue";
+import { Loader, Search } from "@lucide/vue";
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
-import { computed, ref, watch } from "vue";
+import { usePopupStore } from "@/stores/popup.ts";
+import { computed, onMounted, ref, watch } from "vue";
 import api from "@/api";
-import type { BookCopyAdmin } from "@/types";
-
-const popupStore = usePopupStore();
+import { type BookCopyAdmin, type User } from "@/types";
 
 const bookCopyId = ref<any>();
 
 const userIdOrEmailInput = ref<any>();
 const isRenewedInput = ref<boolean>(false);
-const user = ref<any>(); // 查询结果
+const user = ref<User | undefined>(undefined); // 查询结果
 const delayRequest = ref<ReturnType<typeof setTimeout> | undefined>(undefined); // 需要查询（延迟请求）
 const userNotFound = computed(() => !!delayRequest.value || !user.value); // 用户未找到状态，用于控制能否提交
-
-function confirmHandler() {
-  return api.post<BookCopyAdmin>('/api/book-copies/' + bookCopyId.value + '/borrow', { user_id: user.value.id, is_renewed: isRenewedInput.value });
-}
 
 // 监听输入
 watch(userIdOrEmailInput, (newValue) => {
@@ -31,7 +25,7 @@ watch(userIdOrEmailInput, (newValue) => {
   // 当前输入为空白，清除查询结果，不设置请求
   const trimmed = newValue?.trim()
   if (!trimmed) {
-    user.value = null
+    user.value = undefined
     return
   }
 
@@ -62,21 +56,21 @@ watch(userIdOrEmailInput, (newValue) => {
   }
 
   // 解析失败，重置用户搜索结果
-  user.value = null;
+  user.value = undefined;
 }, { immediate: false });
 
-// 监听弹窗打开
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'borrow') {
-    bookCopyId.value = popupStore.clonePayload<'borrow'>().id;
+onMounted(() => {
+  usePopupStore().registerInitHook('borrow', ({ clone }) => {
+    // 刷新 payload
+    bookCopyId.value = clone.id;
     // 清空输入
     userIdOrEmailInput.value = null;
-  }
+  })
 })
 </script>
 
 <template>
-  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="confirmHandler">
+  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}/borrow`, { user_id: user?.id, is_renewed: isRenewedInput })">
     <div class="space-y-3">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
-import { computed, ref, watch } from "vue";
+import { usePopupStore } from "@/stores/popup.ts";
+import { computed, onMounted, ref } from "vue";
 import api from "@/api";
-
-const popupStore = usePopupStore();
 
 const bookId = ref<number>(-1);
 
@@ -24,19 +22,13 @@ function readFile(file: File) {
   });
 }
 
-async function confirmHandler() {
-  return api.post('/api/books/' + bookId.value + '/cover', await readFile(selectedFile.value as File), { headers: { 'Content-Type': 'application/octet-stream' } });
-}
-
-// 监听弹窗打开
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'uploadBookCover')
-    bookId.value = popupStore.clonePayload<'uploadBookCover'>().id;
+onMounted(() => {
+  usePopupStore().registerInitHook('uploadBookCover', ({ clone }) => bookId.value = clone.id);
 })
 </script>
 
 <template>
-  <Popup popup-key="uploadBookCover" title="重新上传封面" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="confirmHandler">
+  <Popup popup-key="uploadBookCover" title="重新上传封面" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="async () => api.post(`/api/books/${bookId}/cover`, await readFile(selectedFile as File), { headers: { 'Content-Type': 'application/octet-stream' } })">
     <template #content>
       选择一张新的封面图片替换当前封面。
     </template>

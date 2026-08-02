@@ -2,9 +2,9 @@
 import { ArrowRight, Key, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 import { useThemeStore } from "@/stores/theme.ts";
-import { computed, type Reactive, ref, watch } from "vue";
+import { computed, onMounted, type Reactive, ref } from "vue";
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -15,9 +15,8 @@ let payload = ref<Reactive<{ top: number; right: number; height: number; }> | un
 let right = computed(() => !payload.value ? 0 : document.documentElement.clientWidth - payload.value.right); // document.documentElement.clientWidth 相比 window.innerWidth，减去了滚动条宽度
 let top = computed(() => !payload.value ? 0 : payload.value.top + payload.value.height);
 
-watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
-  if (newValue === 'header')
-    payload.value = popupStore.rawPayload<'header'>();
+onMounted(() => {
+  popupStore.registerInitHook('header', ({ raw }) => payload.value = raw )
 })
 </script>
 

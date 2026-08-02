@@ -1,35 +1,27 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 import api from "@/api";
 import type { BookCopyAdmin } from "@/types";
-import { ref, watch } from "vue";
-
-const popupStore = usePopupStore();
+import { onMounted, ref } from "vue";
 
 const bookCopyId = ref<number>(-1);
 const purchasePrice = ref<number>(0);
 const purchaseDate = ref<string>("");
 const source = ref<string>("");
 
-function confirmHandler() {
-  return api.put<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}`, { purchase_price: purchasePrice.value, purchase_date: purchaseDate.value, source: source.value });
-}
-
-// 监听弹窗打开
-watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  if (newValue === 'editBookCopy') {
-    const payload = popupStore.clonePayload<'editBookCopy'>();
-    bookCopyId.value = payload.bookCopyId;
-    purchasePrice.value = payload.purchasePrice;
-    purchaseDate.value = payload.purchaseDate;
-    source.value = payload.source;
-  }
-});
+onMounted(() => {
+  usePopupStore().registerInitHook('editBookCopy', ({ clone }) => {
+    bookCopyId.value = clone.bookCopyId;
+    purchasePrice.value = clone.purchasePrice;
+    purchaseDate.value = clone.purchaseDate;
+    source.value = clone.source;
+  })
+})
 </script>
 
 <template>
-  <Popup popup-key="editBookCopy" title="编辑入库信息" confirm-text="保存" :confirm-handler="confirmHandler">
+  <Popup popup-key="editBookCopy" title="编辑入库信息" confirm-text="保存" :confirm-handler="() => api.put<BookCopyAdmin>(`/api/book-copies/${bookCopyId}`, { purchase_price: purchasePrice, purchase_date: purchaseDate, source })">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

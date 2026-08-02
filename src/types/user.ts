@@ -9,4 +9,14 @@ export interface User {
   role: Role;
   username: string;
   bio: string;
+  create_time: string;
+}
+
+export interface JwtUser {
+  id: number;
+  email: string;
+  role: Role;
+  username: string;
+  bio: string;
+  create_time: string;
 }

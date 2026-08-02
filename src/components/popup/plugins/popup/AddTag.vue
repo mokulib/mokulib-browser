@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { computed, onMounted, ref } from "vue";
+import { usePopupStore } from "@/stores/popup.ts";
 import Popup from "@/components/popup/core/Popup.vue";
 import type { Tag } from "@/types";
 import api from "@/api";
@@ -8,8 +8,6 @@ import api from "@/api";
 interface TagWithStatus extends Tag {
   status: 'exists' | 'active' | 'none';
 }
-
-const popupStore = usePopupStore();
 
 const bookId = ref<number>(0);
 const existsTags = ref<Tag[]>([]);
@@ -44,18 +42,16 @@ async function confirmHandler() {
   // 配置需要添加的标签（已在标签库的）
   tags.value?.filter(value => value.status === 'active').forEach(tag => addTags.push(tag.id));
   // 提交请求
-  return api.post<undefined>('/api/books/' + bookId.value + '/tags', addTags);
+  return api.post<undefined>(`/api/books/${bookId.value}/tags`, addTags);
 }
 
-// 监听弹窗打开
-watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  if (newValue === 'addTag') {
+onMounted(() => {
+  usePopupStore().registerInitHook('addTag', async ({ clone }) => {
     // 获取所有标签
     allTags.value = (await api.get<Tag[]>('/api/tags')).data;
     // 刷新 payload
-    const payload = popupStore.clonePayload<'addTag'>();
-    bookId.value = payload.id;
-    existsTags.value = payload.tags;
+    bookId.value = clone.id;
+    existsTags.value = clone.tags;
     // 刷新标签状态
     tags.value = allTags.value.map(tag => {
       return {
@@ -66,8 +62,8 @@ watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
     })
     // 刷新自定义标签
     customTagInput.value = "";
-  }
-});
+  })
+})
 </script>
 
 <template>

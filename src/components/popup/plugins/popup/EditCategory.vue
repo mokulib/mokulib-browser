@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 import api from "@/api";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { Book, Category } from "@/types";
-
-const popupStore = usePopupStore();
 
 const book = ref<Book>();
 const originalCategory = ref<Category>();
@@ -24,24 +22,22 @@ async function confirmHandler() {
   else
     category = selectedCategory.value;
   // 提交请求
-  return api.put<Book>('/api/books/' + book.value?.id, { ...book.value, category_id: category?.id });
+  return api.put<Book>(`/api/books/${book.value?.id}`, { ...book.value, category_id: category?.id });
 }
 
-// 监听弹窗打开
-watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
-  if (newValue === 'editCategory') {
+onMounted(() => {
+  usePopupStore().registerInitHook('editCategory', async ({ clone }) => {
     // 获取所有分类
     allCategories.value = (await api.get<Category[]>('/api/categories')).data;
     // 刷新 payload（深拷贝以避免影响原始数据）
-    const payload = popupStore.clonePayload<'editCategory'>();
-    book.value = payload.book;
-    originalCategory.value = payload.category;
+    book.value = clone.book;
+    originalCategory.value = clone.category;
     // 刷新选中状态
-    selectedCategory.value = payload.category;
+    selectedCategory.value = clone.category;
     // 刷新自定义分类
     customCategoryInput.value = "";
-  }
-});
+  })
+})
 </script>
 
 <template>
