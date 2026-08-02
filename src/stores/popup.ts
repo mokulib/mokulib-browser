@@ -4,9 +4,11 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
 
 /**
  * ### PopupMap
+ *
  * 定义弹窗的键、负载类型，以及返回数据类型。
  *
  * #### 类型设计说明（响应式兼容）
+ *
  * Vue 3 的响应式系统会自动处理对象嵌套：
  * 1. 当 `payload.value` 被赋值一个对象时，Vue 内部会调用 `reactive()` 转换该对象
  * 2. `reactive()` 会自动将内部的 `ref` 属性解包
@@ -16,6 +18,7 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
  * - **取出时**（payloadOut）：`payload.value` 已被转换为 `Reactive` 类型，其内部属性已被解包为 `number`
  *
  * #### 定义规则
+ *
  * - 只有 `payload`：普通数据，传入传出类型一致（如 `{ id: number }`）
  * - 同时有 `payloadIn` 和 `payloadOut`：传入传出类型不同，通常因为传入了 `{ Ref<any> }` 类型的属性
  * - `payloadIn` 和 `payloadOut` 必须成对出现，且不能与 `payload` 同时存在
@@ -75,10 +78,10 @@ export interface PopupMap {
 // 提取 PopupKey 类型
 export type PopupKey = keyof PopupMap;
 
-// 工具类型：根据 PopupKey 获取对应的 payloadIn 类型
+// 工具类型：根据 PopupKey 获取对应的 payloadIn 类型，如果没有 payloadIn，则返回 payload
 export type PopupPayloadIn<K extends PopupKey> = 'payloadIn' extends keyof PopupMap[K] ? PopupMap[K]['payloadIn'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
 
-// 工具类型：根据 PopupKey 获取对应的 payloadOut 类型
+// 工具类型：根据 PopupKey 获取对应的 payloadOut 类型，如果没有 payloadOut，则返回 payload
 export type PopupPayloadOut<K extends PopupKey> = 'payloadOut' extends keyof PopupMap[K] ? PopupMap[K]['payloadOut'] : 'payload' extends keyof PopupMap[K] ? PopupMap[K]['payload'] : never;
 
 // 工具类型：根据 PopupKey 获取对应的 response 类型
@@ -104,6 +107,7 @@ export const usePopupStore = defineStore('popup', () => {
 
   /**
    * 判断弹窗是否打开，如果没有指定弹窗名称，则判断是否有任一弹窗正处于打开状态
+   *
    * @param key 弹窗名称
    */
   function isOpen(key?: PopupKey): boolean {
@@ -114,7 +118,8 @@ export const usePopupStore = defineStore('popup', () => {
   }
 
   /**
-   * 打开弹窗，并关闭所有其他弹窗
+   * ### 打开弹窗，并关闭所有其他弹窗
+   *
    * @param key 弹窗名称
    * @param args 弹窗数据
    */
@@ -131,18 +136,23 @@ export const usePopupStore = defineStore('popup', () => {
   }
 
   /**
-   * 关闭弹窗。通常用于用户点击弹窗内的取消或者 X 按钮
+   * ### 关闭弹窗
+   *
+   * 用于用户点击取消、X 按钮或点击遮罩层等场景
    */
   function close() {
     popups.value = undefined;
   }
 
   /**
-   * 安全关闭弹窗
-   * @param key 弹窗名称
-   * @param response 弹窗返回数据
+   * ### 确认并关闭弹窗
+   *
+   * 用于用户点击确认/提交按钮后，将结果返回给调用者
+   *
+   * @param key 弹窗名称，用于校验当前弹窗是否匹配
+   * @param response 弹窗的返回数据
    */
-  function safeClose<K extends PopupKey>(key: K, response: PopupResponse<K>) {
+  function confirm<K extends PopupKey>(key: K, response: PopupResponse<K>) {
     if (key !== popups.value)
       return;
 
@@ -154,6 +164,7 @@ export const usePopupStore = defineStore('popup', () => {
 
   /**
    * 切换弹窗状态
+   *
    * @param key 弹窗名称
    * @param args 弹窗数据
    */
@@ -169,14 +180,27 @@ export const usePopupStore = defineStore('popup', () => {
     }
   }
 
-  function unsafePayload<K extends PopupKey>(): PopupPayloadOut<K> {
+  /**
+   * ### 获取 payload 的原始引用（响应式对象）
+   *
+   * 注意：返回的是响应式对象的直接引用，修改属性会影响原始数据。
+   * 仅在确认不会意外修改数据时使用，否则请使用 {@link clonePayload}。
+   *
+   * @returns 响应式的 payload 对象
+   */
+  function rawPayload<K extends PopupKey>(): PopupPayloadOut<K> {
     return payload.value as PopupPayloadOut<K>;
   }
 
   /**
-   * 获取经过深拷贝的 payload，类型安全
+   * ### 获取 payload 的深拷贝（普通对象）
+   *
+   * 返回一个完全独立的副本，修改属性不会影响原始数据。
+   * 适用于需要修改或传递 payload 数据的场景。
+   *
+   * @returns payload 的深拷贝
    */
-  function safePayload<K extends PopupKey>(): PopupPayloadOut<K> {
+  function clonePayload<K extends PopupKey>(): PopupPayloadOut<K> {
     return JSON.parse(JSON.stringify(payload.value)) as PopupPayloadOut<K>;
   }
 
@@ -186,9 +210,9 @@ export const usePopupStore = defineStore('popup', () => {
     isOpen,
     open,
     close,
-    unsafePayload,
-    safeClose,
+    confirm,
     toggle,
-    safePayload,
+    rawPayload,
+    clonePayload,
   };
 });

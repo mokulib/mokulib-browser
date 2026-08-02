@@ -28,7 +28,7 @@ async function confirm() {
   // 等待弹窗请求数据并返回结果
   const response = await props.confirmHandler();
   // 关闭弹窗，返回数据
-  popupStore.safeClose(props.popupKey, response);
+  popupStore.confirm(props.popupKey, response);
 }
 </script>
 

@@ -16,7 +16,7 @@ function confirmHandler() {
 // 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'relist')
-    bookCopyId.value = popupStore.safePayload<'relist'>().id;
+    bookCopyId.value = popupStore.clonePayload<'relist'>().id;
 })
 </script>
 

@@ -52,8 +52,8 @@ watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
   if (newValue === 'addTag') {
     // 获取所有标签
     allTags.value = (await api.get<Tag[]>('/api/tags')).data;
-    // 刷新 payload（深拷贝以避免影响原始数据）
-    const payload = popupStore.safePayload<'addTag'>();
+    // 刷新 payload
+    const payload = popupStore.clonePayload<'addTag'>();
     bookId.value = payload.id;
     existsTags.value = payload.tags;
     // 刷新标签状态

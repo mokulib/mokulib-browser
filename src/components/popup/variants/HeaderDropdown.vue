@@ -17,7 +17,7 @@ let top = computed(() => !payload.value ? 0 : payload.value.top + payload.value.
 
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'header')
-    payload.value = popupStore.unsafePayload<'header'>();
+    payload.value = popupStore.rawPayload<'header'>();
 })
 </script>
 

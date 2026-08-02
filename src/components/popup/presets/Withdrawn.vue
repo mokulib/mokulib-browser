@@ -16,7 +16,7 @@ function confirmHandler() {
 // 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'withdrawn')
-    bookCopyId.value = popupStore.safePayload<'withdrawn'>().id;
+    bookCopyId.value = popupStore.clonePayload<'withdrawn'>().id;
 })
 </script>
 

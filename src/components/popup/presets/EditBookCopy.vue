@@ -19,7 +19,7 @@ function confirmHandler() {
 // 监听弹窗打开
 watch(() => popupStore.popups, async (newValue: PopupKey | undefined) => {
   if (newValue === 'editBookCopy') {
-    const payload = popupStore.safePayload<'editBookCopy'>();
+    const payload = popupStore.clonePayload<'editBookCopy'>();
     bookCopyId.value = payload.bookCopyId;
     purchasePrice.value = payload.purchasePrice;
     purchaseDate.value = payload.purchaseDate;

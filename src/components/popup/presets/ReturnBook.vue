@@ -20,7 +20,7 @@ function confirmHandler() {
 // 监听弹窗打开
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'returnBook') {
-    borrowRecordId.value = popupStore.safePayload<'returnBook'>().id;
+    borrowRecordId.value = popupStore.clonePayload<'returnBook'>().id;
     // 刷新弹窗输入
     closeTimeInput.value = DateTime.now().toISO().slice(0, 16);
     closeStatusInput.value = 'CLOSE';

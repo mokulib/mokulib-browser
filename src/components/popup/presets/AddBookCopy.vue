@@ -17,7 +17,7 @@ function confirmHandler() {
 watch(() => popupStore.popups, (newValue: PopupKey | undefined) => {
   if (newValue === 'addBookCopy') {
     addBookCopyRequest.value = {
-      book_id: popupStore.safePayload<'addBookCopy'>().id,
+      book_id: popupStore.clonePayload<'addBookCopy'>().id,
       purchase_price: 0,
       purchase_date: new Date().toISOString().slice(0, 10),
       source: '',
