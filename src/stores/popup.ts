@@ -98,10 +98,31 @@ export const usePopupStore = defineStore('popup', () => {
   const popups = ref<PopupKey | undefined>(undefined);
   // 存储调用者发给弹窗的负载
   const payload = ref<any>(undefined);
+  // 存储初始化函数映射
+  const initHooks = new Map<PopupKey, (payload: any) => void>();
   // 存储回调函数
   // 注意，推荐的 confirm 处理流程是：
   // 在弹窗中点击 confirm 后，如果需要提交表单，应在弹窗组件中进行处理，不要把表单数据通过此回调函数发回调用者让调用者处理，在弹窗组件中处理完毕后，可以通过此回调函数向调用者发回表单提交结果，进行更进一步处理
   const callback = ref<((response: any) => void) | undefined>();
+
+  /**
+   * 注册弹窗初始化函数
+   *
+   * @param key 弹窗名称
+   * @param hook 初始化函数
+   */
+  function registerInitHook<K extends PopupKey>(key: K, hook: (payload: { raw: PopupPayloadOut<K>; clone: PopupPayloadOut<K> }) => void) {
+    initHooks.set(key, hook);
+  }
+
+  /**
+   * 注销弹窗初始化函数
+   *
+   * @param key 弹窗名称
+   */
+  function unregisterInitHook(key: PopupKey) {
+    initHooks.delete(key);
+  }
 
   /**
    * 判断弹窗是否打开，如果没有指定弹窗名称，则判断是否有任一弹窗正处于打开状态
@@ -131,6 +152,11 @@ export const usePopupStore = defineStore('popup', () => {
     popups.value = key;
     payload.value = payload_;
     callback.value = callback_;
+
+    // 调用 initHook
+    const hook = initHooks.get(key);
+    if (hook)
+      hook({ raw: rawPayload<K>(), clone: clonePayload<K>() });
   }
 
   /**
@@ -205,6 +231,8 @@ export const usePopupStore = defineStore('popup', () => {
   return {
     popups,
     payload,
+    registerInitHook,
+    unregisterInitHook,
     isOpen,
     open,
     close,
