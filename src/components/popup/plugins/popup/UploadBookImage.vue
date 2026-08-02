@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Popup from "@/components/popup/Popup.vue";
+import Popup from "@/components/popup/core/Popup.vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
 import { computed, ref, watch } from "vue";
 import api from "@/api";

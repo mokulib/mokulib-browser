@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePopupStore } from "@/stores/popup.ts";
-import Popup from "@/components/popup/Popup.vue";
+import Popup from "@/components/popup/core/Popup.vue";
 import { useUserStore } from "@/stores/user.ts";
 
 const userStore = useUserStore();

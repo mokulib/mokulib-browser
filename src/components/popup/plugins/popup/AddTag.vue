@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type PopupKey, usePopupStore } from "@/stores/popup.ts";
-import Popup from "@/components/popup/Popup.vue";
+import Popup from "@/components/popup/core/Popup.vue";
 import type { Tag } from "@/types";
 import api from "@/api";
 
