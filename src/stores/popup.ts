@@ -99,7 +99,7 @@ export const usePopupStore = defineStore('popup', () => {
   // 存储调用者发给弹窗的负载
   const payload = ref<any>(undefined);
   // 存储初始化函数映射
-  const initHooks = new Map<PopupKey, (payload: any) => void>();
+  const initHooks = new Map<PopupKey, ((payload: any) => void)[]>();
   // 存储回调函数
   // 注意，推荐的 confirm 处理流程是：
   // 在弹窗中点击 confirm 后，如果需要提交表单，应在弹窗组件中进行处理，不要把表单数据通过此回调函数发回调用者让调用者处理，在弹窗组件中处理完毕后，可以通过此回调函数向调用者发回表单提交结果，进行更进一步处理
@@ -112,16 +112,38 @@ export const usePopupStore = defineStore('popup', () => {
    * @param hook 初始化函数
    */
   function registerInitHook<K extends PopupKey>(key: K, hook: (payload: { raw: PopupPayloadOut<K>; clone: PopupPayloadOut<K> }) => void) {
-    initHooks.set(key, hook);
+    // 获取 hooks 列表
+    const hooks = initHooks.get(key);
+    // 列表存在，则添加
+    if (hooks) hooks.push(hook);
+    // 列表不存在，则创建并添加
+    else       initHooks.set(key, [hook]);
   }
 
   /**
    * 注销弹窗初始化函数
    *
    * @param key 弹窗名称
+   * @param hook 要注销的初始化函数，如果不传则移除该 key 下的所有 hook
    */
-  function unregisterInitHook(key: PopupKey) {
-    initHooks.delete(key);
+  function unregisterInitHook<K extends PopupKey>(key: K, hook?: (payload: { raw: PopupPayloadOut<K>; clone: PopupPayloadOut<K> }) => void) {
+    // 不传 hook，移除该 key 下的所有 hook
+    if (!hook) {
+      initHooks.delete(key);
+      return;
+    }
+
+    // 获取 hooks 列表
+    const hooks = initHooks.get(key);
+    // hooks 列表不存在，则返回
+    if (!hooks)
+      return;
+
+    // 获取 hook 的索引
+    const index = hooks.indexOf(hook as (payload: { raw: any; clone: any }) => void);
+    // hook 索引存在，删除该 hook
+    if (index > -1)
+      hooks.splice(index, 1);
   }
 
   /**
@@ -153,10 +175,13 @@ export const usePopupStore = defineStore('popup', () => {
     payload.value = payload_;
     callback.value = callback_;
 
-    // 调用 initHook
-    const hook = initHooks.get(key);
-    if (hook)
-      hook({ raw: rawPayload<K>(), clone: clonePayload<K>() });
+    // 调用该 key 下的所有 initHook
+    const hooks = initHooks.get(key);
+    if (hooks) {
+      const raw = rawPayload<K>();
+      const clone = clonePayload<K>();
+      hooks.forEach(hook => hook({ raw, clone }));
+    }
   }
 
   /**
@@ -229,8 +254,6 @@ export const usePopupStore = defineStore('popup', () => {
   }
 
   return {
-    popups,
-    payload,
     registerInitHook,
     unregisterInitHook,
     isOpen,
@@ -238,7 +261,5 @@ export const usePopupStore = defineStore('popup', () => {
     close,
     confirm,
     toggle,
-    rawPayload,
-    clonePayload,
   };
 });
