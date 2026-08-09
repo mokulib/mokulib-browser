@@ -250,6 +250,8 @@ export const usePopupStore = defineStore('popup', () => {
    * @returns payload 的深拷贝
    */
   function clonePayload<K extends PopupKey>(): PopupPayloadOut<K> {
+    if (payload.value === undefined)
+      return undefined as PopupPayloadOut<K>;
     return JSON.parse(JSON.stringify(payload.value)) as PopupPayloadOut<K>;
   }
 
