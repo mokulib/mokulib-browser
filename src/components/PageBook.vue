@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, toRef, watch } from "vue";
 import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
@@ -18,7 +18,8 @@ import type {
 import api from "@/api"
 import { ElMessage } from "element-plus";
 
-const { id } = defineProps(['id']);
+const props = defineProps(['id']);
+const id = toRef(props, 'id');
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -31,7 +32,7 @@ const bookCopies = ref<BookCopy[]>([]);
 const bookReviews = ref<BookReview[]>([]);
 
 const bookCoverTimestamp = ref<number>(Date.now());
-const bookCoverSrc = computed<string>(() => '/books/' + id + '?timestamp=' + bookCoverTimestamp.value);
+const bookCoverSrc = computed<string>(() => '/books/' + id.value + '?timestamp=' + bookCoverTimestamp.value);
 const isBorrowedByMe = computed(() => bookCopies.value?.some(bookCopy => isMyBorrowRecord(bookCopy.current_borrow_record)) ?? false);
 const isInWishlist = ref(false);
 const isWishlistEnabled = computed(() => authStore.isLoggedIn && !isBorrowedByMe.value)
@@ -75,7 +76,7 @@ async function fetchCategory() {
 }
 
 async function fetchTags() {
-  tags.value = (await api.get<Tag[]>('/api/books/' + id + '/tags')).data ?? [];
+  tags.value = (await api.get<Tag[]>('/api/books/' + id.value + '/tags')).data ?? [];
 }
 
 async function fetchIdUsernameMapping() {
@@ -106,7 +107,7 @@ async function fetchIdUsernameMapping() {
 }
 
 async function fetchBookCopies() {
-  bookCopies.value = (await api.get('/api/books/' + id + '/book-copies')).data ?? [];
+  bookCopies.value = (await api.get('/api/books/' + id.value + '/book-copies')).data ?? [];
   // 置顶我的借阅
   bookCopies.value = [...bookCopies.value].sort((a, b) => {
     if (isMyBorrowRecord(a.current_borrow_record) && !isMyBorrowRecord(b.current_borrow_record)) return -1  // a 是我借的，b 不是，a 排前面
@@ -124,7 +125,7 @@ async function fetchBookCopies() {
 
 async function wishlistHandler() {
   // 根据当前状态决定请求类型
-  const data = isInWishlist.value ? await api.delete<Wishlist>('/api/wishlists/' + id) : await api.post<Wishlist>('/api/wishlists/' + id);
+  const data = isInWishlist.value ? await api.delete<Wishlist>('/api/wishlists/' + id.value) : await api.post<Wishlist>('/api/wishlists/' + id.value);
   // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -136,7 +137,7 @@ async function wishlistHandler() {
 
 async function deleteTagHandler(tagId: number) {
   // 提交请求
-  const data = await api.delete('/api/books/' + id + '/tags/' + tagId);
+  const data = await api.delete('/api/books/' + id.value + '/tags/' + tagId);
   // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -259,21 +260,21 @@ async function relistCallback(data: Response<BookCopyAdmin>) {
 // 监听
 /////////////////////////////////////////////
 
-onMounted(async () => {
+watch(id, async () => {
   // 请求图书信息
-  book.value = (await api.get<Book>('/api/books/' + id)).data ?? {};
+  book.value = (await api.get<Book>('/api/books/' + id.value)).data ?? {};
   // 请求分类信息
   await fetchCategory();
   // 请求标签信息
   await fetchTags();
   // 请求心愿单信息
   if (authStore.isLoggedIn)
-    isInWishlist.value = (await api.get<Wishlist>('/api/wishlists/' + id)).data.is_in_wishlist ?? false;
+    isInWishlist.value = (await api.get<Wishlist>('/api/wishlists/' + id.value)).data.is_in_wishlist ?? false;
   // 仅用户或管理员可以请求馆藏信息
   if (authStore.isLoggedIn)
     await fetchBookCopies();
   // 书评信息
-  bookReviews.value = (await api.get('/api/book-review/' + id)).data ?? [];
+  bookReviews.value = (await api.get('/api/book-review/' + id.value)).data ?? [];
   // 处理书评信息
   if (authStore.isLoggedIn && bookReviews.value.length > 0) {
     const bookReviewIndex = bookReviews.value.findIndex(bookReview => userStore.user_id === bookReview.user_id);
@@ -288,7 +289,7 @@ onMounted(async () => {
       }
     }
   }
-});
+}, { immediate: true });
 </script>
 
 <template>
