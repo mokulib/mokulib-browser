@@ -68,6 +68,10 @@ export interface PopupMap {
     payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
     response: void;
   };
+  search: {
+    payload: undefined;
+    response: void;
+  };
 }
 
 // 提取 PopupKey 类型
