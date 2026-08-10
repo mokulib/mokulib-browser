@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  借阅中
+  我的借阅
 </template>
 
 <style scoped>

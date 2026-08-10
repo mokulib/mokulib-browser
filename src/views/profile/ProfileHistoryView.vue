@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  历史借阅
+  借阅历史
 </template>
 
 <style scoped>

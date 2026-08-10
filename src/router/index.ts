@@ -59,6 +59,7 @@ const router = createRouter({
     },
     {
       path: '/profile',
+      redirect: { name: 'profile-my' },
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
       meta: {
@@ -67,24 +68,27 @@ const router = createRouter({
       },
       children: [
         {
-          path: '',
-          name: 'profile-empty',
-          redirect: { name: 'profile-home' },
-        },
-        {
-          path: 'borrowing',
-          name: 'profile-home',
-          component: () => import('@/views/profile/ProfileHomeView.vue'),
+          path: 'my',
+          name: 'profile-my',
+          component: () => import('@/views/profile/ProfileMyView.vue'),
           meta: {
-            label: '借阅中'
+            label: '我的'
           }
         },
         {
-          path: 'wishlist',
-          name: 'profile-wishlist',
-          component: () => import('@/views/profile/ProfileWishlistView.vue'),
+          path: 'borrowing',
+          name: 'profile-borrowing',
+          component: () => import('@/views/profile/ProfileBorrowingView.vue'),
           meta: {
-            label: '心愿单'
+            label: '我的借阅'
+          }
+        },
+        {
+          path: 'favorite',
+          name: 'profile-favorite',
+          component: () => import('@/views/profile/ProfileFavoriteView.vue'),
+          meta: {
+            label: '我的收藏'
           }
         },
         {
@@ -92,7 +96,7 @@ const router = createRouter({
           name: 'profile-history',
           component: () => import('@/views/profile/ProfileHistoryView.vue'),
           meta: {
-            label: '历史借阅'
+            label: '借阅历史'
           }
         },
       ],

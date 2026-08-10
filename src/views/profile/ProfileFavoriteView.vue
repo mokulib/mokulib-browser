@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  心愿单
+  我的收藏
 </template>
 
 <style scoped>
