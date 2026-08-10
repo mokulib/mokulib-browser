@@ -1,24 +1,34 @@
 <script setup lang="ts">
+import { Search, Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } from "@lucide/vue";
+import { usePopupStore } from "@/stores/popup.ts";
 
-import { Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } from "@lucide/vue";
+const popupStore = usePopupStore();
+
+const hotSearches = ["英语", "数学", "计算机"];
 </script>
 
 <template>
   <main class="flex-1">
-    <!-- 欢迎 -->
-    <section class="mx-auto max-w-6xl px-4 pt-12 md:px-8 md:pt-16">
-      <p class="text-sm tracking-[0.2em] text-(--muted-foreground)">
-        晚上好，读者
-      </p>
-      <h1 class="mt-3 max-w-2xl text-balance font-serif text-4xl font-medium leading-tight md:text-6xl">
-        欢迎来到我的
-        <br>
-        个人图书馆
-      </h1>
-      <p class="mt-4 max-w-lg text-pretty leading-relaxed text-(--muted-foreground)">
-        今天想读点什么？从你正在读的书继续，或从书架上寻一本素未谋面的新友。
-      </p>
-    </section>
+
+    <!-- 搜索 -->
+    <div class="w-full flex items-center justify-center py-24">
+      <div class="w-full max-w-lg flex flex-col gap-2">
+        <!-- 搜索框 -->
+        <div class="w-full flex items-center justify-center px-8 py-2 gap-3 rounded-2xl border border-(--border) bg-(--card)">
+          <Search @click="popupStore.open('search', {})" class="size-5 text-(--foreground)"/>
+          <div @click="popupStore.open('search', {})" class="w-full h-6 outline-none cursor-text"/>
+        </div>
+        <!-- 热搜词 -->
+        <div class="flex items-center justify-start px-8 text-sm">
+          <div class="text-(--muted-foreground)">热搜：</div>
+          <div class="flex items-center justify-center gap-2">
+            <template v-for="search in hotSearches" :key="search">
+              <div @click="popupStore.open('search', { keyword: search })" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline">{{ search }}</div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- 统计 -->
     <section class="mx-auto max-w-6xl mt-10 px-4 pb-4 md:px-8">

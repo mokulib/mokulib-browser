@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Search, Loader, ArrowUpNarrowWide, ArrowDownNarrowWide } from "@lucide/vue";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Book } from "@/types";
 import api from "@/api";
@@ -41,6 +41,14 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
     isSearched.value = true;
   }
 }
+
+onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
+  if (clone?.keyword) {
+    isSearched.value = false;
+    searchInput.value = clone.keyword;
+    goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD');
+  }
+}));
 </script>
 
 <template>

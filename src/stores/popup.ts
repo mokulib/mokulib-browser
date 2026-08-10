@@ -69,7 +69,7 @@ export interface PopupMap {
     response: void;
   };
   search: {
-    payload: undefined;
+    payload: { keyword?: string; };
     response: void;
   };
 }
