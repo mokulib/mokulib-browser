@@ -7,7 +7,7 @@ import api from "@/api";
 import type { Page } from "@/types/page.ts";
 
 // 定义类型
-type SortMode = "publish_date_from_new_to_old" | "publish_date_from_old_to_new" | "price_from_low_to_high" | "price_from_high_to_low";
+type SortMode = "PUBLISH_DATE_FROM_NEW_TO_OLD" | "PUBLISH_DATE_FROM_OLD_TO_NEW" | "PRICE_FROM_LOW_TO_HIGH" | "PRICE_FROM_HIGH_TO_LOW";
 type Conditions = { keyword: string, sortMode: SortMode };
 
 const popupStore = usePopupStore();
@@ -16,10 +16,10 @@ const isSearched = ref(false);
 const isLoading = ref(false);
 const requestTimestamp = ref(0);
 const searchInput = ref("");
-const conditions = ref<Conditions>({ keyword: "", sortMode: "publish_date_from_new_to_old" })
+const conditions = ref<Conditions>({ keyword: "", sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD" })
 const results = ref<Page<Book>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
-const isPublishDateSort = computed(() => conditions.value.sortMode === "publish_date_from_new_to_old" || conditions.value.sortMode === "publish_date_from_old_to_new");
-const isPriceSort = computed(() => conditions.value.sortMode === "price_from_low_to_high" || conditions.value.sortMode === "price_from_high_to_low");
+const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_DATE_FROM_NEW_TO_OLD" || conditions.value.sortMode === "PUBLISH_DATE_FROM_OLD_TO_NEW");
+const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
 
 async function goToPage(pageNum: number, sortMode_: SortMode) {
   if (searchInput.value === conditions.value.keyword && sortMode_ === conditions.value.sortMode && pageNum === results.value.current)
@@ -51,10 +51,10 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
         <ArrowLeft class="size-5 text-(--secondary-foreground)"/>
       </button>
       <div class="w-full flex items-center px-4 md:px-0 py-2 gap-3 rounded-2xl border border-(--border) md:border-none">
-        <button @click="goToPage(1, 'publish_date_from_new_to_old')">
+        <button @click="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')">
           <Search class="size-5 text-(--secondary-foreground)"/>
         </button>
-        <input v-model="searchInput" type="text" @keydown.enter="goToPage(1, 'publish_date_from_new_to_old')" placeholder="搜索..." class="w-full text-(--secondary-foreground) outline-none"/>
+        <input v-model="searchInput" type="text" @keydown.enter="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')" placeholder="搜索..." class="w-full text-(--secondary-foreground) outline-none"/>
         <Loader class="size-5 text-(--secondary-foreground) opacity-0 animate-spin" :class="{ 'opacity-100': isLoading }" style="transition-duration: 500ms; animation-duration: 3000ms"/>
       </div>
     </div>
@@ -70,16 +70,16 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
       <div class="flex items-center justify-between px-10 pt-3 pb-2.5 border-b border-(--border)">
         <!-- 排序 -->
         <div class="flex items-center gap-2">
-          <button @click="() => goToPage(1, conditions.sortMode === 'publish_date_from_new_to_old' ? 'publish_date_from_old_to_new' : 'publish_date_from_new_to_old')" class="flex items-center gap-2" :class="{ 'text-(--primary)': isPublishDateSort }">
+          <button @click="() => goToPage(1, conditions.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' ? 'PUBLISH_DATE_FROM_OLD_TO_NEW' : 'PUBLISH_DATE_FROM_NEW_TO_OLD')" class="flex items-center gap-2" :class="{ 'text-(--primary)': isPublishDateSort }">
             <span class="text-sm">出版时间</span>
-            <ArrowDownNarrowWide v-if="isPriceSort || conditions.sortMode === 'publish_date_from_new_to_old'" class="size-4"/>
-            <ArrowUpNarrowWide v-if="conditions.sortMode === 'publish_date_from_old_to_new'" class="size-4"/>
+            <ArrowDownNarrowWide v-if="isPriceSort || conditions.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD'" class="size-4"/>
+            <ArrowUpNarrowWide v-if="conditions.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW'" class="size-4"/>
           </button>
           <div class="w-px h-full bg-(--border)"></div>
-          <button @click="() => goToPage(1, conditions.sortMode === 'price_from_low_to_high' ? 'price_from_high_to_low' : 'price_from_low_to_high')" class="flex items-center gap-2" :class="{ 'text-(--primary)': isPriceSort }">
+          <button @click="() => goToPage(1, conditions.sortMode === 'PRICE_FROM_LOW_TO_HIGH' ? 'PRICE_FROM_HIGH_TO_LOW' : 'PRICE_FROM_LOW_TO_HIGH')" class="flex items-center gap-2" :class="{ 'text-(--primary)': isPriceSort }">
             <span class="text-sm">价格</span>
-            <ArrowDownNarrowWide v-if="isPublishDateSort || conditions.sortMode === 'price_from_low_to_high'" class="size-4"/>
-            <ArrowUpNarrowWide v-if="conditions.sortMode === 'price_from_high_to_low'" class="size-4"/>
+            <ArrowDownNarrowWide v-if="isPublishDateSort || conditions.sortMode === 'PRICE_FROM_LOW_TO_HIGH'" class="size-4"/>
+            <ArrowUpNarrowWide v-if="conditions.sortMode === 'PRICE_FROM_HIGH_TO_LOW'" class="size-4"/>
           </button>
         </div>
         <!-- 统计 -->
