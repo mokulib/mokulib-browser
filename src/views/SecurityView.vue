@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import PageSecurity from "@/components/PageSecurity.vue";
+
 </script>
 
 <template>
-  <PageSecurity/>
+  <main class="flex-1">
+    安全中心
+    包含：修改密码，关闭账户
+  </main>
 </template>
 
 <style scoped>
