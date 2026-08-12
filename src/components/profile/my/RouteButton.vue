@@ -2,7 +2,7 @@
 defineProps({
   title: { type: String, required: true },
   route: { type: String, required: true },
-  icon: { type: Object, required: true },
+  icon: { type: [ Object, Function ], required: true },
 });
 </script>
 

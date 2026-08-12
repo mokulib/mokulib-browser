@@ -7,7 +7,7 @@ const props = defineProps({
   title: { type: String, required: true },
   route: { type: String, required: true },
   emptyText: { type: String, required: true },
-  emptyIcon: { type: Object, required: true },
+  emptyIcon: { type: [ Object, Function ], required: true },
   bookList: { type: Array<{id: number, title: string}>, required: true },
 });
 
