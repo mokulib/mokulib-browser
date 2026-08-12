@@ -71,33 +71,21 @@ const router = createRouter({
           path: 'my',
           name: 'profile-my',
           component: () => import('@/views/profile/ProfileMyView.vue'),
-          meta: {
-            label: '我的'
-          }
         },
         {
           path: 'borrowing',
           name: 'profile-borrowing',
           component: () => import('@/views/profile/ProfileBorrowingView.vue'),
-          meta: {
-            label: '我的借阅'
-          }
         },
         {
           path: 'favorite',
           name: 'profile-favorite',
           component: () => import('@/views/profile/ProfileFavoriteView.vue'),
-          meta: {
-            label: '我的收藏'
-          }
         },
         {
           path: 'history',
           name: 'profile-history',
           component: () => import('@/views/profile/ProfileHistoryView.vue'),
-          meta: {
-            label: '借阅历史'
-          }
         },
       ],
     },
