@@ -3,8 +3,8 @@ import { BookOpen, FolderHeart, Folders } from "@lucide/vue";
 import { useUserStore } from "@/stores/user.ts";
 import { ElMessage } from "element-plus";
 import { ref } from "vue";
-import RouteCard from "@/components/profile/myview/RouteCard.vue";
-import RouteButton from "@/components/profile/myview/RouteButton.vue";
+import RouteCard from "@/components/profile/my/RouteCard.vue";
+import RouteButton from "@/components/profile/my/RouteButton.vue";
 
 const userStore = useUserStore();
 
