@@ -70,7 +70,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}/borrow`, { user_id: user?.id, is_renewed: isRenewedInput })">
+  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/borrow`, { user_id: user?.id, is_renewed: isRenewedInput })">
     <div class="space-y-3">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
