@@ -434,10 +434,10 @@ watch(id, async () => {
               'bg-linear-to-b from-(--primary)/1 to-(--card) ring-1 ring-(--primary)/40': isMyBorrowRecord(bookCopy.current_borrow_record),
             }">
               <!-- 查看全部借阅记录 -->
-              <a v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN'" class="mb-3 inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline" href="/borrow_record/999">
+              <RouterLink v-if="userStore.user_is_admin && bookCopy.role === 'ADMIN'" :to="{ name: 'borrow-record', params: { id: bookCopy.id } }" class="mb-3 inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline">
                 <ExternalLink class="size-3"/>
                 查看全部借阅记录
-              </a>
+              </RouterLink>
               <!-- 标题 -->
               <div class="flex items-start justify-between gap-3">
                 <div><p class="font-serif text-base font-medium">编号 #{{ bookCopy.id }}</p></div>

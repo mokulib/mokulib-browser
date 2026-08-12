@@ -105,6 +105,12 @@ const router = createRouter({
       props: true, // 将路径参数作为 props 传递给组件
     },
     {
+      path: '/borrow-record/:id',
+      name: 'borrow-record',
+      component: () => import('@/views/BorrowRecordView.vue'),
+      props: true, // 将路径参数作为 props 传递给组件
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('@/views/AboutView.vue'),
