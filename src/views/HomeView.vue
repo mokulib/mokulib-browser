@@ -12,14 +12,14 @@ const hotSearches = ["英语", "数学", "计算机"];
 
     <!-- 搜索 -->
     <div class="w-full flex items-center justify-center py-24">
-      <div class="w-full max-w-lg flex flex-col gap-2">
+      <div class="w-full max-w-xl flex flex-col gap-2">
         <!-- 搜索框 -->
-        <div class="w-full flex items-center justify-center px-8 py-2 gap-3 rounded-2xl border border-(--border) bg-(--card)">
+        <div class="flex items-center justify-center mx-8 px-8 py-2 gap-3 rounded-2xl border border-(--border) bg-(--card)">
           <Search @click="popupStore.open('search', {})" class="size-5 text-(--foreground)"/>
           <div @click="popupStore.open('search', {})" class="w-full h-6 outline-none cursor-text"/>
         </div>
         <!-- 热搜词 -->
-        <div class="flex items-center justify-start px-8 text-sm">
+        <div class="flex items-center justify-start mx-8 px-8 text-sm">
           <div class="text-(--muted-foreground)">热搜：</div>
           <div class="flex items-center justify-center gap-2">
             <template v-for="search in hotSearches" :key="search">
