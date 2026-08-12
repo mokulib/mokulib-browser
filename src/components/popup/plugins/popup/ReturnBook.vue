@@ -23,7 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="returnBook" title="归还馆藏" confirm-text="确认归还" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/borrow-records/${borrowRecordId.value}/return`, { close_status: closeStatusInput, close_time: closeTimeInput + ':00' })">
+  <Popup popup-key="returnBook" title="归还馆藏" confirm-text="确认归还" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/borrow-records/${borrowRecordId}/return`, { close_status: closeStatusInput, close_time: closeTimeInput + ':00' })">
     <form class="space-y-4">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="return-time-102">
