@@ -2,17 +2,24 @@
 import { BookOpen, FolderHeart, Folders } from "@lucide/vue";
 import { useUserStore } from "@/stores/user.ts";
 import { ElMessage } from "element-plus";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
 import RouteButton from "@/components/profile/my/RouteButton.vue";
+import api from "@/api";
 
 const userStore = useUserStore();
 
-const bookList = ref<any[]>([
-  { id: 1, title: '习近平新时代中国特色社会主义' },
-  { id: 2, title: '中国近现代史纲要' },
-  { id: 3, title: '马克思主义基本原理' }
-]);
+const borrowing = ref<{ id: number, title: string }[]>([])
+
+onMounted(async () => {
+  // 请求借阅中的数据
+  const borrowing_ = (await api.get<{ books: any[], borrow_records: any[] }>('/api/users/borrowing')).data;
+  // 将数据转换为 { id: number, title: string }[] 格式
+  borrowing.value = borrowing_.borrow_records.map(record => {
+    const book = borrowing_.books.find(book => book.id === record.book_id)
+    return { id: book.id as number, title: book.title as string }
+  })
+})
 </script>
 
 <template>
@@ -47,7 +54,7 @@ const bookList = ref<any[]>([
 
     <!-- 宽屏：路由卡片 -->
     <div class="hidden sm:flex gap-3 md:gap-4">
-      <RouteCard title="我的借阅" route="profile-borrowing" empty-text="当前没有借阅" :empty-icon="BookOpen" :book-list="bookList"/>
+      <RouteCard title="我的借阅" route="profile-borrowing" empty-text="当前没有借阅" :empty-icon="BookOpen" :book-list="borrowing"/>
       <RouteCard title="好书收藏" route="profile-favorite" empty-text="还没有收藏图书" :empty-icon="FolderHeart" :book-list="[]"/>
       <RouteCard title="借阅过的好书" route="profile-history" empty-text="没有借阅记录" :empty-icon="Folders" :book-list="[]"/>
     </div>
