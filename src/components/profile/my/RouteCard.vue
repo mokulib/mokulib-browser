@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronRight } from "@lucide/vue";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const props = defineProps({
@@ -56,7 +56,7 @@ const stopSlideshow = () => {
   clearInterval(translateCardInterval);
 }
 
-onMounted(() => {
+watch(() => props.bookList, () => {
   // 无数据返回
   if (isEmpty.value)
     return;
@@ -72,7 +72,7 @@ onMounted(() => {
     // 添加切换任务
     startSlideshow()
   }
-})
+}, { immediate: true })
 
 onUnmounted(() => stopSlideshow())
 </script>
