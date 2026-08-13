@@ -6,10 +6,12 @@ import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
 import RouteButton from "@/components/profile/my/RouteButton.vue";
 import api from "@/api";
+import type { Book } from "@/types";
 
 const userStore = useUserStore();
 
 const borrowing = ref<{ id: number, title: string }[]>([])
+const favorites = ref<{ id: number, title: string }[]>([]);
 
 onMounted(async () => {
   // 请求借阅中的数据
@@ -19,6 +21,10 @@ onMounted(async () => {
     const book = borrowing_.books.find(book => book.id === record.book_id)
     return { id: book.id as number, title: book.title as string }
   })
+  // 请求收藏夹数据
+  const favorites_ = (await api.get<Book[]>("/api/users/favorites")).data;
+  // 将数据转换为 { id: number, title: string }[] 格式
+  favorites.value = favorites_.map(book => ({ id: book.id as number, title: book.title as string }))
 })
 </script>
 
@@ -55,7 +61,7 @@ onMounted(async () => {
     <!-- 宽屏：路由卡片 -->
     <div class="hidden sm:flex gap-3 md:gap-4">
       <RouteCard title="我的借阅" route="profile-borrowing" empty-text="当前没有借阅" :empty-icon="BookOpen" :book-list="borrowing"/>
-      <RouteCard title="好书收藏" route="profile-favorite" empty-text="还没有收藏图书" :empty-icon="FolderHeart" :book-list="[]"/>
+      <RouteCard title="好书收藏" route="profile-favorite" empty-text="还没有收藏图书" :empty-icon="FolderHeart" :book-list="favorites"/>
       <RouteCard title="借阅过的好书" route="profile-history" empty-text="没有借阅记录" :empty-icon="Folders" :book-list="[]"/>
     </div>
   </div>
