@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import api from "@/api";
-import { BookOpen, CalendarClock } from "@lucide/vue";
+import { ChevronLeft, BookOpen, CalendarClock } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { DateTime } from "luxon";
 
@@ -23,7 +23,10 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col sm:gap-8">
     <!-- 标题 -->
-    <div class="px-4 sm:px-0 pt-4 sm:pt-0 sm:pb-4 sm:border-b sm:border-(--border) tracking-wide text-lg font-bold">我的借阅</div>
+    <div class="flex items-center px-4 sm:px-0 pt-4 sm:pt-0 sm:pb-4 gap-4 sm:border-b sm:border-(--border)">
+      <ChevronLeft @click="router.back()" class="block sm:hidden ml-2 size-5 cursor-pointer"/>
+      <div class="tracking-wide text-lg font-bold">我的借阅</div>
+    </div>
 
     <!-- 无收藏信息 -->
     <div v-if="borrowing.length === 0" class="flex flex-col items-center py-20 sm:py-4 gap-2">
