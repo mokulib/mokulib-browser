@@ -9,7 +9,7 @@ import { DateTime } from "luxon";
 const borrowRecordId = ref<any>();
 
 const closeTimeInput = ref<string>(DateTime.now().toISO().slice(0, 16));
-const closeStatusInput = ref<string>('CLOSE');
+const closeStatusInput = ref<'CLOSED' | 'LOST' | 'DAMAGED'>('CLOSED');
 
 onMounted(() => {
   usePopupStore().registerInitHook('returnBook', ({ clone }) => {
@@ -17,7 +17,7 @@ onMounted(() => {
     borrowRecordId.value = clone.id;
     // 刷新弹窗输入
     closeTimeInput.value = DateTime.now().toISO().slice(0, 16);
-    closeStatusInput.value = 'CLOSE';
+    closeStatusInput.value = 'CLOSED';
   })
 })
 </script>
@@ -37,7 +37,7 @@ onMounted(() => {
         </label>
         <div class="flex flex-col gap-2">
           <label class="flex items-center gap-2 text-sm text-(--foreground)">
-            <input v-model="closeStatusInput" value="CLOSE" class="size-4 border-(--border) accent-(--primary)" type="radio" checked name="return-status-102">
+            <input v-model="closeStatusInput" value="CLOSED" class="size-4 border-(--border) accent-(--primary)" type="radio" checked name="return-status-102">
             正常归还
           </label>
           <label class="flex items-center gap-2 text-sm text-(--foreground)">
