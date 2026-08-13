@@ -38,14 +38,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="favoriteBooks.length === 0" class="flex flex-col items-center py-16 sm:py-8 gap-2">
-    <FolderHeart class="size-8 text-(--muted-foreground)/50"/>
-    <p class="text-sm text-(--muted-foreground)">收藏夹空空的</p>
-  </div>
-
   <div class="flex flex-col sm:gap-8">
     <!-- 标题 -->
     <div class="px-4 sm:px-0 pt-4 sm:pt-0 sm:pb-4 sm:border-b sm:border-(--border) tracking-wide text-lg font-bold">我的收藏</div>
+
+    <!-- 无收藏信息 -->
+    <div v-if="favoriteBooks.length === 0" class="flex flex-col items-center py-20 sm:py-4 gap-2">
+      <FolderHeart class="size-8 text-(--muted-foreground)/50"/>
+      <p class="text-sm text-(--muted-foreground)">收藏夹空空的</p>
+    </div>
 
     <!-- 网格展示 -->
     <div v-if="favoriteBooks.length > 0" class="grid grid-cols-3 md:grid-cols-4 p-4 sm:p-0 gap-4 md:gap-8">
