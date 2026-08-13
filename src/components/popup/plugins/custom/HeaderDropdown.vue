@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Key, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
+import { ArrowRight, ShieldKeyhole, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
@@ -45,12 +45,12 @@ onMounted(() => {
         <ArrowRight class="size-4"/>
       </RouterLink>
     </div>
-    <!-- 安全中心 -->
+    <!-- 账号与安全 -->
     <div class="px-2 py-1">
       <RouterLink :to="{ name: 'security' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
         <div class="flex items-center gap-2.5 py-2 text-sm">
-          <Key class="size-4"/>
-          安全中心
+          <ShieldKeyhole class="size-4"/>
+          账号与安全
         </div>
         <ArrowRight class="size-4"/>
       </RouterLink>
