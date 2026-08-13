@@ -25,7 +25,7 @@ const navItems = [
         <template v-for="navItem in navItems" :key="navItem.route">
           <!-- 按钮 -->
           <RouterLink :to="{ name: navItem.route }"
-                      class="pl-3 pr-8 md:pr-16 py-2 rounded-lg text-sm text-(--foreground) transition-transform duration-300"
+                      class="pl-3 pr-8 md:pr-16 py-2 rounded-lg tracking-wide text-sm text-(--foreground) transition-transform duration-300"
                       :class="{ 'hover:bg-(--secondary) hover:-translate-y-0.5': route.name !== navItem.route }"
                       active-class="font-bold text-(--primary) bg-(--primary)/8">
             {{ navItem.title }}
