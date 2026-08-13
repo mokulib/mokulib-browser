@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ChevronLeft } from "@lucide/vue";
+import { ChevronLeft, Loader } from "@lucide/vue";
 import { useRouter } from "vue-router";
 
 defineProps({
+  isLoading: { type: Boolean, required: true },
   isEmpty: { type: Boolean, required: true },
   emptyText: { type: String, required: true },
   emptyIcon: { type: [ Object, Function ], required: true },
@@ -19,13 +20,19 @@ const router = useRouter();
       <slot name="title"/>
     </div>
 
+    <!-- 加载中 -->
+    <div v-if="isLoading" class="flex flex-col items-center py-20 sm:py-4 gap-2">
+      <Loader class="size-5 text-(--secondary-foreground) opacity-0 animate-spin" :class="{ 'opacity-100': isLoading }" style="transition-duration: 500ms; animation-duration: 3000ms"/>
+      <p class="tracking-wider text-sm text-(--muted-foreground)">加载中...</p>
+    </div>
+
     <!-- 空信息 -->
-    <div v-if="isEmpty" class="flex flex-col items-center py-20 sm:py-4 gap-2">
+    <div v-if="!isLoading && isEmpty" class="flex flex-col items-center py-20 sm:py-4 gap-2">
       <component :is="emptyIcon" class="size-8 text-(--muted-foreground)/50"/>
       <p class="text-sm text-(--muted-foreground)">{{ emptyText }}</p>
     </div>
 
-    <template v-if="!isEmpty">
+    <template v-if="!isLoading && !isEmpty">
       <slot/>
     </template>
   </div>

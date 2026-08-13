@@ -25,6 +25,7 @@ interface ExtendedHistory extends History {
 
 const router = useRouter();
 
+const isLoading = ref(true);
 const history = ref<ExtendedHistory[]>([]);
 const books = ref<Book[]>([]);
 
@@ -41,6 +42,7 @@ function formatTime(time: string) {
 /////////////////////////////////////////////
 
 onMounted(async () => {
+  isLoading.value = true;
   // 查询历史记录
   const history_ = (await api.get<History[]>('/api/users/history')).data;
   // 收集待查询的图书 id （去掉已查过的图书）
@@ -59,11 +61,12 @@ onMounted(async () => {
     book: books.value.find(book => book.id === record.book_id)!,
     is_overdue: DateTime.fromISO(record.return_time).diff(DateTime.fromISO(record.due_time)).milliseconds > 0
   }));
+  isLoading.value = false;
 })
 </script>
 
 <template>
-  <ProfileLayout :is-empty="history.length === 0" empty-text="还没有借阅记录" :empty-icon="Folders">
+  <ProfileLayout :is-loading="isLoading" :is-empty="history.length === 0" empty-text="还没有借阅记录" :empty-icon="Folders">
     <template #title>
       <div class="block sm:hidden tracking-wide text-lg font-bold">借阅历史</div>
       <div class="hidden sm:block tracking-wide text-lg font-bold">借阅过的好书</div>

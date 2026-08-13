@@ -10,6 +10,7 @@ interface FavoriteBook extends Book {
   is_favorite: boolean;
 }
 
+const isLoading = ref(true);
 const favoriteBooks = ref<FavoriteBook[]>([]);
 
 /////////////////////////////////////////////
@@ -33,13 +34,15 @@ async function favoriteHandler(index: number) {
 /////////////////////////////////////////////
 
 onMounted(async () => {
+  isLoading.value = true;
   const favorites = (await api.get<Book[]>("/api/users/favorites")).data;
   favoriteBooks.value = favorites.map((book: Book) => ({ ...book, is_favorite: true }));
+  isLoading.value = false;
 })
 </script>
 
 <template>
-  <ProfileLayout :is-empty="favoriteBooks.length === 0" empty-text="收藏夹空空的" :empty-icon="FolderHeart">
+  <ProfileLayout :is-loading="isLoading" :is-empty="favoriteBooks.length === 0" empty-text="收藏夹空空的" :empty-icon="FolderHeart">
     <template #title>
       <div class="tracking-wide text-lg font-bold">我的收藏</div>
     </template>

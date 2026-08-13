@@ -8,9 +8,11 @@ import ProfileLayout from "@/components/profile/ProfileLayout.vue";
 
 const router = useRouter();
 
+const isLoading = ref(true)
 const borrowing = ref<any[]>([])
 
 onMounted(async () => {
+  isLoading.value = true
   const borrowing_ = (await api.get<{ books: any[], borrow_records: any[] }>('/api/users/borrowing')).data;
   borrowing.value = borrowing_.borrow_records.length > 0 ? borrowing_.borrow_records.map(record => ({
     ...record,
@@ -18,11 +20,12 @@ onMounted(async () => {
     isOverdue: DateTime.fromISO(record.due_time) < DateTime.now(),
     percent: (1 - DateTime.fromISO(record.due_time).diffNow('days').days / DateTime.fromISO(record.due_time).diff(DateTime.fromISO(record.create_time), 'days').days) * 100,
   })) : []
+  isLoading.value = false
 })
 </script>
 
 <template>
-  <ProfileLayout :is-empty="borrowing.length === 0" empty-text="当前没有借阅" :empty-icon="BookOpen">
+  <ProfileLayout :is-loading="isLoading" :is-empty="borrowing.length === 0" empty-text="当前没有借阅" :empty-icon="BookOpen">
     <template #title>
       <div class="tracking-wide text-lg font-bold">我的借阅</div>
     </template>
