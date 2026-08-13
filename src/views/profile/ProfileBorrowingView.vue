@@ -1,34 +1,32 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import api from "@/api";
-import { CalendarClock } from "@lucide/vue";
+import { BookOpen, CalendarClock } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { DateTime } from "luxon";
 
 const router = useRouter();
 
-const borrowing = ref()
+const borrowing = ref<any[]>([])
 
 onMounted(async () => {
   const borrowing_ = (await api.get<{ books: any[], borrow_records: any[] }>('/api/users/borrowing')).data;
-  borrowing.value = borrowing_.borrow_records.map(record => ({
+  borrowing.value = borrowing_.borrow_records.length > 0 ? borrowing_.borrow_records.map(record => ({
     ...record,
     book: borrowing_.books.find(book => book.id === record.book_id),
     isOverdue: DateTime.fromISO(record.due_time) < DateTime.now(),
     percent: (1 - DateTime.fromISO(record.due_time).diffNow('days').days / DateTime.fromISO(record.due_time).diff(DateTime.fromISO(record.create_time), 'days').days) * 100,
-  }))
-  borrowing_.borrow_records.forEach(record => {
-    var total = DateTime.fromISO(record.due_time).diff(DateTime.fromISO(record.create_time), 'days').days;
-    console.log("借阅时间：", total)
-    var remain = DateTime.fromISO(record.due_time).diffNow('days').days;
-    console.log("剩余时间：", remain)
-    console.log("百分比：", (1 - remain / total) * 100)
-  })
+  })) : []
 })
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-4">
+  <div v-if="borrowing.length === 0" class="flex flex-col items-center py-16 sm:py-8 gap-2">
+    <BookOpen class="size-8 text-(--muted-foreground)/50"/>
+    <p class="text-sm text-(--muted-foreground)">当前没有借阅</p>
+  </div>
+
+  <div v-if="borrowing.length > 0" class="grid grid-cols-1 gap-4">
     <template v-for="record in borrowing">
       <div class="flex flex-col p-4 gap-2 border border-(--border) rounded-lg bg-(--card)">
         <!-- 上部 -->
