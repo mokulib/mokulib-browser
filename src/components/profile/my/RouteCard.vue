@@ -87,10 +87,12 @@ onUnmounted(() => stopSlideshow())
 
     <!-- 卡片 -->
     <div class="relative min-w-26 w-full overflow-hidden">
-      <!-- 占位辅助元素 -->
-      <div class="flex flex-col gap-1 opacity-0">
-        <div class="aspect-square h-26"></div>
-        <p class="text-sm">&nbsp;</p>
+      <!-- 占位卡片 -->
+      <div class="flex flex-col items-center gap-2" :class="{ 'opacity-0': isEmpty || enableSlideshow }">
+        <div class="rounded overflow-hidden">
+          <img :src="`/books/${aCardData.id}`" alt="图书封面" class="size-26"/>
+        </div>
+        <p class="line-clamp-1 tracking-wide text-sm text-center">{{ aCardData.title }}</p>
       </div>
       <!-- 缺省卡片 -->
       <div v-if="isEmpty" class="absolute inset-0 flex flex-col items-center justify-center gap-2">
@@ -99,18 +101,18 @@ onUnmounted(() => stopSlideshow())
         <button @click="router.push({ name: 'home'})" class="px-2 py-1 border border-(--border) rounded text-xs bg-(--background) hover:bg-(--muted) cursor-pointer">去逛逛</button>
       </div>
       <!-- 轮播卡片：第一张卡片 -->
-      <div v-if="!isEmpty" @mouseenter="stopSlideshow()" @mouseleave="startSlideshow()" @click="router.push(`/book/${aCardData.id}`)" class="absolute inset-0 flex flex-col items-center gap-2 transition-transform duration-500 ease-in-out cursor-pointer" :class="aCardClass">
+      <div v-if="enableSlideshow" @mouseenter="stopSlideshow()" @mouseleave="startSlideshow()" @click="router.push(`/book/${aCardData.id}`)" class="absolute inset-0 flex flex-col items-center gap-2 transition-transform duration-500 ease-in-out cursor-pointer" :class="aCardClass">
         <div class="rounded overflow-hidden">
           <img :src="`/books/${aCardData.id}`" alt="图书封面" class="size-26"/>
         </div>
-        <p class="line-clamp-1 text-sm text-center">{{ aCardData.title }}</p>
+        <p class="line-clamp-1 tracking-wide text-sm text-center">{{ aCardData.title }}</p>
       </div>
       <!-- 轮播卡片：第二张卡片 -->
-      <div v-if="!isEmpty" @mouseenter="stopSlideshow()" @mouseleave="startSlideshow()" @click="router.push(`/book/${bCardData.id}`)" class="absolute inset-0 flex flex-col items-center gap-2 transition-transform duration-500 ease-in-out cursor-pointer" :class="bCardClass">
+      <div v-if="enableSlideshow" @mouseenter="stopSlideshow()" @mouseleave="startSlideshow()" @click="router.push(`/book/${bCardData.id}`)" class="absolute inset-0 flex flex-col items-center gap-2 transition-transform duration-500 ease-in-out cursor-pointer" :class="bCardClass">
         <div class="rounded overflow-hidden">
           <img :src="`/books/${bCardData.id}`" alt="图书封面" class="size-26"/>
         </div>
-        <p class="line-clamp-1 text-sm text-center">{{ bCardData.title }}</p>
+        <p class="line-clamp-1 tracking-wide text-sm text-center">{{ bCardData.title }}</p>
       </div>
     </div>
   </div>
