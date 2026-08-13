@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { BookOpen, ChevronLeft } from "@lucide/vue";
+import { Folders } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import api from "@/api";
 import type { Book } from "@/types";
 import { DateTime } from "luxon";
+import ProfileLayout from "@/components/profile/ProfileLayout.vue";
 
 interface History {
   id: number;
@@ -27,9 +28,17 @@ const router = useRouter();
 const history = ref<ExtendedHistory[]>([]);
 const books = ref<Book[]>([]);
 
+/////////////////////////////////////////////
+// 工具方法
+/////////////////////////////////////////////
+
 function formatTime(time: string) {
   return DateTime.fromISO(time).toFormat("yyyy-MM-dd")
 }
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
 
 onMounted(async () => {
   // 查询历史记录
@@ -54,68 +63,62 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col sm:gap-8">
-    <!-- 标题 -->
-    <div class="flex items-center px-4 sm:px-0 pt-4 sm:pt-0 sm:pb-4 gap-4 sm:border-b sm:border-(--border)">
-      <ChevronLeft @click="router.back()" class="block sm:hidden ml-2 size-5 cursor-pointer"/>
+  <ProfileLayout :is-empty="history.length === 0" empty-text="还没有借阅记录" :empty-icon="Folders">
+    <template #title>
       <div class="block sm:hidden tracking-wide text-lg font-bold">借阅历史</div>
       <div class="hidden sm:block tracking-wide text-lg font-bold">借阅过的好书</div>
-    </div>
+    </template>
 
-    <!-- 无历史信息 -->
-    <div v-if="history.length === 0" class="flex flex-col items-center py-20 sm:py-4 gap-2">
-      <BookOpen class="size-8 text-(--muted-foreground)/50"/>
-      <p class="text-sm text-(--muted-foreground)">还没有借阅记录</p>
-    </div>
-
-    <!-- 卡片展示 -->
-    <div v-if="history.length > 0" class="flex flex-col p-4 sm:p-0 gap-4">
-      <template v-for="record in history">
-        <!-- 卡片 -->
-        <div class="flex flex-col gap-4">
-          <!-- 标题 -->
-          <div class="flex items-center justify-between px-4 py-1.5 rounded-lg text-sm bg-(--muted)">
-            <!-- 左侧：借阅日 + 借阅单号 -->
-            <div class="flex items-center gap-4">
-              <p>{{ formatTime(record.borrow_time) }}</p>
-              <p>借阅单号: {{ record.id }}</p>
-            </div>
-            <!-- 右侧：归还状态 -->
-            <div class="flex items-center gap-2">
-              <p v-if="record.is_overdue">逾期</p>
-              <p v-if="record.close_status === 'CLOSED'">正常归还</p>
-              <p v-if="record.close_status === 'LOST'">借阅丢失</p>
-              <p v-if="record.close_status === 'DAMAGED'">借阅损坏</p>
-            </div>
-          </div>
-
-          <!-- 数据 -->
-          <div class="flex justify-between gap-4 pr-4">
-            <!-- 图书信息 -->
-            <div class="flex gap-4">
-              <img :src="`/books/${record.book_id}`" alt="图书封面" class="size-24 rounded-lg"/>
-              <div class="flex flex-col gap-1.5">
-                <RouterLink :to="{ name: 'book', params: { id: record.book_id } }" class="line-clamp-1 text-sm hover:text-(--primary) hover:underline">{{ record.book.title }}</RouterLink>
-                <p class="line-clamp-1 text-xs text-(--muted-foreground)">{{ record.book.author }} / {{ record.book.publish_date }} / {{ record.book.publisher }} / {{ record.book.price.toFixed(2) }}￥</p>
+    <template #default>
+      <!-- 卡片展示 -->
+      <div class="flex flex-col p-4 sm:p-0 gap-4">
+        <template v-for="record in history">
+          <!-- 卡片 -->
+          <div class="flex flex-col gap-4">
+            <!-- 标题 -->
+            <div class="flex items-center justify-between px-4 py-1.5 rounded-lg text-sm bg-(--muted)">
+              <!-- 左侧：借阅日 + 借阅单号 -->
+              <div class="flex items-center gap-4">
+                <p>{{ formatTime(record.borrow_time) }}</p>
+                <p>借阅单号: {{ record.id }}</p>
               </div>
-            </div>
-            <!-- 归还信息 -->
-            <div class="flex flex-col items-center gap-1 shrink-0">
+              <!-- 右侧：归还状态 -->
               <div class="flex items-center gap-2">
-                <p class="text-xs">归还</p>
-                <p class="text-sm font-semibold">{{ formatTime(record.return_time) }}</p>
+                <p v-if="record.is_overdue">逾期</p>
+                <p v-if="record.close_status === 'CLOSED'">正常归还</p>
+                <p v-if="record.close_status === 'LOST'">借阅丢失</p>
+                <p v-if="record.close_status === 'DAMAGED'">借阅损坏</p>
               </div>
-              <div class="flex items-center gap-2 text-xs text-(--muted-foreground)">
-                <p>应还:</p>
-                <p>{{ formatTime(record.due_time) }}</p>
+            </div>
+
+            <!-- 数据 -->
+            <div class="flex justify-between gap-4 pr-4">
+              <!-- 图书信息 -->
+              <div class="flex gap-4">
+                <img :src="`/books/${record.book_id}`" @click="router.push({ name: 'book', params: { id: record.book_id } })" :alt="record.book.title" class="size-24 rounded-lg"/>
+                <div class="flex flex-col gap-1.5">
+                  <RouterLink :to="{ name: 'book', params: { id: record.book_id } }" class="line-clamp-1 text-sm hover:text-(--primary) hover:underline">{{ record.book.title }}</RouterLink>
+                  <p class="line-clamp-1 text-xs text-(--muted-foreground)">{{ record.book.author }} / {{ record.book.publish_date }} / {{ record.book.publisher }} / {{ record.book.price.toFixed(2) }}￥</p>
+                </div>
               </div>
-              <p class="text-xs text-(--muted-foreground)">{{ record.is_renewed ? '已续借' : '未续借' }}</p>
+              <!-- 归还信息 -->
+              <div class="flex flex-col items-center gap-1 shrink-0">
+                <div class="flex items-center gap-2">
+                  <p class="text-xs">归还</p>
+                  <p class="text-sm font-semibold">{{ formatTime(record.return_time) }}</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-(--muted-foreground)">
+                  <p>应还:</p>
+                  <p>{{ formatTime(record.due_time) }}</p>
+                </div>
+                <p class="text-xs text-(--muted-foreground)">{{ record.is_renewed ? '已续借' : '未续借' }}</p>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-    </div>
-  </div>
+        </template>
+      </div>
+    </template>
+  </ProfileLayout>
 </template>
 
 <style scoped>
