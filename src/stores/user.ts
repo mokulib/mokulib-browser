@@ -73,34 +73,6 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  function updateAvatar(newFile: File) {
-    // 构造 FileReader
-    const reader = new FileReader()
-    reader.onload = async function () {
-      const data = await api.post('/api/users/' + user_id.value + '/avatar', reader.result, { headers: { 'Content-Type': 'application/octet-stream' } });
-      if (data.status === 'OK') {
-        ElMessage.success('头像上传成功')
-        // 延迟更新头像时间戳，确保头像刷新
-        setTimeout(() => {
-          user_avatar_timestamp.value = Date.now();
-        }, 500);
-      } else {
-        ElMessage.error('头像上传失败: ' + data.message)
-      }
-    }
-    // 读取上传文件，读取完成后触发 onload 事件，进行上传处理
-    reader.readAsArrayBuffer(newFile)
-  }
-
-  async function updateUsername(newUsername: string) {
-    const data = await api.post('/api/users/' + user_id.value + '/username', { newUsername: newUsername });
-    if (data.status === 'OK') {
-      ElMessage.success('用户名更新成功');
-    } else {
-      ElMessage.error('用户名更新失败: ' + data.message);
-    }
-  }
-
   const router = useRouter();
 
   async function modifyPassword(dataIn: any) {
@@ -129,8 +101,6 @@ export const useUserStore = defineStore('user', () => {
     user_create_time,
     user_avatar,
     updateUserInfo,
-    updateAvatar,
-    updateUsername,
     modifyPassword,
   };
 });
