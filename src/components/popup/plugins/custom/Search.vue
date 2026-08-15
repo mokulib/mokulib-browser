@@ -22,8 +22,13 @@ const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_
 const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
 
 async function goToPage(pageNum: number, sortMode_: SortMode) {
-  if (searchInput.value === conditions.value.keyword && sortMode_ === conditions.value.sortMode && pageNum === results.value.current)
+  if (isSearched.value && searchInput.value === conditions.value.keyword && sortMode_ === conditions.value.sortMode && pageNum === results.value.current)
     return;
+
+  if (!searchInput.value) {
+    isSearched.value = false;
+    return;
+  }
 
   isLoading.value = true;
   requestTimestamp.value = Date.now();
