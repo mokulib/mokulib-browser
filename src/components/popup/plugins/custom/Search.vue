@@ -23,6 +23,7 @@ const conditions = ref<Conditions>({ keyword: "", sortMode: "PUBLISH_DATE_FROM_N
 const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_DATE_FROM_NEW_TO_OLD" || conditions.value.sortMode === "PUBLISH_DATE_FROM_OLD_TO_NEW");
 const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
 const results = ref<Page<Book>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
+const hoveredIndex = ref<number>(0);
 
 async function hotSearch(keyword: string) {
   searchInput.value = keyword;
@@ -43,6 +44,7 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
   const data = await api.get<{ conditions: Conditions, results: Page<Book> }>('/api/books/search', { params: { keyword: searchInput.value, pageNum, sortMode: sortMode_ } });
   conditions.value = data.data.conditions;
   results.value = data.data.results;
+  hoveredIndex.value = 0;
   // 至少等待 1s
   if (Date.now() - requestTimestamp.value < 1000) {
     setTimeout(() => {
@@ -54,6 +56,10 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
     isSearched.value = true;
   }
 }
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
 
 onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
   if (clone?.keyword) {
@@ -85,11 +91,11 @@ onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
       </div>
 
       <!-- 热搜 -->
-      <div class="w-full flex items-center justify-start mt-2 pl-18 md:pl-8 pr-16 text-sm">
-        <div class="text-(--muted-foreground)">热搜：</div>
+      <div class="w-full flex items-center justify-start mt-2 pl-18 md:pl-8 pr-16 text-sm text-(--muted-foreground)">
+        <div>热搜：</div>
         <div class="flex items-center justify-center gap-2">
           <template v-for="search in hotSearches" :key="search">
-            <div @click="hotSearch(search)" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline">{{ search }}</div>
+            <div @click="hotSearch(search)" class="cursor-pointer hover:text-(--primary) hover:underline">{{ search }}</div>
           </template>
         </div>
       </div>
@@ -122,11 +128,11 @@ onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
       <!-- 搜索结果 -->
       <div v-if="isSearched && results.total > 0" class="w-full overflow-y-auto overscroll-behavior-contain min-h-30 max-h-[calc(100vh-190px)] md:max-h-[calc(100vh-255px)]">
         <div class="flex flex-col gap-2">
-          <template v-for="result in results.records" :key="result.id">
-            <div @click="router.push({ name: 'book', params: { id: result.id } })" class="
-              flex p-2 gap-4 border border-(--border) rounded md:hover:border-(--primary) cursor-pointer
-              md:[&_.title]:text-(--muted-foreground)/50 md:hover:[&_.title]:text-(--foreground)
-              [&_.desc]:text-(--muted-foreground) md:[&_.desc]:text-(--muted-foreground)/50 md:hover:[&_.desc]:text-(--muted-foreground)">
+          <template v-for="(result, index) in results.records" :key="result.id">
+            <div @click="router.push({ name: 'book', params: { id: result.id } })" @mouseenter="hoveredIndex = index" :data-is-hovered="hoveredIndex === index" class="
+              flex p-2 gap-4 border border-(--border) rounded md:data-[is-hovered=true]:border-(--primary) cursor-pointer
+              md:[&_.title]:text-(--muted-foreground)/50 md:data-[is-hovered=true]:[&_.title]:text-(--foreground)
+              [&_.desc]:text-(--muted-foreground) md:[&_.desc]:text-(--muted-foreground)/50 md:data-[is-hovered=true]:[&_.desc]:text-(--muted-foreground)">
               <img :src="`/books/${result.id}`" class="size-24 object-cover rounded-lg md:rounded" alt="Book Cover"/>
               <div class="flex flex-col items-start">
                 <div class="title mt-0.5 line-clamp-1 text-sm">{{ result.title }}</div>
