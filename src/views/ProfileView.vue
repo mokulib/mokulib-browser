@@ -15,7 +15,7 @@ const navItems = [
   <main class="flex-1">
     <!-- 横幅（仅宽屏） -->
     <div class="hidden mx-auto max-w-6xl sm:flex mb-4 md:mb-8 px-4 md:px-8">
-      <img src="/banner.png" class="w-full h-full rounded-b-lg" alt="横幅"/>
+      <div class="w-full h-62 rounded-b-lg bg-[url('/banner.png')] dark:bg-[url('/banner-dark.png')] bg-center"></div>
     </div>
 
     <!-- 主区域 -->
