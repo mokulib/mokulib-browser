@@ -1,14 +1,38 @@
 <script setup lang="ts">
 import { Search, Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } from "@lucide/vue";
 import { usePopupStore } from "@/stores/popup.ts";
-import { onMounted, ref } from "vue";
-import type { Category } from "@/types";
+import { onMounted, ref, watch } from "vue";
+import type { Book, Category } from "@/types";
 import api from "@/api";
 
 const popupStore = usePopupStore();
 
-const categories = ref<Category[]>([]);
 const hotSearches = ref<string[]>([]);
+const hoveredCategoryId = ref<number | undefined>(undefined);
+const delayClear = ref<number>();
+const categories = ref<Category[]>([]);
+const books = ref<Book[]>([]);
+
+function setHover(id: number) {
+  cancelDelayClear();
+  hoveredCategoryId.value = id;
+}
+
+function setDelayClear() {
+  delayClear.value = setTimeout(() => {
+    hoveredCategoryId.value = undefined;
+  }, 500);
+}
+
+function cancelDelayClear() {
+  clearTimeout(delayClear.value);
+}
+
+watch(hoveredCategoryId, async (newValue) => {
+  if (newValue) {
+    books.value = (await api.get<Book[]>(`/api/categories/${newValue}/books`, { params: { pageNum: 1 } })).data;
+  }
+})
 
 onMounted(async () => {
   // 获取热搜
@@ -22,8 +46,9 @@ onMounted(async () => {
   <main class="flex-1 flex flex-col">
 
     <!-- 搜索 -->
-    <div class="w-full flex items-center justify-center py-24">
-      <div class="w-full max-w-xl flex flex-col gap-2">
+    <div class="relative mx-auto max-w-6xl w-full h-62 flex items-center justify-center">
+      <div class="absolute inset-0 z-10 mx-4 md:mx-8 bg-[url('/banner.png')] dark:bg-[url('/banner-dark.png')] bg-center"></div>
+      <div class="z-20 w-full max-w-xl flex flex-col gap-2">
         <!-- 搜索框 -->
         <div class="flex items-center justify-center mx-8 px-8 py-2 gap-3 rounded-2xl border border-(--border) bg-(--card)">
           <Search @click="popupStore.open('search', {})" class="size-5 text-(--foreground)"/>
@@ -41,23 +66,23 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="mx-auto max-w-6xl w-full flex-1 flex px-4 pb-8 md:px-8">
+    <div class="mx-auto max-w-6xl w-full flex-1 flex px-4 py-8 md:px-8">
       <!-- 边框 -->
       <div class="flex-1 flex border border-(--primary)">
         <!-- 导航 -->
-        <aside class="text-sm flex flex-col">
+        <aside class="shrink-0 flex flex-col text-sm">
           <div class="pl-4 pr-16 py-2 text-(--background) bg-(--primary)">全部图书分类</div>
           <div data-blank class="h-4 border-r border-(--primary)"></div>
           <template v-for="category in categories" :key="category.id">
-            <div class="ml-2 pl-2 py-1 hover:border-l-2 border-r hover:border-r-0 hover:border-y-2 border-(--primary) hover:text-base hover:text-(--primary) cursor-pointer">
+            <div @mouseenter="setHover(category.id)" @mouseleave="setDelayClear()" :data-is-hovered="hoveredCategoryId === category.id" class="ml-2 pl-2 py-1 data-[is-hovered=true]:border-l-2 border-r data-[is-hovered=true]:border-r-0 data-[is-hovered=true]:border-y-2 border-(--primary) data-[is-hovered=true]:text-base data-[is-hovered=true]:text-(--primary) cursor-pointer">
               {{ category.name }}
             </div>
           </template>
           <div data-blank class="h-full border-r border-(--primary)"></div>
         </aside>
         <!-- 内容 -->
-        <section class="p-4">
-          内容
+        <section @mouseenter="cancelDelayClear()" class="p-4">
+          {{ hoveredCategoryId ? books : '主页' }}
         </section>
       </div>
     </div>
