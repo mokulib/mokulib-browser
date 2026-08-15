@@ -28,7 +28,7 @@ async function confirmHandler() {
 onMounted(() => {
   usePopupStore().registerInitHook('editCategory', async ({ clone }) => {
     // 获取所有分类
-    allCategories.value = (await api.get<Category[]>('/api/categories')).data;
+    allCategories.value = (await api.get<Category[]>('/api/categories')).data.sort((a, b) => a.id - b.id);
     // 刷新 payload（深拷贝以避免影响原始数据）
     book.value = clone.book;
     originalCategory.value = clone.category;
