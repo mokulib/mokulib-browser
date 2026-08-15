@@ -84,7 +84,7 @@ onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
             <button @click="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')">
               <Search class="size-5 text-(--secondary-foreground)"/>
             </button>
-            <input v-model="searchInput" type="text" @keydown.enter="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')" placeholder="搜索..." class="w-full text-(--secondary-foreground) outline-none"/>
+            <input v-model="searchInput" type="text" @keydown.enter="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')" data-autofocus placeholder="搜索..." class="w-full text-(--secondary-foreground) outline-none"/>
             <Loader class="size-5 text-(--secondary-foreground) opacity-0 animate-spin" :class="{ 'opacity-100': isLoading }" style="transition-duration: 500ms; animation-duration: 3000ms"/>
           </div>
         </div>
