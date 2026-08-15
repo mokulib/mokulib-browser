@@ -48,7 +48,7 @@ async function confirmHandler() {
 onMounted(() => {
   usePopupStore().registerInitHook('addTag', async ({ clone }) => {
     // 获取所有标签
-    allTags.value = (await api.get<Tag[]>('/api/tags')).data;
+    allTags.value = (await api.get<Tag[]>('/api/tags')).data.sort((a, b) => a.id - b.id);
     // 刷新 payload
     bookId.value = clone.id;
     existsTags.value = clone.tags;
