@@ -18,7 +18,7 @@ const isSearched = ref(false);
 const isLoading = ref(false);
 const requestTimestamp = ref(0);
 const searchInput = ref("");
-const hotSearches = ["英语", "数学", "计算机"];
+const hotSearches = ref<string[]>([]);
 const conditions = ref<Conditions>({ keyword: "", sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD" })
 const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_DATE_FROM_NEW_TO_OLD" || conditions.value.sortMode === "PUBLISH_DATE_FROM_OLD_TO_NEW");
 const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
@@ -41,7 +41,7 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
 
   isLoading.value = true;
   requestTimestamp.value = Date.now();
-  const data = await api.get<{ conditions: Conditions, results: Page<Book> }>('/api/books/search', { params: { keyword: searchInput.value, pageNum, sortMode: sortMode_ } });
+  const data = await api.get<{ conditions: Conditions, results: Page<Book> }>('/api/search', { params: { keyword: searchInput.value, sortMode: sortMode_, pageNum } });
   conditions.value = data.data.conditions;
   results.value = data.data.results;
   hoveredIndex.value = 0;
@@ -61,11 +61,12 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
 // 监听
 /////////////////////////////////////////////
 
-onMounted(() => popupStore.registerInitHook('search', ({ clone }) => {
+onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
+  hotSearches.value = (await api.get<string[]>('/api/search/hot')).data;
   if (clone?.keyword) {
     isSearched.value = false;
     searchInput.value = clone.keyword;
-    goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD');
+    await goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD');
   }
 }));
 </script>

@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import { Search, Library, BookOpenCheck, Sparkles, ArrowRight, Target, CalendarClock } from "@lucide/vue";
 import { usePopupStore } from "@/stores/popup.ts";
+import { onMounted, ref } from "vue";
+import type { Category } from "@/types";
+import api from "@/api";
 
 const popupStore = usePopupStore();
 
-const hotSearches = ["英语", "数学", "计算机"];
+const categories = ref<Category[]>([]);
+const hotSearches = ref<string[]>([]);
+
+onMounted(async () => {
+  // 获取热搜
+  hotSearches.value = (await api.get<string[]>('/api/search/hot')).data;
+  // 获取所有分类
+  categories.value = (await api.get<Category[]>('/api/categories')).data.sort((a, b) => a.id - b.id);
+})
 </script>
 
 <template>
-  <main class="flex-1">
+  <main class="flex-1 flex flex-col">
 
     <!-- 搜索 -->
     <div class="w-full flex items-center justify-center py-24">
@@ -30,8 +41,29 @@ const hotSearches = ["英语", "数学", "计算机"];
       </div>
     </div>
 
+    <div class="mx-auto max-w-6xl w-full flex-1 flex px-4 pb-8 md:px-8">
+      <!-- 边框 -->
+      <div class="flex-1 flex border border-(--primary)">
+        <!-- 导航 -->
+        <aside class="text-sm flex flex-col">
+          <div class="pl-4 pr-16 py-2 text-(--background) bg-(--primary)">全部图书分类</div>
+          <div data-blank class="h-4 border-r border-(--primary)"></div>
+          <template v-for="category in categories" :key="category.id">
+            <div class="ml-2 pl-2 py-1 hover:border-l-2 border-r hover:border-r-0 hover:border-y-2 border-(--primary) hover:text-base hover:text-(--primary) cursor-pointer">
+              {{ category.name }}
+            </div>
+          </template>
+          <div data-blank class="h-full border-r border-(--primary)"></div>
+        </aside>
+        <!-- 内容 -->
+        <section class="p-4">
+          内容
+        </section>
+      </div>
+    </div>
+
     <!-- 统计 -->
-    <section class="mx-auto max-w-6xl mt-10 px-4 pb-4 md:px-8">
+    <section v-if="false" class="mx-auto max-w-6xl mt-10 px-4 pb-4 md:px-8">
       <dl class="grid grid-cols-3 gap-4 border-t border-(--border) pt-8">
         <div class="flex flex-col gap-2">
           <Library class="size-5 text-(--primary)"/>
@@ -52,7 +84,7 @@ const hotSearches = ["英语", "数学", "计算机"];
     </section>
 
     <!-- 继续阅读 -->
-    <section class="mx-auto max-w-6xl px-4 py-12 md:px-8">
+    <section v-if="false" class="mx-auto max-w-6xl px-4 py-12 md:px-8">
       <!-- 标题 -->
       <div class="mb-6 flex items-end justify-between">
         <div>
@@ -134,98 +166,8 @@ const hotSearches = ["英语", "数学", "计算机"];
       </div>
     </section>
 
-    <!-- 书架 -->
-    <section class="mx-auto max-w-6xl px-4 py-12 md:px-8">
-      <div class="flex flex-col gap-16">
-        <div>
-          <div class="mb-6 flex items-end justify-between border-b border-(--border) pb-4">
-            <div>
-              <h2 class="font-serif text-2xl font-medium md:text-3xl">文学与小说</h2>
-              <p class="mt-1 text-sm text-(--muted-foreground)">那些让人辗转反侧的故事</p>
-            </div>
-            <a href="#" class="hidden items-center gap-1 text-sm text-(--muted-foreground) transition-colors hover:text-(--primary) sm:flex">
-              查看全部
-              <ArrowRight class="size-4"/>
-            </a>
-          </div>
-          <div class="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《挪威的森林》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-1.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">挪威的森林</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">村上春树</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《小径分岔的花园》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-2.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">小径分岔的花园</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">博尔赫斯</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《岛上书店》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-5.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">岛上书店</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">加·泽文</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《献给阿尔吉侬的花束》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-3.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">献给阿尔吉侬的花束</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">丹尼尔·凯斯</p>
-            </article>
-          </div>
-        </div>
-        <div>
-          <div class="mb-6 flex items-end justify-between border-b border-(--border) pb-4">
-            <div>
-              <h2 class="font-serif text-2xl font-medium md:text-3xl">思想与哲学</h2>
-              <p class="mt-1 text-sm text-(--muted-foreground)">在纸页之间叩问世界</p>
-            </div>
-            <a href="#" class="hidden items-center gap-1 text-sm text-(--muted-foreground) transition-colors hover:text-(--primary) sm:flex">
-              查看全部
-              <ArrowRight class="size-4"/>
-            </a>
-          </div>
-          <div class="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《沉思录》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-6.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">沉思录</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">马可·奥勒留</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《西方哲学史》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-4.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">西方哲学史</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">罗素</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《存在与虚无》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-2.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">存在与虚无</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">萨特</p>
-            </article>
-            <article class="group">
-              <div class="relative aspect-2/3 overflow-hidden rounded-md shadow-sm ring-1 ring-(--border) transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-                <img alt="《瓦尔登湖》封面" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" src="@/assets/cover-3.png">
-              </div>
-              <h3 class="mt-3 truncate font-serif text-base font-medium">瓦尔登湖</h3>
-              <p class="truncate text-sm text-(--muted-foreground)">梭罗</p>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- 结尾 -->
-    <section class="mx-auto grid max-w-6xl gap-12 px-4 py-12 md:grid-cols-5 md:px-8">
+    <section v-if="false" class="mx-auto grid max-w-6xl gap-12 px-4 py-12 md:grid-cols-5 md:px-8">
       <!-- 心愿单 -->
       <div class="md:col-span-3">
         <h2 class="mb-6 font-serif text-2xl font-medium md:text-3xl">心愿单</h2>
