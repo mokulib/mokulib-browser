@@ -8,10 +8,20 @@ const descriptions = [
   "“藏书是与时间的低语，每一页都值得被珍藏。”",
   "“纸张会泛黄，但故事永远年轻。”",
   "“藏书者，藏的不是纸，是渡人过河的舟楫。”",
+  "“墨痕会干涸，思想不会。”",
+  "“纸张沉默，但每一个字都在呼吸。”"
 ]
-
+const currentDescriptionIndex = ref<number>(Math.floor(Math.random() * descriptions.length));
 const currentStatus = ref<'EMAIL_PASSWORD_LOGIN' | 'EMAIL_CAPTCHA_LOGIN'>('EMAIL_PASSWORD_LOGIN');
 const currentComponent = computed(() => currentStatus.value === 'EMAIL_PASSWORD_LOGIN' ? EmailPasswordLogin : EmailCaptchaLogin);
+
+function changeDescription() {
+  // 随机一个 [0, description.length - 1) 区间的随机整数
+  const rawIndex = Math.floor(Math.random() * (descriptions.length - 1));
+  // 若整数在 [0, currentDescriptionIndex) 区间内，则直接使用；
+  // 若整数在 [currentDescriptionIndex, description.length - 1) 区间内，则加 1，即平移至 (currentDescription, description.length) 区间内
+  currentDescriptionIndex.value = rawIndex < currentDescriptionIndex.value ? rawIndex : rawIndex + 1;
+}
 </script>
 
 <template>
@@ -23,16 +33,16 @@ const currentComponent = computed(() => currentStatus.value === 'EMAIL_PASSWORD_
         <span class="font-serif text-xl font-semibold tracking-tight">墨库</span>
       </RouterLink>
       <div class="hidden md:block">
-        <p class="font-serif text-3xl leading-snug text-balance">{{ descriptions[Math.floor(Math.random() * 3)] }}</p>
-        <p class="mt-4 text-sm text-(--primary-foreground)/70">— 墨库 · 藏书借阅平台</p>
+        <p @click="changeDescription()" class="font-serif text-3xl leading-snug text-balance">{{ descriptions[currentDescriptionIndex] }}</p>
+        <p class="mt-4 text-sm text-(--primary-foreground)/70">— 墨库 · 个人图书馆</p>
       </div>
       <p class="hidden text-xs text-(--primary-foreground)/60 md:block">© 2026 墨库</p>
     </aside>
     <!-- 表单区 -->
     <section class="flex flex-1 items-center justify-center px-4 py-12 md:px-8">
       <div class="w-full max-w-sm">
-        <h1 class="font-serif text-3xl font-semibold tracking-tight text-balance">欢迎回来</h1>
-        <p class="mt-2 text-sm leading-relaxed text-(--muted-foreground)">登录以继续管理你的藏书与阅读进度。</p>
+        <h1 class="font-serif text-3xl font-semibold tracking-tight text-balance">欢迎来到墨库</h1>
+        <p class="mt-2 text-sm leading-relaxed text-(--muted-foreground)">登录或注册以继续管理你的藏书与阅读进度。</p>
         <!-- 邮箱密码登录表单/邮箱验证码登录表单 -->
         <div class="mt-8">
           <component :is="currentComponent" />
