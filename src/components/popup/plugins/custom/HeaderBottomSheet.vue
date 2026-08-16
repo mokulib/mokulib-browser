@@ -9,6 +9,11 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 const popupStore = usePopupStore();
 const themeStore = useThemeStore();
+
+function switchTheme() {
+  themeStore.toggle();
+  popupStore.close();
+}
 </script>
 
 <template>
@@ -57,7 +62,7 @@ const themeStore = useThemeStore();
       <div class="my-1 border-t border-(--border)"></div>
       <!-- 主题切换 -->
       <div class="px-2 py-1">
-        <a href="/" @click.prevent="themeStore.toggle" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <a href="/" @click.prevent="switchTheme()" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
           <div class="flex items-center gap-2.5 py-2 text-sm">
             <SunMoon class="size-4"/>
             主题切换
