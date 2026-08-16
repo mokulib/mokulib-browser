@@ -2,13 +2,12 @@
 import { ArrowLeft, Search, Loader, ArrowUpNarrowWide, ArrowDownNarrowWide } from "@lucide/vue";
 import { computed, onMounted, ref } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book } from "@/types";
+import type { Book, SortMode } from "@/types";
 import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useRouter } from "vue-router";
 
 // 定义类型
-type SortMode = "PUBLISH_DATE_FROM_NEW_TO_OLD" | "PUBLISH_DATE_FROM_OLD_TO_NEW" | "PRICE_FROM_LOW_TO_HIGH" | "PRICE_FROM_HIGH_TO_LOW";
 type Conditions = { keyword: string, sortMode: SortMode };
 
 const router = useRouter();
