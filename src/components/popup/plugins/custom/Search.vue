@@ -92,10 +92,10 @@ onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
 
       <!-- 热搜 -->
       <div class="w-full flex items-center justify-start mt-2 pl-18 md:pl-8 pr-16 text-sm text-(--muted-foreground)">
-        <div>热搜：</div>
-        <div class="flex items-center justify-center gap-2">
+        <div class="shrink-0">热搜：</div>
+        <div class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
           <template v-for="search in hotSearches" :key="search">
-            <div @click="hotSearch(search)" class="cursor-pointer hover:text-(--primary) hover:underline">{{ search }}</div>
+            <div @click="hotSearch(search)" class="cursor-pointer hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
           </template>
         </div>
       </div>

@@ -79,10 +79,10 @@ onMounted(async () => {
         </div>
         <!-- 热搜词 -->
         <div class="flex items-center justify-start mx-8 px-8 text-sm">
-          <div class="text-(--muted-foreground)">热搜：</div>
-          <div class="flex items-center justify-center gap-2">
+          <div class="text-(--muted-foreground) shrink-0">热搜：</div>
+          <div class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
             <template v-for="search in hotSearches" :key="search">
-              <div @click="popupStore.open('search', { keyword: search })" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline">{{ search }}</div>
+              <div @click="popupStore.open('search', { keyword: search })" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
             </template>
           </div>
         </div>
