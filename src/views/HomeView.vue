@@ -25,10 +25,10 @@ const status = ref<Status[]>([ { type: "hot", isActive: true }, { type: "new", i
 const isHotActive = computed(() => status.value.some(s => s.type === 'hot' && s.isActive));
 const isNewActive = computed(() => status.value.some(s => s.type === 'new' && s.isActive));
 const activeCategory = computed<CategoryStatus | undefined>(() => status.value.find(s => s.type === 'category' && s.isActive) as CategoryStatus | undefined);
-const topFavoriteBookIds = ref<number[]>([]);
-const activatedFavoriteIndex = ref<number>(0);
-const topBorrowedBookIds = ref<number[]>([]);
-const activatedBorrowedIndex = ref<number>(0);
+const borrowRank = ref<number[]>([]);
+const favoriteRank = ref<number[]>([]);
+const newMonthlyRank = ref<number[]>([]);
+const newStoreRank = ref<number[]>([]);
 
 /////////////////////////////////////////////
 // 状态管理
@@ -71,12 +71,13 @@ onMounted(async () => {
   categories.value = (await api.get<Category[]>('/api/categories')).data.sort((a, b) => a.id - b.id);
   // 添加分类状态
   status.value.push(...categories.value.map(category => ({ type: "category", isActive: false, id: category.id, pageNum: 1, sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD", books: { current: 0, pages: 0, records: [], size: 0, total: -1 } })) as CategoryStatus[]);
-  // 获取最多人收藏榜单
-  topFavoriteBookIds.value = (await api.get<number[]>('/api/favorites/hot')).data;
-  // 获取最多人借阅榜单
-  topBorrowedBookIds.value = (await api.get<number[]>('/api/borrow-records/hot')).data;
+  // 获取榜单
+  borrowRank.value = (await api.get<number[]>('/api/ranks/borrow')).data;
+  favoriteRank.value = (await api.get<number[]>('/api/ranks/favorite')).data;
+  newMonthlyRank.value = (await api.get<number[]>('/api/ranks/new-monthly')).data;
+  newStoreRank.value = (await api.get<number[]>('/api/ranks/new-store')).data;
   // 预加载
-  await bookStore.preload(...topFavoriteBookIds.value, ...topBorrowedBookIds.value);
+  await bookStore.preload(...borrowRank.value, ...favoriteRank.value, ...newMonthlyRank.value, ...newStoreRank.value);
 })
 </script>
 
@@ -109,12 +110,11 @@ onMounted(async () => {
       <div class="mx-auto max-w-6xl w-full flex items-center px-4 md:px-8"><!-- 限制宽度 -->
         <div class="shrink-0 w-44 pl-4 py-2 border-t border-(--primary) text-(--background) bg-(--primary)">全部图书分类</div>
         <div class="flex items-end px-4 gap-4">
-          <div @mouseenter="setActive('hot')" :data-is-active="isHotActive" class="relative mt-1 px-4 pt-1 pb-2 rounded-t data-[is-active=true]:text-(--primary) data-[is-active=true]:bg-(--primary)/10 transition-all cursor-pointer">
-            <div class="absolute inset-x-5 bottom-1 h-0.5 bg-(--primary) transition-opacity duration-300" :class="{ 'opacity-0': !isHotActive }"></div>
+          <div @mouseenter="setActive('hot')" :data-is-active="isHotActive" class="relative mt-1 px-6 pt-1 pb-2 rounded-t data-[is-active=true]:text-(--primary) data-[is-active=true]:bg-(--primary)/10 transition-all cursor-pointer">
+            <div class="absolute inset-x-5 bottom-1 h-0.5 bg-(--primary) transition-all duration-300 pointer-events-none" :class="{ 'opacity-0': !isHotActive && !isNewActive, 'translate-x-30': isNewActive }"></div>
             热门好书
           </div>
-          <div @mouseenter="setActive('new')" :data-is-active="isNewActive" class="relative mt-1 px-4 pt-1 pb-2 rounded-t data-[is-active=true]:text-(--primary) data-[is-active=true]:bg-(--primary)/10 transition-all cursor-pointer">
-            <div class="absolute inset-x-5 bottom-1 h-0.5 bg-(--primary) transition-opacity duration-300" :class="{ 'opacity-0': !isNewActive }"></div>
+          <div @mouseenter="setActive('new')" :data-is-active="isNewActive" class="mt-1 px-6 pt-1 pb-2 rounded-t data-[is-active=true]:text-(--primary) data-[is-active=true]:bg-(--primary)/10 transition-all cursor-pointer">
             新书上架
           </div>
         </div>
@@ -139,15 +139,18 @@ onMounted(async () => {
         <!-- 内容 -->
         <section class="flex-1 flex">
           <!-- 热门好书 -->
-          <div v-if="isHotActive" class="grid grid-rows-1 grid-cols-2 pl-4 pt-4 gap-4">
+          <div v-if="isHotActive" class="flex-1 grid grid-rows-1 grid-cols-2 pl-4 pt-4 gap-4">
             <!-- 阅读榜 -->
-            <RankCard title="阅读榜单" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="topBorrowedBookIds"/>
+            <RankCard title="阅读榜单" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="borrowRank"/>
             <!-- 收藏榜 -->
-            <RankCard title="收藏榜单" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="topFavoriteBookIds"/>
+            <RankCard title="收藏榜单" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="favoriteRank"/>
           </div>
           <!-- 新书上架 -->
-          <div v-if="isNewActive">
-            新书上架
+          <div v-if="isNewActive" class="flex-1 grid grid-rows-1 grid-cols-2 pl-4 pt-4 gap-4">
+            <!-- 本月上新 -->
+            <RankCard title="本月上新" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="newMonthlyRank"/>
+            <!-- 近期入库 -->
+            <RankCard title="近期入库" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="newStoreRank"/>
           </div>
           <!-- 分类页 - 空 -->
           <div v-if="activeCategory && activeCategory.books.total === 0" class="flex-1 flex flex-col items-center justify-center gap-4">
