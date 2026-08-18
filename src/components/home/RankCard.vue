@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useBookStore } from "@/stores/book.ts";
 import { useRouter } from "vue-router";
+import { useThemeStore } from "@/stores/theme.ts";
 
 defineProps({
   title: { type: String, required: true },
@@ -12,12 +13,13 @@ defineProps({
 
 const router = useRouter();
 const bookStore = useBookStore();
+const themeStore = useThemeStore();
 
 const activatedIndex = ref<number>(0);
 </script>
 
 <template>
-  <div class="flex flex-col p-4 rounded-lg bg-contain bg-top bg-no-repeat bg-white dark:bg-black shadow-[0_12px_67px_0_rgba(0,0,0,0.04)]" :class="[ `bg-[url('/${backgroundImage}')]`, `dark:bg-[url('/${backgroundImageDark}')]` ]">
+  <div class="flex flex-col p-4 rounded-lg bg-contain bg-top bg-no-repeat bg-white dark:bg-black shadow-[0_12px_67px_0_rgba(0,0,0,0.04)]" :style="{ 'background-image': `url('/${themeStore.isSun ? backgroundImage : backgroundImageDark}')` }">
     <div class="text-xl tracking-wider">{{ title }}</div>
     <div class="mt-0.5 mb-4 text-xs text-(--muted-foreground)/60">仅展示前十本，统计时间截止至04-01 24:00</div>
     <div class="flex flex-col gap-1" :class="{ 'pb-2': activatedIndex === 0 }">
