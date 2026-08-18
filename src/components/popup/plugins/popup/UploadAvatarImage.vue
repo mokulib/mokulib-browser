@@ -4,7 +4,7 @@ import { usePopupStore } from "@/stores/popup.ts";
 import { computed, onMounted, ref } from "vue";
 import api from "@/api";
 
-const bookId = ref<number>(-1);
+const id = ref<number>(-1);
 
 const selectedFile = ref<File | undefined>(undefined)
 const isSelectedFile = computed(() => !selectedFile.value);
@@ -25,23 +25,23 @@ async function confirmHandler() {
   } catch (error) {
     return { status: 'ERROR', businessType: '', message: '文件读取失败', data: null };
   }
-  return api.post(`/api/books/${bookId.value}/cover`, data, { headers: { 'Content-Type': 'application/octet-stream' } });
+  return api.post(`/api/users/${id.value}/avatar`, data, { headers: { 'Content-Type': 'application/octet-stream' } });
 }
 
 onMounted(() => {
-  usePopupStore().registerInitHook('uploadBookCover', ({ clone }) => bookId.value = clone.id);
+  usePopupStore().registerInitHook('uploadAvatar', ({ clone }) => id.value = clone.id);
 })
 </script>
 
 <template>
-  <Popup popup-key="uploadBookCover" title="上传封面" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="confirmHandler">
+  <Popup popup-key="uploadAvatar" title="上传头像" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="confirmHandler">
     <template #content>
-      选择一张新的封面图。
+      选择一张新的头像。
     </template>
     <template #default>
       <form class="space-y-3">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="cover-file">
-          封面图片
+          头像
         </label>
         <input data-slot="input" accept="image/*" @change="(event: Event) => selectedFile = (event.target as HTMLInputElement).files?.[0]" class="h-8 w-full min-w-0 rounded-lg border border-(--input) bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--foreground) placeholder:text-(--muted-foreground) focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-(--input)/50 disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 md:text-sm dark:bg-(--input)/30 dark:disabled:bg-(--input)/80 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40" type="file">
       </form>

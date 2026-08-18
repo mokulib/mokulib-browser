@@ -1,19 +1,38 @@
 <script setup lang="ts">
 import { BookOpen, FolderHeart, Folders } from "@lucide/vue";
 import { useUserStore } from "@/stores/user.ts";
-import { ElMessage } from "element-plus";
 import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
 import RouteButton from "@/components/profile/my/RouteButton.vue";
 import api from "@/api";
-import type { Book } from "@/types";
+import type { Book, Response } from "@/types";
+import { usePopupStore } from "@/stores/popup.ts";
+import { ElMessage } from "element-plus";
 
 const userStore = useUserStore();
+const popupStore = usePopupStore();
 
 const borrowing = ref<{ id: number, title: string }[]>([]);
 const favorites = ref<{ id: number, title: string }[]>([]);
 const history = ref<{ id: number, title: string }[]>([]);
 const books = ref<Book[]>([]);
+
+/////////////////////////////////////////////
+// 弹窗回调
+/////////////////////////////////////////////
+
+async function uploadAvatarCallback(data: Response<any>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    userStore.user_avatar_timestamp = Date.now(); // 刷新头像
+  } else {
+    ElMessage.error(data.message);
+  }
+}
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
 
 onMounted(async () => {
   // 请求借阅中的数据
@@ -55,8 +74,8 @@ onMounted(async () => {
         <!-- 头像 -->
         <img :src="userStore.user_avatar" alt="avatar" class="w-full h-full object-cover">
         <!-- 遮罩 -->
-        <div @click="ElMessage('click')" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
-          <span class="text-sm text-white">编辑资料</span>
+        <div @click="popupStore.open('uploadAvatar', { id: userStore.user_id }, uploadAvatarCallback)" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+          <span class="text-sm text-white">上传头像</span>
         </div>
       </div>
       <!-- 昵称、邮箱 -->

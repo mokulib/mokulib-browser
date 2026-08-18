@@ -42,7 +42,7 @@ export const useUserStore = defineStore('user', () => {
     }
   });
   // 头像
-  let user_avatar_timestamp = ref(0) // 用于强制刷新头像
+  let user_avatar_timestamp = ref(Date.now()) // 用于强制刷新头像
   let user_avatar = computed(() => {
     return `/avatars/${user_id.value}?timestamp=${user_avatar_timestamp.value}`
   })
@@ -99,6 +99,7 @@ export const useUserStore = defineStore('user', () => {
     user_username,
     user_bio,
     user_create_time,
+    user_avatar_timestamp,
     user_avatar,
     updateUserInfo,
     modifyPassword,

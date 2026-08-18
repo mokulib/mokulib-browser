@@ -24,6 +24,10 @@ export interface PopupMap {
     payload: { id: number; };
     response: Response<any>;
   };
+  uploadAvatar: {
+    payload: { id: number; };
+    response: Response<any>;
+  }
   editCategory: {
     payload: { book: Book; category: Category; };
     response: Response<Book>;
