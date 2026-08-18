@@ -36,6 +36,10 @@ export interface PopupMap {
     payload: { book: Book; };
     response: Response<Book>;
   };
+  editUsername: {
+    payload: undefined;
+    response: Response<any>;
+  }
   addTag: {
     payload: { id: number; tags: Tag[]; };
     response: Response<undefined>;

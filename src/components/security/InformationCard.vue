@@ -3,8 +3,20 @@ import { Pencil } from "@lucide/vue"
 import SecurityCard from "@/components/security/SecurityCard.vue";
 import { useUserStore } from "@/stores/user.ts";
 import { DateTime } from "luxon";
+import { usePopupStore } from "@/stores/popup.ts";
+import type { Response } from "@/types";
+import { ElMessage } from "element-plus";
 
 const userStore = useUserStore();
+const popupStore = usePopupStore();
+
+function editUsernameCallback(data: Response<any>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+  } else {
+    ElMessage.error(data.message);
+  }
+}
 </script>
 
 <template>
@@ -35,8 +47,8 @@ const userStore = useUserStore();
 
     <!-- 操作按钮 -->
     <div>
-      <button class="flex items-center px-4 py-1 gap-2 border border-(--border) rounded text-sm bg-(--background) hover:bg-(--muted) transition-colors">
-        <Pencil @click="" class="size-3"/>
+      <button @click="popupStore.open('editUsername', undefined, editUsernameCallback)" class="flex items-center px-4 py-1 gap-2 border border-(--border) rounded text-sm bg-(--background) hover:bg-(--muted) transition-colors">
+        <Pencil class="size-3"/>
         修改昵称
       </button>
     </div>
