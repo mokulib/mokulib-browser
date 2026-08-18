@@ -153,38 +153,41 @@ onMounted(async () => {
             <BookDashed class="size-10 text-(--muted-foreground)"/>
             <div class="text-sm text-(--muted-foreground)">没有找到符合条件的图书</div>
           </div>
-          <!-- 分类页 - 排序 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center pl-4 py-2 gap-4">
-            <button @click="() => goToPage(1, activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' ? 'PUBLISH_DATE_FROM_OLD_TO_NEW' : 'PUBLISH_DATE_FROM_NEW_TO_OLD')" class="flex items-center gap-2 hover:-translate-y-0.5 transition-transform cursor-pointer" :class="{ 'text-(--primary)': activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' || activeCategory?.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW' }">
-              <span class="text-sm">出版时间</span>
-              <ArrowDownNarrowWide v-if="activeCategory?.sortMode !== 'PUBLISH_DATE_FROM_OLD_TO_NEW'" class="size-4"/>
-              <ArrowUpNarrowWide v-if="activeCategory?.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW'" class="size-4"/>
-            </button>
-            <div class="w-px h-4 block bg-(--primary)"></div>
-            <button @click="() => goToPage(1, activeCategory?.sortMode === 'PRICE_FROM_LOW_TO_HIGH' ? 'PRICE_FROM_HIGH_TO_LOW' : 'PRICE_FROM_LOW_TO_HIGH')" class="flex items-center gap-2 hover:-translate-y-0.5 transition-transform cursor-pointer" :class="{ 'text-(--primary)': activeCategory?.sortMode === 'PRICE_FROM_HIGH_TO_LOW' || activeCategory?.sortMode === 'PRICE_FROM_LOW_TO_HIGH' }">
-              <span class="text-sm">价格</span>
-              <ArrowDownNarrowWide v-if="activeCategory?.sortMode !== 'PRICE_FROM_HIGH_TO_LOW'" class="size-4"/>
-              <ArrowUpNarrowWide v-if="activeCategory?.sortMode === 'PRICE_FROM_HIGH_TO_LOW'" class="size-4"/>
-            </button>
-          </div>
-          <!-- 分类页 - 图书展示 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-rows-3 grid-cols-4 m-4 gap-2">
-            <template v-for="book in activeCategory.books?.records" :key="book.id">
-              <div class="flex flex-col items-center justify-start px-4 gap-1">
-                <img :src="`/books/${book.id}`" class="size-24 object-cover" :alt="book.title"/>
-                <div class="line-clamp-2 text-sm text-center">{{ book.title }}</div>
-              </div>
-            </template>
-          </div>
-          <!-- 分类页 - 分页组件 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center justify-center mb-2 gap-2">
-            <button @click="goToPage(1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">首页</button>
-            <button @click="goToPage(activeCategory.books?.current - 1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">上一页</button>
-            <template v-for="i in activeCategory.books?.pages">
-              <button @click="activeCategory.books?.current === i ? null : goToPage(i, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) cursor-pointer data-[is-current=true]:cursor-auto" :data-is-current="activeCategory.books?.current === i" :class="{ 'text-(--primary)': activeCategory.books?.current === i }">{{ i }}</button>
-            </template>
-            <button @click="goToPage(activeCategory.books?.current + 1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === activeCategory.books?.pages">下一页</button>
-            <button @click="goToPage(activeCategory.books?.pages, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === activeCategory.books?.pages">尾页</button>
+          <!-- 分类页 -->
+          <div class="flex flex-col">
+            <!-- 排序 -->
+            <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center pl-4 py-2 gap-4">
+              <button @click="() => goToPage(1, activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' ? 'PUBLISH_DATE_FROM_OLD_TO_NEW' : 'PUBLISH_DATE_FROM_NEW_TO_OLD')" class="flex items-center gap-2 hover:-translate-y-0.5 transition-transform cursor-pointer" :class="{ 'text-(--primary)': activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' || activeCategory?.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW' }">
+                <span class="text-sm">出版时间</span>
+                <ArrowDownNarrowWide v-if="activeCategory?.sortMode !== 'PUBLISH_DATE_FROM_OLD_TO_NEW'" class="size-4"/>
+                <ArrowUpNarrowWide v-if="activeCategory?.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW'" class="size-4"/>
+              </button>
+              <div class="w-px h-4 block bg-(--primary)"></div>
+              <button @click="() => goToPage(1, activeCategory?.sortMode === 'PRICE_FROM_LOW_TO_HIGH' ? 'PRICE_FROM_HIGH_TO_LOW' : 'PRICE_FROM_LOW_TO_HIGH')" class="flex items-center gap-2 hover:-translate-y-0.5 transition-transform cursor-pointer" :class="{ 'text-(--primary)': activeCategory?.sortMode === 'PRICE_FROM_HIGH_TO_LOW' || activeCategory?.sortMode === 'PRICE_FROM_LOW_TO_HIGH' }">
+                <span class="text-sm">价格</span>
+                <ArrowDownNarrowWide v-if="activeCategory?.sortMode !== 'PRICE_FROM_HIGH_TO_LOW'" class="size-4"/>
+                <ArrowUpNarrowWide v-if="activeCategory?.sortMode === 'PRICE_FROM_HIGH_TO_LOW'" class="size-4"/>
+              </button>
+            </div>
+            <!-- 图书展示 -->
+            <div v-if="activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-rows-3 grid-cols-4 m-4 gap-2">
+              <template v-for="book in activeCategory.books?.records" :key="book.id">
+                <div class="flex flex-col items-center justify-start px-4 gap-1">
+                  <img :src="`/books/${book.id}`" class="size-24 object-cover" :alt="book.title"/>
+                  <div class="line-clamp-2 text-sm text-center">{{ book.title }}</div>
+                </div>
+              </template>
+            </div>
+            <!-- 分页组件 -->
+            <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center justify-center mb-2 gap-2">
+              <button @click="goToPage(1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">首页</button>
+              <button @click="goToPage(activeCategory.books?.current - 1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">上一页</button>
+              <template v-for="i in activeCategory.books?.pages">
+                <button @click="activeCategory.books?.current === i ? null : goToPage(i, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) cursor-pointer data-[is-current=true]:cursor-auto" :data-is-current="activeCategory.books?.current === i" :class="{ 'text-(--primary)': activeCategory.books?.current === i }">{{ i }}</button>
+              </template>
+              <button @click="goToPage(activeCategory.books?.current + 1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === activeCategory.books?.pages">下一页</button>
+              <button @click="goToPage(activeCategory.books?.pages, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === activeCategory.books?.pages">尾页</button>
+            </div>
           </div>
         </section>
       </div>
