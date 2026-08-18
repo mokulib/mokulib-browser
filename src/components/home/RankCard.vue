@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type PropType, ref } from "vue";
+import { nextTick, onMounted, type PropType, ref } from "vue";
 import { useBookStore } from "@/stores/book.ts";
 import { useRouter } from "vue-router";
 import { useThemeStore } from "@/stores/theme.ts";
@@ -18,7 +18,19 @@ const router = useRouter();
 const bookStore = useBookStore();
 const themeStore = useThemeStore();
 
+const isTouchDevice = ref(false)
 const activatedIndex = ref<number>(0);
+
+function handleMouseEnter(index: number) {
+  // 触屏设备禁用 mouseenter 事件
+  if (isTouchDevice.value)
+    return
+  activatedIndex.value = index;
+}
+
+onMounted(() => {
+  isTouchDevice.value = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window
+})
 </script>
 
 <template>
@@ -27,7 +39,7 @@ const activatedIndex = ref<number>(0);
     <div class="line-clamp-1 mt-0.5 mb-4 text-xs text-(--muted-foreground)/60">{{ description }}，统计时间截止至{{ DateTime.fromISO(rank.update_time).toFormat('MM-dd HH:mm') }}</div>
     <div class="flex flex-col gap-1" :class="{ 'pb-2': activatedIndex === 0 }">
       <template v-for="(bookId, index) in rank.rank" :key="bookId">
-        <div v-if="activatedIndex !== index" @click="activatedIndex = index" @mouseenter="activatedIndex = index" class="flex items-center mt-2 cursor-pointer">
+        <div v-if="activatedIndex !== index" @click="activatedIndex = index" @mouseenter="handleMouseEnter(index)" class="flex items-center mt-2 cursor-pointer">
           <div class="text-sm font-semibold text-(--muted-foreground)/50" :class="{ 'text-[#FF5F00]': index === 0, 'text-[#00754A]': index === 1, 'text-[#D6A562]': index === 2 }">{{ String(index + 1).padStart(2, '0') }}</div>
           <div class="line-clamp-1 ml-2 text-sm">{{ bookStore.book(bookId).value?.title }}</div>
         </div>
