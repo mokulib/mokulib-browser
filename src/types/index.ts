@@ -5,6 +5,7 @@ export * from './borrow-record.ts'
 export * from './category.ts'
 export * from './favorite.ts'
 export * from "./page.ts"
+export * from "./rank.ts"
 export * from "./response.ts"
 export * from "./sort-mode.ts"
 export * from './tag.ts'

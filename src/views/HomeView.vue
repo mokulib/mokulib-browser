@@ -2,7 +2,7 @@
 import { Search, ArrowDownNarrowWide, ArrowUpNarrowWide, BookDashed } from "@lucide/vue";
 import { usePopupStore } from "@/stores/popup.ts";
 import { computed, onMounted, ref } from "vue";
-import type { Book, Category, SortMode } from "@/types";
+import type { Book, Category, Rank, SortMode } from "@/types";
 import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useBookStore } from "@/stores/book.ts";
@@ -25,10 +25,10 @@ const status = ref<Status[]>([ { type: "hot", isActive: true }, { type: "new", i
 const isHotActive = computed(() => status.value.some(s => s.type === 'hot' && s.isActive));
 const isNewActive = computed(() => status.value.some(s => s.type === 'new' && s.isActive));
 const activeCategory = computed<CategoryStatus | undefined>(() => status.value.find(s => s.type === 'category' && s.isActive) as CategoryStatus | undefined);
-const borrowRank = ref<number[]>([]);
-const favoriteRank = ref<number[]>([]);
-const newMonthlyRank = ref<number[]>([]);
-const newStoreRank = ref<number[]>([]);
+const borrowRank = ref<Rank>({ rank: [], update_time: '' });
+const favoriteRank = ref<Rank>({ rank: [], update_time: '' });
+const newMonthlyRank = ref<Rank>({ rank: [], update_time: '' });
+const newStoreRank = ref<Rank>({ rank: [], update_time: '' });
 
 /////////////////////////////////////////////
 // 状态管理
@@ -72,12 +72,12 @@ onMounted(async () => {
   // 添加分类状态
   status.value.push(...categories.value.map(category => ({ type: "category", isActive: false, id: category.id, pageNum: 1, sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD", books: { current: 0, pages: 0, records: [], size: 0, total: -1 } })) as CategoryStatus[]);
   // 获取榜单
-  borrowRank.value = (await api.get<number[]>('/api/ranks/borrow')).data;
-  favoriteRank.value = (await api.get<number[]>('/api/ranks/favorite')).data;
-  newMonthlyRank.value = (await api.get<number[]>('/api/ranks/new-monthly')).data;
-  newStoreRank.value = (await api.get<number[]>('/api/ranks/new-store')).data;
+  borrowRank.value = (await api.get<Rank>('/api/ranks/borrow')).data;
+  favoriteRank.value = (await api.get<Rank>('/api/ranks/favorite')).data;
+  newMonthlyRank.value = (await api.get<Rank>('/api/ranks/new-monthly')).data;
+  newStoreRank.value = (await api.get<Rank>('/api/ranks/new-store')).data;
   // 预加载
-  await bookStore.preload(...borrowRank.value, ...favoriteRank.value, ...newMonthlyRank.value, ...newStoreRank.value);
+  await bookStore.preload(...borrowRank.value.rank, ...favoriteRank.value.rank, ...newMonthlyRank.value.rank, ...newStoreRank.value.rank);
 })
 </script>
 
@@ -140,17 +140,13 @@ onMounted(async () => {
         <section class="flex-1 flex">
           <!-- 热门好书 -->
           <div v-if="isHotActive" class="flex-1 grid grid-rows-1 grid-cols-2 pl-4 pt-4 gap-4">
-            <!-- 阅读榜 -->
-            <RankCard title="阅读榜单" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="borrowRank"/>
-            <!-- 收藏榜 -->
-            <RankCard title="收藏榜单" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="favoriteRank"/>
+            <RankCard title="阅读榜单" description="根据借阅量排序" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="borrowRank"/>
+            <RankCard title="收藏榜单" description="根据收藏量排序" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="favoriteRank"/>
           </div>
           <!-- 新书上架 -->
           <div v-if="isNewActive" class="flex-1 grid grid-rows-1 grid-cols-2 pl-4 pt-4 gap-4">
-            <!-- 本月上新 -->
-            <RankCard title="本月上新" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="newMonthlyRank"/>
-            <!-- 近期入库 -->
-            <RankCard title="近期入库" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="newStoreRank"/>
+            <RankCard title="本月上新" description="近30天首次入库" background-image="bg-card.png" background-image-dark="bg-card-dark.png" :rank="newMonthlyRank"/>
+            <RankCard title="近期入库" description="近期新入库的图书" background-image="bg-card-2.png" background-image-dark="bg-card-2-dark.png" :rank="newStoreRank"/>
           </div>
           <!-- 分类页 - 空 -->
           <div v-if="activeCategory && activeCategory.books.total === 0" class="flex-1 flex flex-col items-center justify-center gap-4">
