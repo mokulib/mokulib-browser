@@ -7,7 +7,7 @@ defineProps({
 <template>
   <div class="flex flex-col py-4 md:py-8 gap-4 border-b border-(--border) last:border-b-0">
     <p class="font-semibold">{{ title }}</p>
-    <div class="flex px-4 md:px-8">
+    <div class="flex flex-col px-4 md:px-8 gap-4">
       <slot/>
     </div>
   </div>
