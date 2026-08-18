@@ -13,7 +13,7 @@ const input = ref('')
 <template>
   <SecurityCard title="注销账号">
     <!-- 提示信息 -->
-    <div class="flex flex-col px-4 py-2 gap-2 rounded text-(--destructive) border border-(--destructive)">
+    <div class="flex flex-col px-4 py-2 gap-2 rounded text-sm text-(--destructive) border border-(--destructive)">
       <p>为保证账号安全，你提交的注销申请生效前需满足以下条件。</p>
       <ul class="list-decimal pl-8">
         <li>通过账号安全验证</li>
@@ -37,7 +37,7 @@ const input = ref('')
 
     <!-- 操作按钮 -->
     <div>
-      <button class="flex items-center px-4 py-1 gap-2 border border-(--border) rounded text-sm text-(--destructive) bg-(--background) hover:bg-(--muted) transition-colors">
+      <button class="flex items-center px-4 py-1 gap-2 border border-(--destructive) rounded text-sm text-(--destructive) bg-(--background) hover:bg-(--muted) transition-colors">
         <UserRoundX class="size-3"/>
         注销账号
       </button>

@@ -8,7 +8,7 @@ defineProps({
 <template>
   <div class="grid grid-cols-1 sm:grid-cols-[88px_auto] gap-2">
     <div class="flex items-center justify-start">
-      <p>{{ label }}：</p>
+      <p class="text-sm">{{ label }}：</p>
     </div>
     <div class="flex items-center">
       <slot/>

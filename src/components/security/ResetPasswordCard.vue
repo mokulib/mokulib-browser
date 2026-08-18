@@ -13,7 +13,7 @@ const input = ref('')
 <template>
   <SecurityCard title="重置密码">
     <!-- 提示信息 -->
-    <div class="flex flex-col px-4 py-2 gap-2 rounded text-(--muted-foreground) border border-(--border)">
+    <div class="flex flex-col px-4 py-2 gap-2 rounded text-sm text-(--muted-foreground) border border-(--border)">
       <p>重置密码后，您需要使用新密码重新登录。</p>
     </div>
 
@@ -34,7 +34,7 @@ const input = ref('')
 
     <!-- 操作按钮 -->
     <div>
-      <button class="flex items-center px-4 py-1 gap-2 border border-(--border) rounded text-sm bg-(--background) hover:bg-(--muted) transition-colors">
+      <button class="flex items-center px-4 py-1 gap-2 border border-(--border) rounded text-sm text-(--primary) bg-(--background) hover:bg-(--muted) transition-colors">
         <LockKeyhole class="size-3"/>
         重置密码
       </button>
