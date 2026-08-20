@@ -111,6 +111,7 @@ Done in 57.9s using pnpm v11.10.0
 - [x] `pnpm add @tailwindcss/vite`
 - [x] `pnpm add @vueuse/core`
 - [x] `pnpm add axios`
+- [x] `pnpm add echarts`
 - [x] `pnpm add element-plus`
 - [x] `pnpm add js-base64`
 - [x] `pnpm add luxon`
