@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { BookDashed, Loader } from "@lucide/vue";
+import { BookDashed, Loader, Undo2 } from "@lucide/vue";
 import { ref, toRef, watch } from "vue";
 import api from "@/api";
 import { DateTime } from "luxon";
 import type { BorrowRecord, FullBookCopy } from "@/types";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 
 const props = defineProps({ id: { type: String, required: true } });
 const id = toRef(props, "id");
+
+const router = useRouter();
 
 const requestTimestamp = ref(DateTime.now());
 const isLoading = ref(false);
@@ -14,11 +18,17 @@ const isError = ref(false);
 const bookCopy = ref<FullBookCopy>({ id: 0, book_id: 0, purchase_price: 0, purchase_date: "", source: "", status: "AVAILABLE", entry_by: 0, withdrawn_reason: null, create_time: "", withdrawn_time: null });
 const borrowRecords = ref<BorrowRecord[]>([]);
 
-/////////////////////////////////////////////
-// 监听
-/////////////////////////////////////////////
+async function rollbackReturn(id: number) {
+  const data = await api.post(`/api/borrow-records/${id}/rollback-return`);
+  if (data.status === "OK") {
+    ElMessage.success(data.message);
+    await init();
+  } else {
+    ElMessage.error(data.message);
+  }
+}
 
-watch(id, async () => {
+async function init() {
   // 初始化
   requestTimestamp.value = DateTime.now();
   isLoading.value = true;
@@ -32,7 +42,13 @@ watch(id, async () => {
     isError.value = true;
   // 延迟加载完成
   setTimeout(() => isLoading.value = false, Math.max(0, 1000 - DateTime.now().diff(requestTimestamp.value).milliseconds));
-}, { immediate: true })
+}
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
+
+watch(id, async () => init(), { immediate: true })
 </script>
 
 <template>
@@ -51,7 +67,7 @@ watch(id, async () => {
       <!-- 头部 -->
       <div class="flex px-0 md:px-8 gap-4 md:gap-8">
         <div class="my-auto flex justify-center">
-          <img :src="`/books/${bookCopy.book_id}`" class="w-32 md:w-48 object-cover aspect-4/5 rounded-lg" alt="cover"/>
+          <img :src="`/books/${bookCopy.book_id}`" @click="router.push({ name: 'book', params: { id: bookCopy.book_id } })" class="w-32 md:w-48 object-cover aspect-4/5 rounded-lg shadow" alt="cover"/>
         </div>
         <div class="flex flex-col justify-between gap-2 py-2 text-sm">
           <div class="flex items-center gap-2">
@@ -95,7 +111,13 @@ watch(id, async () => {
 
       <!-- 记录列表 -->
       <div v-if="borrowRecords.length > 0" class="flex flex-col gap-4">
-        <div v-for="item in borrowRecords" :key="item.id" class="rounded-lg border border-(--border) bg-(--card) p-4">
+        <div v-for="(item, index) in borrowRecords" :key="item.id" class="relative rounded-lg border border-(--border) bg-(--card) p-4">
+          <div v-if="index === 0 && item.close_status !== 'OPEN'" class="absolute right-4 bottom-2">
+            <button @click="rollbackReturn(item.id)" class="flex items-center px-2 py-1 gap-2 bg-(--background) hover:bg-(--muted) border border-(--border) rounded text-sm">
+              <Undo2 class="size-4"/>
+              撤销归还操作
+            </button>
+          </div>
           <div class="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
             <div><span class="text-(--muted-foreground)">记录编号：</span>{{ item.id }}</div>
             <div><span class="text-(--muted-foreground)">用户编号：</span>{{ item.user_id }}</div>
