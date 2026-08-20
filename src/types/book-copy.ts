@@ -42,6 +42,19 @@ export type BookCopyAdmin = BookCopyAdminAvailable | BookCopyAdminUnavailable | 
 
 export type BookCopy = BookCopyUser | BookCopyAdmin;
 
+export interface FullBookCopy {
+  id: number;
+  book_id: number;
+  purchase_price: number;
+  purchase_date: string;
+  source: string;
+  status: 'AVAILABLE' | 'UNAVAILABLE' | 'WITHDRAWN';
+  entry_by: number;
+  withdrawn_reason: 'LOST' | 'DAMAGED' | 'OTHER' | null;
+  create_time: string;
+  withdrawn_time: string | null;
+}
+
 export interface AddBookCopyRequest {
   book_id: number;
   purchase_price: number;
