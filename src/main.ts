@@ -45,8 +45,13 @@ axios.interceptors.response.use(
   (response) => {
     // 检查响应是否包含 JWT（即使为空字符串）
     if (response.data?.data?.jwt !== undefined) {
+      // 获取 authStore
       const authStore = useAuthStore();
-      authStore.setJwt(response.data.data.jwt); // 更新 JWT
+      // 更新 JWT
+      authStore.setJwt(response.data.data.jwt);
+      // 若新 JWT 为空字符串，则表示用户已登出
+      if (authStore.jwt === "")
+        authStore.logout();
     }
     // 返回响应
     return response;
