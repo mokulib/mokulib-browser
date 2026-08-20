@@ -4,7 +4,11 @@ import { useAuthStore } from "@/stores/auth.ts";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import { useThemeStore } from "@/stores/theme.ts";
+import type { Response } from "@/types";
+import { ElMessage } from "element-plus";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const popupStore = usePopupStore();
@@ -13,6 +17,19 @@ const themeStore = useThemeStore();
 function switchTheme() {
   themeStore.toggle();
   popupStore.close();
+}
+
+/////////////////////////////////////////////
+// 弹窗回调
+/////////////////////////////////////////////
+
+async function addBookCallback(data: Response<number>) {
+  if (data.status === 'OK') {
+    ElMessage.success(data.message);
+    router.push({ name: 'book', params: { id: data.data } });
+  } else {
+    ElMessage.error(data.message);
+  }
 }
 </script>
 
@@ -62,7 +79,7 @@ function switchTheme() {
       <div v-if="userStore.user_is_admin" class="my-1 border-t border-(--border)"></div>
       <!-- 录入新书 -->
       <div v-if="userStore.user_is_admin" class="px-2 py-1">
-        <a href="/" @click.prevent="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <a href="/" @click.prevent="popupStore.open('addBook', undefined, addBookCallback)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
           <div class="flex items-center gap-2.5 py-2 text-sm">
             <BookPlus class="size-4"/>
             录入新书

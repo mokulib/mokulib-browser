@@ -40,6 +40,10 @@ export interface PopupMap {
     payload: undefined;
     response: Response<any>;
   }
+  addBook: {
+    payload: undefined;
+    response: Response<number>;
+  }
   addTag: {
     payload: { id: number; tags: Tag[]; };
     response: Response<undefined>;
