@@ -111,6 +111,11 @@ const router = createRouter({
       props: true, // 将路径参数作为 props 传递给组件
     },
     {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/views/DashboardView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('@/views/AboutView.vue'),
