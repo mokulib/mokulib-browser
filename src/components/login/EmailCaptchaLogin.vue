@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.ts";
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import api from "@/api";
+import type { GetEmailCaptcha } from "@/types";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -72,7 +73,7 @@ const handleEmailSubmit = async () => {
 
   emailSubmitLoading.value = true;
 
-  let data = await api.get<{ codePrefix: string, coolingTime: string }>("/api/auth/login", {
+  let data = await api.get<GetEmailCaptcha>("/api/auth/login", {
     params: {
       email: loginForm.value.username,
       imageToken: loginForm.value.imageToken,
@@ -81,7 +82,7 @@ const handleEmailSubmit = async () => {
   });
   // 成功
   if (data.status === 'OK') {
-    codePrefix.value = data.data.codePrefix;
+    codePrefix.value = data.data.code_prefix;
     currentStep.value = 'CAPTCHA_INPUT';
     emailSubmitLoading.value = false;
     return;
