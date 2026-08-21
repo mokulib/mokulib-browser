@@ -2,27 +2,36 @@
 import { ref, onMounted } from 'vue'
 import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban } from '@lucide/vue'
 import * as echarts from 'echarts'
+import api from "@/api";
+
+const availableCopies = ref(0);           // 可流通馆藏
+const bookTypes = ref(0);                 // 图书种类
+const borrowing = ref(0);                 // 借阅中
+const todayBorrowed = ref(0);             // 今日借出
+const todayReturned = ref(0);             // 今日归还
+const availableCopiesChange = ref(0);     // 可流通馆藏较上月变化
+const bookTypesChange = ref(0);           // 图书种类较上月变化
+const borrowingPercentage = ref(0);       // 借阅中占馆藏比例
+const todayBorrowedChange = ref(0);       // 今日借出较昨日变化
+const todayReturnedChange = ref(0);       // 今日归还较昨日变化
+const borrowTrend = ref<number[]>([]);    // 借出趋势
+const returnTrend = ref<number[]>([]);    // 归还趋势
+const newCopyTrend = ref<number[]>([]);   // 新增馆藏趋势
+const newTypeTrend = ref<number[]>([]);   // 新增图书趋势
+const categoryStats = ref<any[]>([]);
+const overdueBooks = ref<any[]>([]);
+const withdrawnCount = ref(0);            // 已下架总量
+const lostWithdrawnCount = ref(0);        // 丢失数量
+const damagedWithdrawnCount = ref(0);     // 损坏数量
+const otherWithdrawnCount = ref(0);       // 其他下架数量
+
+/////////////////////////////////////////////
+// 图表初始化 & 切换数据
+/////////////////////////////////////////////
 
 const trendChartRef = ref<HTMLElement | null>(null)
 const categoryChartRef = ref<HTMLElement | null>(null)
 const trendMode = ref<'borrowReturn' | 'new'>('borrowReturn')
-
-const overdueBooks = [
-  { id: 1, title: '挪威的森林', borrower: '张明', dueDate: '2026-08-10', days: 7 },
-  { id: 2, title: '百年孤独', borrower: '李丽', dueDate: '2026-08-12', days: 5 },
-  { id: 3, title: '人类简史', borrower: '王强', dueDate: '2026-08-14', days: 3 },
-  { id: 4, title: '三体', borrower: '赵雪', dueDate: '2026-08-15', days: 2 },
-  { id: 5, title: '活着', borrower: '陈晨', dueDate: '2026-08-16', days: 1 },
-  { id: 6, title: '瓦尔登湖', borrower: '刘静', dueDate: '2026-08-17', days: 0 },
-]
-
-const chartData = {
-  borrow: [12, 18, 15, 22, 19, 14, 8],
-  return: [8, 10, 12, 16, 14, 9, 6],
-  newCopy: [2, 3, 1, 4, 2, 0, 3],
-  newType: [1, 2, 0, 3, 1, 0, 2],
-}
-
 let trendChart: echarts.ECharts | null = null
 
 function initTrendChart() {
@@ -56,7 +65,7 @@ function initTrendChart() {
         name: '借出',
         type: 'line',
         smooth: true,
-        data: chartData.borrow,
+        data: borrowTrend.value,
         lineStyle: { color: '#d4a574', width: 2 },
         areaStyle: { color: 'rgba(212, 165, 116, 0.10)' },
         symbol: 'circle',
@@ -67,7 +76,7 @@ function initTrendChart() {
         name: '归还',
         type: 'line',
         smooth: true,
-        data: chartData.return,
+        data: returnTrend.value,
         lineStyle: { color: '#b8a08e', width: 2 },
         areaStyle: { color: 'rgba(184, 160, 142, 0.10)' },
         symbol: 'diamond',
@@ -77,32 +86,6 @@ function initTrendChart() {
     ],
   })
   window.addEventListener('resize', () => trendChart?.resize())
-}
-
-function updateTrendChart() {
-  if (!trendChart) return
-  const isBorrowReturn = trendMode.value === 'borrowReturn'
-  trendChart.setOption({
-    series: [
-      {
-        name: isBorrowReturn ? '借出' : '新增馆藏',
-        data: isBorrowReturn ? chartData.borrow : chartData.newCopy,
-        lineStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
-        areaStyle: { color: isBorrowReturn ? 'rgba(212, 165, 116, 0.10)' : 'rgba(143, 168, 184, 0.10)' },
-        itemStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
-      },
-      {
-        name: isBorrowReturn ? '归还' : '新增图书',
-        data: isBorrowReturn ? chartData.return : chartData.newType,
-        lineStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
-        areaStyle: { color: isBorrowReturn ? 'rgba(184, 160, 142, 0.10)' : 'rgba(168, 184, 160, 0.10)' },
-        itemStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
-      },
-    ],
-    legend: {
-      data: isBorrowReturn ? ['借出', '归还'] : ['新增馆藏', '新增图书'],
-    },
-  })
 }
 
 function initCategoryChart() {
@@ -136,20 +119,67 @@ function initCategoryChart() {
           length: 8,
           length2: 6,
         },
-        data: [
-          { value: 256, name: '文学', itemStyle: { color: '#d4a574' } },
-          { value: 180, name: '历史', itemStyle: { color: '#b8a08e' } },
-          { value: 145, name: '计算机', itemStyle: { color: '#8fa8b8' } },
-          { value: 120, name: '哲学', itemStyle: { color: '#a8b8a0' } },
-          { value: 98, name: '其他', itemStyle: { color: '#c8b8a8' } },
-        ],
+        data: categoryStats.value,
       },
     ],
   })
   window.addEventListener('resize', () => chart.resize())
 }
 
-onMounted(() => {
+function updateTrendChart() {
+  if (!trendChart) return
+  const isBorrowReturn = trendMode.value === 'borrowReturn'
+  trendChart.setOption({
+    series: [
+      {
+        name: isBorrowReturn ? '借出' : '新增馆藏',
+        data: isBorrowReturn ? borrowTrend.value : newCopyTrend.value,
+        lineStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
+        areaStyle: { color: isBorrowReturn ? 'rgba(212, 165, 116, 0.10)' : 'rgba(143, 168, 184, 0.10)' },
+        itemStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
+      },
+      {
+        name: isBorrowReturn ? '归还' : '新增图书',
+        data: isBorrowReturn ? returnTrend.value : newTypeTrend.value,
+        lineStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
+        areaStyle: { color: isBorrowReturn ? 'rgba(184, 160, 142, 0.10)' : 'rgba(168, 184, 160, 0.10)' },
+        itemStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
+      },
+    ],
+    legend: {
+      data: isBorrowReturn ? ['借出', '归还'] : ['新增馆藏', '新增图书'],
+    },
+  })
+}
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
+
+onMounted(async () => {
+  const data = (await api.get('/api/dashboard')).data;
+
+  availableCopies.value = data.available_copies;
+  bookTypes.value = data.book_types;
+  borrowing.value = data.borrowing;
+  todayBorrowed.value = data.today_borrowed;
+  todayReturned.value = data.today_returned;
+  availableCopiesChange.value = data.available_copies_change;
+  bookTypesChange.value = data.book_types_change;
+  borrowingPercentage.value = data.borrowing_percentage;
+  todayBorrowedChange.value = data.today_borrowed_change;
+  todayReturnedChange.value = data.today_returned_change;
+  borrowTrend.value = data.borrow_trend;
+  returnTrend.value = data.return_trend;
+  newCopyTrend.value = data.new_book_copy_trend;
+  newTypeTrend.value = data.new_book_trend;
+  categoryStats.value = data.category_stats;
+  overdueBooks.value = data.overdue_records;
+  withdrawnCount.value = data.withdrawn_count;
+  lostWithdrawnCount.value = data.lost_withdrawn_count;
+  damagedWithdrawnCount.value = data.damaged_withdrawn_count;
+  otherWithdrawnCount.value = data.other_withdrawn_count;
+
   initTrendChart()
   initCategoryChart()
 })
@@ -170,8 +200,8 @@ onMounted(() => {
           <span class="text-sm text-(--muted-foreground)">可流通馆藏</span>
           <Library class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">1,272</p>
-        <p class="mt-1 text-xs text-(--muted-foreground)">较上月 +12</p>
+        <p class="mt-2 font-serif text-2xl font-medium">{{ availableCopies.toLocaleString() }}</p>
+        <p class="mt-1 text-xs text-(--muted-foreground)">较上月 {{ availableCopiesChange > 0 ? `+${availableCopiesChange.toLocaleString()}` : availableCopiesChange.toLocaleString() }}</p>
       </div>
 
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
@@ -179,8 +209,8 @@ onMounted(() => {
           <span class="text-sm text-(--muted-foreground)">图书种类</span>
           <Layers class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">684</p>
-        <p class="mt-1 text-xs text-(--muted-foreground)">较上月 +8</p>
+        <p class="mt-2 font-serif text-2xl font-medium">{{ bookTypes.toLocaleString() }}</p>
+        <p class="mt-1 text-xs text-(--muted-foreground)">较上月 {{ bookTypesChange > 0 ? `+${bookTypesChange.toLocaleString()}` : bookTypesChange.toLocaleString() }}</p>
       </div>
 
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
@@ -188,8 +218,8 @@ onMounted(() => {
           <span class="text-sm text-(--muted-foreground)">借阅中</span>
           <BookOpen class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">47</p>
-        <p class="mt-1 text-xs text-(--muted-foreground)">占馆藏 3.7%</p>
+        <p class="mt-2 font-serif text-2xl font-medium">{{ borrowing.toLocaleString() }}</p>
+        <p class="mt-1 text-xs text-(--muted-foreground)">占馆藏 {{ borrowingPercentage }}%</p>
       </div>
 
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
@@ -197,8 +227,8 @@ onMounted(() => {
           <span class="text-sm text-(--muted-foreground)">今日借出</span>
           <ArrowRightToLine class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">23</p>
-        <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 +5</p>
+        <p class="mt-2 font-serif text-2xl font-medium">{{ todayBorrowed.toLocaleString() }}</p>
+        <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 {{ todayBorrowedChange > 0 ? `+${todayBorrowedChange.toLocaleString()}` : todayBorrowedChange.toLocaleString() }}</p>
       </div>
 
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
@@ -206,8 +236,8 @@ onMounted(() => {
           <span class="text-sm text-(--muted-foreground)">今日归还</span>
           <ArrowLeftToLine class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">18</p>
-        <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 -2</p>
+        <p class="mt-2 font-serif text-2xl font-medium">{{ todayReturned.toLocaleString() }}</p>
+        <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 {{ todayReturnedChange > 0 ? `+${todayReturnedChange.toLocaleString()}` : todayReturnedChange.toLocaleString() }}</p>
       </div>
     </div>
 
@@ -271,18 +301,18 @@ onMounted(() => {
       <div class="rounded-lg border border-(--border) bg-(--card) p-4 flex flex-col">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="font-serif text-base font-medium">已下架状态</h3>
-          <span class="text-xs text-(--muted-foreground)">占馆藏 0.9%</span>
+          <span class="text-xs text-(--muted-foreground)">单位：本</span>
         </div>
         <div class="flex flex-col flex-1 justify-between gap-3">
           <div class="flex items-center justify-between rounded-md bg-(--muted)/30 px-4 py-2.5">
             <span class="text-sm text-(--muted-foreground)">已下架总量</span>
-            <span class="font-serif text-xl font-medium">12 本</span>
+            <span class="font-serif text-xl font-medium">{{ withdrawnCount }}</span>
           </div>
           <div class="grid grid-cols-3 flex-1 gap-3">
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <BookX class="size-5 shrink-0 text-(--chart-3)" />
               <div>
-                <p class="text-base font-medium text-(--chart-3)">5</p>
+                <p class="text-base font-medium text-(--chart-3)">{{ lostWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">丢失</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">借阅中遗失</p>
               </div>
@@ -290,7 +320,7 @@ onMounted(() => {
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <BookOpen class="size-5 shrink-0 text-(--chart-4)" />
               <div>
-                <p class="text-base font-medium text-(--chart-4)">4</p>
+                <p class="text-base font-medium text-(--chart-4)">{{ damagedWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">损坏</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">污损或破损</p>
               </div>
@@ -298,7 +328,7 @@ onMounted(() => {
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <Ban class="size-5 shrink-0 text-(--chart-5)" />
               <div>
-                <p class="text-base font-medium text-(--chart-5)">3</p>
+                <p class="text-base font-medium text-(--chart-5)">{{ otherWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">其他</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">维护或剔旧</p>
               </div>
@@ -307,11 +337,11 @@ onMounted(() => {
           <div class="flex items-center gap-2 rounded-md bg-(--muted)/20 px-3 py-1.5">
             <span class="text-xs text-(--muted-foreground)">分布</span>
             <div class="flex-1 h-1.5 rounded-full overflow-hidden flex">
-              <div class="h-full bg-(--chart-3)" style="width: 41.7%"></div>
-              <div class="h-full bg-(--chart-4)/75" style="width: 33.3%"></div>
-              <div class="h-full bg-(--chart-5)/50" style="width: 25%"></div>
+              <div class="h-full bg-(--chart-3)" :style="{ width: (lostWithdrawnCount / withdrawnCount) * 100 + '%' }"></div>
+              <div class="h-full bg-(--chart-4)/75" :style="{ width: (damagedWithdrawnCount / withdrawnCount) * 100 + '%' }"></div>
+              <div class="h-full bg-(--chart-5)/50" :style="{ width: (otherWithdrawnCount / withdrawnCount) * 100 + '%' }"></div>
             </div>
-            <span class="text-[10px] text-(--muted-foreground)">5:4:3</span>
+            <span class="text-[10px] text-(--muted-foreground)">{{ lostWithdrawnCount }}:{{ damagedWithdrawnCount }}:{{ otherWithdrawnCount }}</span>
           </div>
         </div>
       </div>
