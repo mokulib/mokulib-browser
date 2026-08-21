@@ -5,7 +5,7 @@ import * as echarts from 'echarts'
 
 const trendChartRef = ref<HTMLElement | null>(null)
 const categoryChartRef = ref<HTMLElement | null>(null)
-const trendMode = ref<'borrow' | 'return' | 'new'>('borrow')
+const trendMode = ref<'borrowReturn' | 'new'>('borrowReturn')
 
 const overdueBooks = [
   { id: 1, title: '挪威的森林', borrower: '张明', dueDate: '2026-08-10', days: 7 },
@@ -16,102 +16,142 @@ const overdueBooks = [
   { id: 6, title: '瓦尔登湖', borrower: '刘静', dueDate: '2026-08-17', days: 0 },
 ]
 
-const trendData = {
+const chartData = {
   borrow: [12, 18, 15, 22, 19, 14, 8],
   return: [8, 10, 12, 16, 14, 9, 6],
-  new: [2, 3, 1, 4, 2, 0, 3],
+  newCopy: [2, 3, 1, 4, 2, 0, 3],
+  newType: [1, 2, 0, 3, 1, 0, 2],
 }
 
-function getTrendData() {
-  return trendData[trendMode.value]
-}
+let trendChart: echarts.ECharts | null = null
 
-function getTrendName() {
-  const map = { borrow: '借出', return: '归还', new: '新增' }
-  return map[trendMode.value]
-}
-
-function initCharts() {
-  // 趋势图
-  if (trendChartRef.value) {
-    const chart = echarts.init(trendChartRef.value)
-    chart.setOption({
-      grid: { left: 30, right: 10, top: 10, bottom: 20 },
-      xAxis: {
-        type: 'category',
-        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { fontSize: 11, color: '#9ca3af' },
+function initTrendChart() {
+  if (!trendChartRef.value) return
+  trendChart = echarts.init(trendChartRef.value)
+  trendChart.setOption({
+    grid: { left: 30, right: 10, top: 20, bottom: 20 },
+    xAxis: {
+      type: 'category',
+      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { fontSize: 11, color: '#9ca3af' },
+    },
+    yAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
+      axisLabel: { fontSize: 11, color: '#9ca3af' },
+    },
+    legend: {
+      data: ['借出', '归还'],
+      right: 0,
+      top: 0,
+      icon: 'circle',
+      itemWidth: 6,
+      itemHeight: 6,
+      textStyle: { fontSize: 11, color: '#9ca3af' },
+    },
+    series: [
+      {
+        name: '借出',
+        type: 'line',
+        smooth: true,
+        data: chartData.borrow,
+        lineStyle: { color: '#d4a574', width: 2 },
+        areaStyle: { color: 'rgba(212, 165, 116, 0.10)' },
+        symbol: 'circle',
+        symbolSize: 5,
+        itemStyle: { color: '#d4a574' },
       },
-      yAxis: {
-        type: 'value',
-        splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } },
-        axisLabel: { fontSize: 11, color: '#9ca3af' },
+      {
+        name: '归还',
+        type: 'line',
+        smooth: true,
+        data: chartData.return,
+        lineStyle: { color: '#b8a08e', width: 2 },
+        areaStyle: { color: 'rgba(184, 160, 142, 0.10)' },
+        symbol: 'diamond',
+        symbolSize: 5,
+        itemStyle: { color: '#b8a08e' },
       },
-      series: [
-        {
-          type: 'line',
-          smooth: true,
-          data: getTrendData(),
-          lineStyle: { color: '#d4a574', width: 2 },
-          areaStyle: { color: 'rgba(212, 165, 116, 0.12)' },
-          symbol: 'circle',
-          symbolSize: 5,
-          itemStyle: { color: '#d4a574' },
+    ],
+  })
+  window.addEventListener('resize', () => trendChart?.resize())
+}
+
+function updateTrendChart() {
+  if (!trendChart) return
+  const isBorrowReturn = trendMode.value === 'borrowReturn'
+  trendChart.setOption({
+    series: [
+      {
+        name: isBorrowReturn ? '借出' : '新增馆藏',
+        data: isBorrowReturn ? chartData.borrow : chartData.newCopy,
+        lineStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
+        areaStyle: { color: isBorrowReturn ? 'rgba(212, 165, 116, 0.10)' : 'rgba(143, 168, 184, 0.10)' },
+        itemStyle: { color: isBorrowReturn ? '#d4a574' : '#8fa8b8' },
+      },
+      {
+        name: isBorrowReturn ? '归还' : '新增图书',
+        data: isBorrowReturn ? chartData.return : chartData.newType,
+        lineStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
+        areaStyle: { color: isBorrowReturn ? 'rgba(184, 160, 142, 0.10)' : 'rgba(168, 184, 160, 0.10)' },
+        itemStyle: { color: isBorrowReturn ? '#b8a08e' : '#a8b8a0' },
+      },
+    ],
+    legend: {
+      data: isBorrowReturn ? ['借出', '归还'] : ['新增馆藏', '新增图书'],
+    },
+  })
+}
+
+function initCategoryChart() {
+  if (!categoryChartRef.value) return
+  const chart = echarts.init(categoryChartRef.value)
+  chart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)',
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      borderColor: '#e5e7eb',
+      borderWidth: 1,
+      textStyle: { fontSize: 12 },
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['45%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 4,
+          borderColor: 'transparent',
         },
-      ],
-    })
-    window.addEventListener('resize', () => chart.resize())
-  }
-
-  // 分类饼图
-  if (categoryChartRef.value) {
-    const chart = echarts.init(categoryChartRef.value)
-    chart.setOption({
-      tooltip: {
-        trigger: 'item',
-        formatter: '{b}: {c} ({d}%)',
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        textStyle: { fontSize: 12 },
-      },
-      series: [
-        {
-          type: 'pie',
-          radius: ['45%', '70%'],
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderRadius: 4,
-            borderColor: 'transparent',
-          },
-          label: {
-            show: true,
-            fontSize: 11,
-            color: '#9ca3af',
-            formatter: '{b}',
-          },
-          labelLine: {
-            length: 8,
-            length2: 6,
-          },
-          data: [
-            { value: 256, name: '文学', itemStyle: { color: '#d4a574' } },
-            { value: 180, name: '历史', itemStyle: { color: '#b8a08e' } },
-            { value: 145, name: '计算机', itemStyle: { color: '#8fa8b8' } },
-            { value: 120, name: '哲学', itemStyle: { color: '#a8b8a0' } },
-            { value: 98, name: '其他', itemStyle: { color: '#c8b8a8' } },
-          ],
+        label: {
+          show: true,
+          fontSize: 11,
+          color: '#9ca3af',
+          formatter: '{b}',
         },
-      ],
-    })
-    window.addEventListener('resize', () => chart.resize())
-  }
+        labelLine: {
+          length: 8,
+          length2: 6,
+        },
+        data: [
+          { value: 256, name: '文学', itemStyle: { color: '#d4a574' } },
+          { value: 180, name: '历史', itemStyle: { color: '#b8a08e' } },
+          { value: 145, name: '计算机', itemStyle: { color: '#8fa8b8' } },
+          { value: 120, name: '哲学', itemStyle: { color: '#a8b8a0' } },
+          { value: 98, name: '其他', itemStyle: { color: '#c8b8a8' } },
+        ],
+      },
+    ],
+  })
+  window.addEventListener('resize', () => chart.resize())
 }
 
 onMounted(() => {
-  initCharts()
+  initTrendChart()
+  initCategoryChart()
 })
 </script>
 
@@ -171,7 +211,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 第三行：趋势图 + 分类饼图 -->
+    <!-- 第三行：趋势图（左）+ 分类饼图（右） -->
     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
       <!-- 趋势图 -->
       <div class="md:col-span-2 rounded-lg border border-(--border) bg-(--card) p-4">
@@ -179,14 +219,19 @@ onMounted(() => {
           <div class="flex items-center gap-6">
             <h3 class="font-serif text-base font-medium">近7日趋势</h3>
             <div class="flex gap-2 text-sm">
-              <button @click="trendMode = 'borrow'" class="transition-colors" :class="trendMode === 'borrow' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'">
-                借出
+              <button
+                @click="trendMode = 'borrowReturn'; updateTrendChart()"
+                class="transition-colors"
+                :class="trendMode === 'borrowReturn' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'"
+              >
+                借出归还
               </button>
-              <button @click="trendMode = 'return'" class="transition-colors" :class="trendMode === 'return' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'">
-                归还
-              </button>
-              <button @click="trendMode = 'new'" class="transition-colors" :class="trendMode === 'new' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'">
-                新增
+              <button
+                @click="trendMode = 'new'; updateTrendChart()"
+                class="transition-colors"
+                :class="trendMode === 'new' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'"
+              >
+                新增好书
               </button>
             </div>
           </div>
@@ -206,7 +251,6 @@ onMounted(() => {
 
     <!-- 第四行：逾期未还列表 + 已下架统计 -->
     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-      <!-- 逾期未还列表 -->
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="font-serif text-base font-medium">逾期未还</h3>
@@ -230,12 +274,10 @@ onMounted(() => {
           <span class="text-xs text-(--muted-foreground)">占馆藏 0.9%</span>
         </div>
         <div class="flex flex-col flex-1 justify-between gap-3">
-          <!-- 总量 -->
           <div class="flex items-center justify-between rounded-md bg-(--muted)/30 px-4 py-2.5">
             <span class="text-sm text-(--muted-foreground)">已下架总量</span>
             <span class="font-serif text-xl font-medium">12 本</span>
           </div>
-          <!-- 三个原因 - 横向布局，四要素完整 -->
           <div class="grid grid-cols-3 flex-1 gap-3">
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <BookX class="size-5 shrink-0 text-(--chart-3)" />
@@ -262,7 +304,6 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <!-- 分布条 -->
           <div class="flex items-center gap-2 rounded-md bg-(--muted)/20 px-3 py-1.5">
             <span class="text-xs text-(--muted-foreground)">分布</span>
             <div class="flex-1 h-1.5 rounded-full overflow-hidden flex">
