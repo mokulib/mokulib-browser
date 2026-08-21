@@ -42,17 +42,9 @@ axios.interceptors.request.use(
 // 全局响应拦截器
 axios.interceptors.response.use(
   // onFulfilled
-  (response) => {
-    // 检查响应是否包含 JWT（即使为空字符串）
-    if (response.data?.data?.jwt !== undefined) {
-      // 获取 authStore
-      const authStore = useAuthStore();
-      // 更新 JWT
-      authStore.setJwt(response.data.data.jwt);
-      // 若新 JWT 为空字符串，则表示用户已登出
-      if (authStore.jwt === "")
-        authStore.logout();
-    }
+  async (response) => {
+    // 检查响应是否包含 JWT（即使为空字符串），并进行处理
+    await useAuthStore().syncJwtFromResponse(response);
     // 返回响应
     return response;
   },
@@ -63,7 +55,7 @@ axios.interceptors.response.use(
       // 重新认证
       const authStore = useAuthStore();
       // 越权访问在正常的设计流程中不应触发，因此在正常情况下，必然是由凭证过期引起，则必然跳转
-      authStore.logout();
+      await authStore.logout();
       // 静默返回
       return error.response;
     }

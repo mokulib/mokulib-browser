@@ -52,7 +52,7 @@ const router = createRouter({
         const authStore = useAuthStore();
 
         if (authStore.isLoggedIn) // 强制登出
-          authStore.logout();
+          await authStore.logout();
 
         return true;
       }
