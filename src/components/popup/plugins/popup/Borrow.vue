@@ -15,7 +15,7 @@ const delayRequest = ref<ReturnType<typeof setTimeout> | undefined>(undefined); 
 const userNotFound = computed(() => !!delayRequest.value || !user.value); // 用户未找到状态，用于控制能否提交
 
 function confirmHandler() {
-  return api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/borrow`, { user_id: user.value?.id, is_renewed: isRenewedInput.value });
+  return api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}/borrow`, { user_id: user.value?.id, is_renewed: isRenewedInput.value });
 }
 
 // 监听输入
