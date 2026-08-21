@@ -40,13 +40,15 @@ export const useBookStore = defineStore('book', () => {
    * @param bookIds bookIds
    */
   async function load(...bookIds: number[]) {
+    // 去重
+    const uniqueIds = [...new Set(bookIds)];
     // 如果 items 中不存在某 bookId，则添加新项
-    bookIds.forEach(bookId => {
+    uniqueIds.forEach(bookId => {
       if (!items.value.some(item => item.bookId === bookId))
         items.value.push({ bookId, isCached: false, book: undefined });
     });
     // 构造批量请求
-    const requests = bookIds.map(bookId => api.get<Book>(`/api/books/${bookId}`));
+    const requests = uniqueIds.map(bookId => api.get<Book>(`/api/books/${bookId}`));
     // 发送查询请求
     const responses: Book[] = (await Promise.all(requests)).map(response => response.data);
     // 处理响应
