@@ -2,12 +2,12 @@
 import { Send, UserRoundX } from "@lucide/vue";
 import { ref } from "vue";
 import SecurityCard from "@/components/security/SecurityCard.vue";
-import { useUserStore } from "@/stores/user.ts";
+import { useAuthStore } from "@/stores/auth.ts";
 import FormItem from "@/components/security/FormItem.vue";
 import api from "@/api";
 import { ElMessage } from "element-plus";
 
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const prefix = ref('--');
 const captcha = ref('');
@@ -45,7 +45,7 @@ async function closeAccount() {
       <p>此操作不可逆，请谨慎操作。</p>
     </div>
 
-    <FormItem label="验证码" :description="`验证码将发送至您的注册邮箱（${userStore.user_email}）。`">
+    <FormItem label="验证码" :description="`验证码将发送至您的注册邮箱（${authStore.email}）。`">
       <div class="sm:max-w-64 flex-1 flex items-center mr-4 py-1 border border-(--border) rounded text-sm">
         <p class="shrink-0 w-10 text-center">{{ prefix }}</p>
         <p class="shrink-0 w-6 text-center border-x border-(--border)">-</p>

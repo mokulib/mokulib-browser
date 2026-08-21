@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { usePopupStore } from "@/stores/popup.ts";
 import Popup from "@/components/popup/core/Popup.vue";
-import { useUserStore } from "@/stores/user.ts";
 import { onMounted, ref } from "vue";
+import { useAuthStore } from "@/stores/auth.ts";
 
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const user_name = ref<string>('');
 
@@ -21,7 +21,7 @@ onMounted(() => {
 <template>
   <Popup popup-key="deleteBookReviewConfirm" title="删除书评" confirm="确认删除" confirm-type="danger" @confirm="confirmHandler">
     <template #content>
-      <template v-if="userStore.user_is_admin">
+      <template v-if="authStore.isAdmin">
         确定要删除 {{ user_name }} 的书评吗？此操作不可撤销。
       </template>
       <template v-else>

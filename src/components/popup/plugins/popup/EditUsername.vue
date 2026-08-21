@@ -4,9 +4,9 @@ import Popup from "@/components/popup/core/Popup.vue";
 import { onMounted, ref } from "vue";
 import api from "@/api";
 import { usePopupStore } from "@/stores/popup.ts";
-import { useUserStore } from "@/stores/user.ts";
+import { useAuthStore } from "@/stores/auth.ts";
 
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const input = ref("");
 
@@ -15,7 +15,7 @@ function confirmHandler () {
 }
 
 onMounted(() => {
-  usePopupStore().registerInitHook('editUsername', () => input.value = userStore.user_username);
+  usePopupStore().registerInitHook('editUsername', () => input.value = authStore.username);
 })
 </script>
 

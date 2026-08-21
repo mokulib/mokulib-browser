@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { LockKeyhole, Send } from "@lucide/vue";
-import { useUserStore } from "@/stores/user.ts";
+import { useAuthStore } from "@/stores/auth.ts";
 import { ref } from "vue";
 import SecurityCard from "@/components/security/SecurityCard.vue";
 import FormItem from "@/components/security/FormItem.vue";
 import api from "@/api";
 import { ElMessage } from "element-plus";
 
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const password = ref('');
 const prefix = ref('--');
@@ -43,7 +43,7 @@ async function resetPassword() {
     <FormItem label="新密码" :description="`共8-20位，必须同时包含大写字母、小写字母、数字和特殊字符（!@#$%^&*_:;,.?）`">
       <input v-model="password" type="text" placeholder="请输入新密码" class="sm:max-w-64 flex-1 px-4 py-1 border border-(--border) rounded text-sm outline-none"/>
     </FormItem>
-    <FormItem label="验证码" :description="`验证码将发送至您的注册邮箱（${userStore.user_email}）。`">
+    <FormItem label="验证码" :description="`验证码将发送至您的注册邮箱（${authStore.email}）。`">
       <div class="sm:max-w-64 flex-1 flex items-center mr-4 py-1 border border-(--border) rounded text-sm">
         <p class="shrink-0 w-10 text-center">{{ prefix }}</p>
         <p class="shrink-0 w-6 text-center border-x border-(--border)">-</p>

@@ -51,7 +51,7 @@ const router = createRouter({
       async beforeEnter() {
         const authStore = useAuthStore();
 
-        if (authStore.isLoggedIn) // 强制登出
+        if (authStore.isAuthed) // 强制登出
           await authStore.logout();
 
         return true;

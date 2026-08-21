@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
-import { computed, watch } from "vue";
-import type { Response } from "@/types";
+import { computed, ref, watch } from "vue";
+import type { JwtUser, Response } from "@/types";
 import { useRoute, useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user.ts";
 import { useLocalStorage } from "@vueuse/core";
 import api from "@/api";
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { usePopupStore } from "@/stores/popup.ts";
+import { Base64 } from "js-base64";
 
 export const useAuthStore = defineStore('auth', () => {
 
@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 从 localStorage 初始化。初始化后，不得为 null 或 undefined
   const jwt = useLocalStorage('mk-jwt', '');
   // 对外暴露，缓存当前登录状态
-  const isLoggedIn = computed(() => !!jwt.value);
+  const isAuthed = computed(() => !!jwt.value);
 
   /////////////////////////////////////////////
   // 认证相关方法
@@ -56,7 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function syncJwtToRequest(config: InternalAxiosRequestConfig) {
     // 如果已登录，自动附加 Authorization 头
-    if (isLoggedIn.value)
+    if (isAuthed.value)
       config.headers.Authorization = `Bearer ${jwt.value}`;
   }
 
@@ -74,21 +74,80 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /////////////////////////////////////////////
+  // 用户信息管理
+  /////////////////////////////////////////////
+
+  let id = ref<number>(-1);
+  let email = ref<string>('');
+  let role = ref<string>('');
+  let username = ref<string>('');
+  let bio = ref<string>('');
+  let createTime = ref<string>('');
+  // 常用状态
+  let isUser = computed(() => role.value === 'USER');
+  let isAdmin = computed(() => role.value === 'ADMIN');
+  let roleName = computed(() => {
+    switch (role.value) {
+      case 'USER':
+        return '读者';
+      case 'ADMIN':
+        return '管理员';
+      default:
+        return '游客';
+    }
+  });
+  // 头像
+  let avatarTimestamp = ref(Date.now()) // 用于强制刷新头像
+  let avatar = computed(() => {
+    return `/avatars/${id.value}?timestamp=${avatarTimestamp.value}`
+  })
+
+  /////////////////////////////////////////////
   // 监听
   /////////////////////////////////////////////
 
-  watch(jwt, (newJwt) => {
-    useUserStore().updateUserInfo(newJwt);
+  watch(jwt, (token) => {
+    if (token) {
+      const encodePayload = token.split('.')[1] as string;
+      const decodePayload = Base64.decode(encodePayload);
+      const payload = JSON.parse(decodePayload);
+      const user = JSON.parse(payload.user) as JwtUser;
+      id.value = user.id
+      email.value = user.email
+      role.value = user.role
+      username.value = user.username
+      bio.value = user.bio
+      createTime.value = user.create_time
+    } else {
+      id.value = -1;
+      email.value = '';
+      role.value = '';
+      username.value = '';
+      bio.value = '';
+      createTime.value = '';
+    }
   }, { immediate: true });
 
   return {
     jwt,
-    isLoggedIn,
+    isAuthed,
     login,
     logout,
     syncJwtFromResponse,
     syncJwtToRequest,
     ping,
+
+    id,
+    email,
+    role,
+    isUser,
+    isAdmin,
+    roleName,
+    username,
+    bio,
+    createTime,
+    avatarTimestamp,
+    avatar,
   };
 
 })

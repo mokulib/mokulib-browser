@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight, ShieldKeyhole, BookPlus, LayoutDashboard, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
-import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import { useThemeStore } from "@/stores/theme.ts";
 import { computed, onMounted, type Reactive, ref } from "vue";
@@ -11,7 +10,6 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const userStore = useUserStore();
 const popupStore = usePopupStore();
 const themeStore = useThemeStore();
 
@@ -51,13 +49,13 @@ onMounted(() => {
        :style="{ top: top + 'px', right: right + 'px' }">
     <!-- 信息 -->
     <div class="flex items-center gap-3 px-4 py-4">
-      <img :src="userStore.user_avatar" :alt="userStore.user_username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
+      <img :src="authStore.avatar" :alt="authStore.username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
       <div class="min-w-0 self-stretch flex flex-col justify-between">
         <div class="flex items-center gap-2">
-          <p class="truncate font-serif text-base font-semibold text-(--foreground)">{{ userStore.user_username }}</p>
-          <span class="shrink-0 rounded-full bg-(--primary)/10 px-2 py-0.5 text-[11px] font-medium text-(--primary)">{{ userStore.user_role_name }}</span>
+          <p class="truncate font-serif text-base font-semibold text-(--foreground)">{{ authStore.username }}</p>
+          <span class="shrink-0 rounded-full bg-(--primary)/10 px-2 py-0.5 text-[11px] font-medium text-(--primary)">{{ authStore.roleName }}</span>
         </div>
-        <p class="truncate text-xs text-(--muted-foreground)">{{ userStore.user_email }}</p>
+        <p class="truncate text-xs text-(--muted-foreground)">{{ authStore.email }}</p>
       </div>
     </div>
     <div class="mb-1 border-t border-(--border)"></div>
@@ -81,9 +79,9 @@ onMounted(() => {
         <ArrowRight class="size-4"/>
       </RouterLink>
     </div>
-    <div v-if="userStore.user_is_admin" class="my-1 border-t border-(--border)"></div>
+    <div v-if="authStore.isAdmin" class="my-1 border-t border-(--border)"></div>
     <!-- 录入新书 -->
-    <div v-if="userStore.user_is_admin" class="px-2 py-1">
+    <div v-if="authStore.isAdmin" class="px-2 py-1">
       <a href="/" @click.prevent="popupStore.open('addBook', undefined, addBookCallback)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
         <div class="flex items-center gap-2.5 py-2 text-sm">
           <BookPlus class="size-4"/>
@@ -92,7 +90,7 @@ onMounted(() => {
       </a>
     </div>
     <!-- 数据概览 -->
-    <div v-if="userStore.user_is_admin" class="px-2 py-1">
+    <div v-if="authStore.isAdmin" class="px-2 py-1">
       <RouterLink :to="{ name: 'dashboard' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
         <div class="flex items-center gap-2.5 py-2 text-sm">
           <LayoutDashboard class="size-4"/>

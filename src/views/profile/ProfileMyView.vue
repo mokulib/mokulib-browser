@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BookOpen, FolderHeart, Folders } from "@lucide/vue";
-import { useUserStore } from "@/stores/user.ts";
+import { useAuthStore } from "@/stores/auth.ts";
 import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
 import RouteButton from "@/components/profile/my/RouteButton.vue";
@@ -9,7 +9,7 @@ import type { Book, Response } from "@/types";
 import { usePopupStore } from "@/stores/popup.ts";
 import { ElMessage } from "element-plus";
 
-const userStore = useUserStore();
+const authStore = useAuthStore();
 const popupStore = usePopupStore();
 
 const borrowing = ref<{ id: number, title: string }[]>([]);
@@ -24,7 +24,7 @@ const books = ref<Book[]>([]);
 async function uploadAvatarCallback(data: Response<any>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    userStore.user_avatar_timestamp = Date.now(); // 刷新头像
+    authStore.avatarTimestamp = Date.now(); // 刷新头像
   } else {
     ElMessage.error(data.message);
   }
@@ -72,19 +72,19 @@ onMounted(async () => {
     <div class="flex px-6 py-4 gap-4 sm:rounded-lg bg-(--primary)/8">
       <div class="relative group w-28 h-28 rounded-full overflow-hidden">
         <!-- 头像 -->
-        <img :src="userStore.user_avatar" alt="avatar" class="w-full h-full object-cover">
+        <img :src="authStore.avatar" alt="avatar" class="w-full h-full object-cover">
         <!-- 遮罩 -->
-        <div @click="popupStore.open('uploadAvatar', { id: userStore.user_id }, uploadAvatarCallback)" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+        <div @click="popupStore.open('uploadAvatar', { id: authStore.id }, uploadAvatarCallback)" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
           <span class="text-sm text-white">上传头像</span>
         </div>
       </div>
       <!-- 昵称、邮箱 -->
       <div class="flex flex-col gap-3">
-        <p class="text-xl">{{ userStore.user_username }}</p>
+        <p class="text-xl">{{ authStore.username }}</p>
         <div class="flex items-center gap-3">
-          <p class="text-sm">{{ userStore.user_email }}</p>
+          <p class="text-sm">{{ authStore.email }}</p>
           <div class="w-px h-3/4 bg-(--primary)/10"></div>
-          <span class="px-2 py-0.5 rounded-full text-xs text-(--primary) bg-(--primary)/10">{{ userStore.user_role_name }}</span>
+          <span class="px-2 py-0.5 rounded-full text-xs text-(--primary) bg-(--primary)/10">{{ authStore.roleName }}</span>
         </div>
       </div>
     </div>
