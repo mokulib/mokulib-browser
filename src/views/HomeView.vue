@@ -129,7 +129,7 @@ onMounted(async () => {
         <aside class="shrink-0 flex flex-col text-sm bg-(--muted)">
           <div class="h-2"></div>
           <template v-for="category in categories" :key="category.id">
-            <div @mouseenter="setActive('category', category.id)" :data-is-hovered="status.find(s => s.type === 'category' && s.id === category.id)!.isActive" class="w-42 ml-2 pl-2 data-[is-hovered=true]:pl-4 py-1 data-[is-hovered=true]:bg-(--primary)/10 border-(--primary) rounded-l data-[is-hovered=true]:text-base data-[is-hovered=true]:text-(--primary) transition-all cursor-pointer">
+            <div @mouseenter="setActive('category', category.id)" :data-is-hovered="status.find(s => s.type === 'category' && s.id === category.id)!.isActive" class="w-42 ml-2 pl-2 data-[is-hovered=true]:pl-4 py-1.5 data-[is-hovered=true]:bg-(--primary)/10 border-(--primary) rounded-l data-[is-hovered=true]:text-base data-[is-hovered=true]:text-(--primary) transition-all cursor-pointer">
               <div class="line-clamp-1">
                 {{ category.name }}
               </div>
@@ -172,10 +172,10 @@ onMounted(async () => {
             <!-- 图书展示 -->
             <div v-if="activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-rows-3 grid-cols-4 m-4 gap-2">
               <template v-for="book in activeCategory.books?.records" :key="book.id">
-                <div class="flex flex-col items-center justify-start px-4 gap-1">
+                <RouterLink :to="{ name: 'book', params: { id: book.id } }" class="flex flex-col items-center justify-start px-4 gap-1 hover:[&_a]:text-(--primary) hover:[&_a]:underline cursor-pointer">
                   <img :src="`/books/${book.id}`" class="size-24 object-cover" :alt="book.title"/>
-                  <div class="line-clamp-2 text-sm text-center">{{ book.title }}</div>
-                </div>
+                  <a class="line-clamp-2 text-sm text-center">{{ book.title }}</a>
+                </RouterLink>
               </template>
             </div>
             <!-- 分页组件 -->
