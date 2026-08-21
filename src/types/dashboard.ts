@@ -6,11 +6,10 @@ export interface CategoryStat {
 
 // 逾期记录
 export interface OverdueRecord {
-  id: number;
-  title: string;
-  borrower: string;
-  dueDate: string;
-  days: number;
+  book_copy_id: number;
+  book_id: number;
+  user_id: number;
+  dueTime: string;
 }
 
 // 仪表盘数据

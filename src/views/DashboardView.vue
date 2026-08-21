@@ -3,7 +3,11 @@ import { ref, onMounted } from 'vue'
 import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban } from '@lucide/vue'
 import * as echarts from 'echarts'
 import api from "@/api";
-import type { Dashboard } from "@/types";
+import type { Dashboard, OverdueRecord } from "@/types";
+import { DateTime } from "luxon";
+import { useBookStore } from "@/stores/book.ts";
+
+const bookStore = useBookStore();
 
 const availableCopies = ref(0);           // 可流通馆藏
 const bookTypes = ref(0);                 // 图书种类
@@ -19,8 +23,8 @@ const borrowTrend = ref<number[]>([]);    // 借出趋势
 const returnTrend = ref<number[]>([]);    // 归还趋势
 const newCopyTrend = ref<number[]>([]);   // 新增馆藏趋势
 const newTypeTrend = ref<number[]>([]);   // 新增图书趋势
-const categoryStats = ref<any[]>([]);
-const overdueBooks = ref<any[]>([]);
+const categoryStats = ref<{ name: string; value: number }[]>([]);
+const overdueBooks = ref<OverdueRecord[]>([]);
 const withdrawnCount = ref(0);            // 已下架总量
 const lostWithdrawnCount = ref(0);        // 丢失数量
 const damagedWithdrawnCount = ref(0);     // 损坏数量
@@ -184,6 +188,9 @@ onMounted(async () => {
 
   initTrendChart()
   initCategoryChart()
+
+  // 预加载图书数据
+  await bookStore.preload(...overdueBooks.value.map(record => record.book_id));
 })
 </script>
 
@@ -191,7 +198,7 @@ onMounted(async () => {
   <main class="flex-1 mx-auto max-w-6xl w-full flex flex-col px-4 py-8 md:px-8">
     <!-- 第一行：页面标题 -->
     <div class="mb-8">
-      <h1 class="font-serif text-3xl font-medium">数据概览</h1>
+      <h1 class="font-serif text-3xl">数据概览</h1>
       <p class="mt-1 text-sm text-(--muted-foreground)">个人图书馆运营数据总览 · 更新于今日 14:30</p>
     </div>
 
@@ -202,7 +209,7 @@ onMounted(async () => {
           <span class="text-sm text-(--muted-foreground)">可流通馆藏</span>
           <Library class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">{{ availableCopies.toLocaleString() }}</p>
+        <p class="mt-2 font-serif text-2xl">{{ availableCopies.toLocaleString() }}</p>
         <p class="mt-1 text-xs text-(--muted-foreground)">较上月 {{ availableCopiesChange > 0 ? `+${availableCopiesChange.toLocaleString()}` : availableCopiesChange.toLocaleString() }}</p>
       </div>
 
@@ -211,7 +218,7 @@ onMounted(async () => {
           <span class="text-sm text-(--muted-foreground)">图书种类</span>
           <Layers class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">{{ bookTypes.toLocaleString() }}</p>
+        <p class="mt-2 font-serif text-2xl">{{ bookTypes.toLocaleString() }}</p>
         <p class="mt-1 text-xs text-(--muted-foreground)">较上月 {{ bookTypesChange > 0 ? `+${bookTypesChange.toLocaleString()}` : bookTypesChange.toLocaleString() }}</p>
       </div>
 
@@ -220,7 +227,7 @@ onMounted(async () => {
           <span class="text-sm text-(--muted-foreground)">借阅中</span>
           <BookOpen class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">{{ borrowing.toLocaleString() }}</p>
+        <p class="mt-2 font-serif text-2xl">{{ borrowing.toLocaleString() }}</p>
         <p class="mt-1 text-xs text-(--muted-foreground)">占馆藏 {{ borrowingPercentage }}%</p>
       </div>
 
@@ -229,7 +236,7 @@ onMounted(async () => {
           <span class="text-sm text-(--muted-foreground)">今日借出</span>
           <ArrowRightToLine class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">{{ todayBorrowed.toLocaleString() }}</p>
+        <p class="mt-2 font-serif text-2xl">{{ todayBorrowed.toLocaleString() }}</p>
         <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 {{ todayBorrowedChange > 0 ? `+${todayBorrowedChange.toLocaleString()}` : todayBorrowedChange.toLocaleString() }}</p>
       </div>
 
@@ -238,7 +245,7 @@ onMounted(async () => {
           <span class="text-sm text-(--muted-foreground)">今日归还</span>
           <ArrowLeftToLine class="size-4 text-(--primary)" />
         </div>
-        <p class="mt-2 font-serif text-2xl font-medium">{{ todayReturned.toLocaleString() }}</p>
+        <p class="mt-2 font-serif text-2xl">{{ todayReturned.toLocaleString() }}</p>
         <p class="mt-1 text-xs text-(--muted-foreground)">较昨日 {{ todayReturnedChange > 0 ? `+${todayReturnedChange.toLocaleString()}` : todayReturnedChange.toLocaleString() }}</p>
       </div>
     </div>
@@ -249,19 +256,19 @@ onMounted(async () => {
       <div class="md:col-span-2 rounded-lg border border-(--border) bg-(--card) p-4">
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-6">
-            <h3 class="font-serif text-base font-medium">近7日趋势</h3>
+            <h3 class="font-serif text-base">近7日趋势</h3>
             <div class="flex gap-2 text-sm">
               <button
                 @click="trendMode = 'borrowReturn'; updateTrendChart()"
                 class="transition-colors"
-                :class="trendMode === 'borrowReturn' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'"
+                :class="trendMode === 'borrowReturn' ? 'text-(--primary)' : 'text-(--muted-foreground) hover:text-(--foreground)'"
               >
                 借出归还
               </button>
               <button
                 @click="trendMode = 'new'; updateTrendChart()"
                 class="transition-colors"
-                :class="trendMode === 'new' ? 'text-(--primary) font-medium' : 'text-(--muted-foreground) hover:text-(--foreground)'"
+                :class="trendMode === 'new' ? 'text-(--primary)' : 'text-(--muted-foreground) hover:text-(--foreground)'"
               >
                 新增好书
               </button>
@@ -275,7 +282,7 @@ onMounted(async () => {
       <!-- 分类饼图 -->
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
         <div class="mb-4">
-          <h3 class="font-serif text-base font-medium">分类分布</h3>
+          <h3 class="font-serif text-base">分类分布</h3>
         </div>
         <div ref="categoryChartRef" class="h-48 w-full"></div>
       </div>
@@ -285,16 +292,19 @@ onMounted(async () => {
     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
       <div class="rounded-lg border border-(--border) bg-(--card) p-4">
         <div class="mb-4 flex items-center justify-between">
-          <h3 class="font-serif text-base font-medium">逾期未还</h3>
+          <h3 class="font-serif text-base">逾期未还</h3>
           <span class="text-xs text-(--muted-foreground)">共 {{ overdueBooks.length }} 本</span>
         </div>
         <div class="max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-(--muted) scrollbar-track-transparent">
-          <div v-for="book in overdueBooks" :key="book.id" class="flex items-center justify-between border-b border-(--border)/50 py-2.5 last:border-0">
+          <div v-for="book in overdueBooks" :key="book.book_copy_id" class="flex items-center justify-between border-b border-(--border)/50 py-2.5 last:border-0">
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium">{{ book.title }}</p>
-              <p class="text-xs text-(--muted-foreground)">{{ book.borrower }} · 应还 {{ book.dueDate }}</p>
+              <p class="line-clamp-1 text-sm">
+                <span class="text-(--primary)">#{{ book.book_copy_id }}</span>
+                <span class="ml-2">{{ book.user_id }}</span>
+              </p>
+              <p class="line-clamp-1 text-xs text-(--muted-foreground)">应还 {{ book.dueTime }} · {{ bookStore.book(book.book_id).value?.title }}</p>
             </div>
-            <span class="ml-3 shrink-0 text-sm font-medium text-(--destructive)">+{{ book.days }}天</span>
+              <span class="ml-3 shrink-0 text-sm text-(--destructive)">+{{ Math.ceil(DateTime.now().diff(DateTime.fromISO(book.dueTime), 'days').days) }}天</span>
           </div>
         </div>
       </div>
@@ -302,19 +312,19 @@ onMounted(async () => {
       <!-- 已下架统计 -->
       <div class="rounded-lg border border-(--border) bg-(--card) p-4 flex flex-col">
         <div class="mb-4 flex items-center justify-between">
-          <h3 class="font-serif text-base font-medium">已下架状态</h3>
+          <h3 class="font-serif text-base">已下架状态</h3>
           <span class="text-xs text-(--muted-foreground)">单位：本</span>
         </div>
         <div class="flex flex-col flex-1 justify-between gap-3">
           <div class="flex items-center justify-between rounded-md bg-(--muted)/30 px-4 py-2.5">
             <span class="text-sm text-(--muted-foreground)">已下架总量</span>
-            <span class="font-serif text-xl font-medium">{{ withdrawnCount }}</span>
+            <span class="font-serif text-xl">{{ withdrawnCount }}</span>
           </div>
           <div class="grid grid-cols-3 flex-1 gap-3">
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <BookX class="size-5 shrink-0 text-(--chart-3)" />
               <div>
-                <p class="text-base font-medium text-(--chart-3)">{{ lostWithdrawnCount }}</p>
+                <p class="text-base text-(--chart-3)">{{ lostWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">丢失</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">借阅中遗失</p>
               </div>
@@ -322,7 +332,7 @@ onMounted(async () => {
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <BookOpen class="size-5 shrink-0 text-(--chart-4)" />
               <div>
-                <p class="text-base font-medium text-(--chart-4)">{{ damagedWithdrawnCount }}</p>
+                <p class="text-base text-(--chart-4)">{{ damagedWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">损坏</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">污损或破损</p>
               </div>
@@ -330,7 +340,7 @@ onMounted(async () => {
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
               <Ban class="size-5 shrink-0 text-(--chart-5)" />
               <div>
-                <p class="text-base font-medium text-(--chart-5)">{{ otherWithdrawnCount }}</p>
+                <p class="text-base text-(--chart-5)">{{ otherWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">其他</p>
                 <p class="text-[10px] text-(--muted-foreground)/60">维护或剔旧</p>
               </div>
