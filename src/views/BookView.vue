@@ -3,25 +3,17 @@ import { computed, ref, toRef, watch } from "vue";
 import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
-import type {
-  Book,
-  BookCopy,
-  BookReview,
-  Category,
-  Tag,
-  Response,
-  Favorite,
-  BorrowRecord,
-  BookCopyAdmin
-} from "@/types";
+import type { Book, BookCopy, BookReview, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
 import api from "@/api"
 import { ElMessage } from "element-plus";
+import { useUserStore } from "@/stores/user.ts";
 
 const props = defineProps(['id']);
 const id = toRef(props, 'id');
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
+const userStore = useUserStore();
 
 const book = ref<Book>();
 const category = ref<Category>({ id: -1, name: '' });
@@ -32,7 +24,6 @@ const bookReviews = ref<BookReview[]>([]);
 const bookCoverTimestamp = ref<number>(Date.now());
 const bookCoverSrc = computed<string>(() => '/books/' + id.value + '?timestamp=' + bookCoverTimestamp.value);
 const isFavorite = ref(false);
-const idUsernameMapping = ref<Record<number,string>>({});
 const availableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'AVAILABLE').length);
 const unavailableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'UNAVAILABLE').length);
 const withdrawnCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'WITHDRAWN').length);
@@ -76,7 +67,7 @@ async function fetchTags() {
 }
 
 async function fetchIdUsernameMapping() {
-  // 收集需要查询的用户名（未去重）
+  // 收集需要查询的用户名
   const ids = bookCopies.value?.flatMap(bookCopy => {
     if (bookCopy.role === 'ADMIN' && !bookCopy.current_borrow_record)
       return [bookCopy.entry_by];
@@ -84,22 +75,8 @@ async function fetchIdUsernameMapping() {
       return [bookCopy.entry_by, bookCopy.current_borrow_record.user_id];
     return [];
   });
-  // 去重
-  const uniqueIds = [...new Set(ids)];
-  // 去掉已查询过的
-  const requestIds = uniqueIds.filter(id => !idUsernameMapping.value[id]);
-  // 需要请求的用户名不为空时再请求
-  if (requestIds.length) {
-    // 请求新映射
-    const newIdUsernameMapping = (await api.get<{ id: number, username: string }[]>('/api/users/usernames', {
-      params: { ids: requestIds.join(',') }
-    })).data.reduce((acc, item) => { // 转换类型，便于模板中使用 usernames[user_id] 直接查询
-      acc[item.id] = item.username;
-      return acc;
-    }, {} as Record<number, string>);
-    // 合并到已有映射
-    idUsernameMapping.value = { ...idUsernameMapping.value, ...newIdUsernameMapping };
-  }
+  // 预请求
+  await userStore.preload(...ids);
 }
 
 async function fetchBookCopies() {
@@ -110,7 +87,7 @@ async function fetchBookCopies() {
     if (!isMyBorrowRecord(a.current_borrow_record) && isMyBorrowRecord(b.current_borrow_record)) return 1   // b 是我借的，a 不是，b 排前面
     return 0  // 其他情况顺序不变
   })
-  // 管理员能看到详细信息，其中包含用户 id，需要刷新 id-username 映射
+  // 管理员能看到详细信息，其中包含用户 id
   if (authStore.isAdmin)
     await fetchIdUsernameMapping();
 }
@@ -474,7 +451,9 @@ watch(id, async () => {
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅人</span>
                   <span class="min-w-0 text-(--foreground)">
-                    <a class="text-(--primary) underline-offset-2 hover:underline" href="#">{{ idUsernameMapping[bookCopy.current_borrow_record.user_id] }}</a>
+                    <a class="text-(--primary) underline-offset-2 hover:underline" href="#">
+                      {{ userStore.user(bookCopy.current_borrow_record.user_id).value?.username }}
+                    </a>
                   </span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
@@ -522,7 +501,9 @@ watch(id, async () => {
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">入库人</span>
                   <span class="min-w-0 text-(--foreground)">
-                    <a class="text-(--primary) underline-offset-2 hover:underline" :href="'/user/' + bookCopy.entry_by">{{ idUsernameMapping[bookCopy.entry_by] }}</a>
+                    <a class="text-(--primary) underline-offset-2 hover:underline" :href="'/user/' + bookCopy.entry_by">
+                      {{ userStore.user(bookCopy.entry_by).value?.username }}
+                    </a>
                   </span>
                 </div>
                 <div class="flex gap-2 text-sm">
