@@ -1,4 +1,3 @@
-import type { MockMethod } from "vite-plugin-mock";
 import { BookReview } from "../src/types";
 
 export default [
