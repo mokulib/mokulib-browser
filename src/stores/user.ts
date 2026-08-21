@@ -1,20 +1,8 @@
 import { computed, ref } from "vue";
 import { defineStore } from 'pinia';
 import { Base64 } from "js-base64";
-import { ElMessage } from "element-plus";
-import { useAuthStore } from "@/stores/auth.ts";
-import { useRouter } from "vue-router";
-import api from "@/api";
 import type { JwtUser } from "@/types";
 
-/**
- * <h3>User Store</h3>
- *
- * <ul>
- *   <li>管理用户信息</li>
- *   <li>提供用户信息更新接口</li>
- * </ul>
- */
 export const useUserStore = defineStore('user', () => {
 
   /////////////////////////////////////////////
@@ -73,22 +61,6 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const router = useRouter();
-
-  async function modifyPassword(dataIn: any) {
-    const data = await api.post('/api/users/' + user_id.value + '/password', dataIn);
-    if (data.status === 'OK') {
-      ElMessage.success(data.message);
-      // 清除用户信息，强制用户重新登录
-      setTimeout(() => {
-        useAuthStore().logout();
-        router.push({ name: 'login' })
-      }, 500);
-    } else {
-      ElMessage.error(data.message);
-    }
-  }
-
   return {
     user_id,
     user_email,
@@ -102,6 +74,5 @@ export const useUserStore = defineStore('user', () => {
     user_avatar_timestamp,
     user_avatar,
     updateUserInfo,
-    modifyPassword,
   };
 });
