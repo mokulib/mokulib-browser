@@ -5,7 +5,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.ts";
 import { useLocalStorage } from "@vueuse/core";
 import api from "@/api";
-import type { AxiosResponse } from "axios";
+import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { usePopupStore } from "@/stores/popup.ts";
 
 export const useAuthStore = defineStore('auth', () => {
@@ -19,8 +19,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 从 localStorage 初始化。初始化后，不得为 null 或 undefined
   const jwt = useLocalStorage('mk-jwt', '');
-  // 用于构造 Authorization Header
-  const authorizationHeader = computed(() => `Bearer ${jwt.value}`);
   // 对外暴露，缓存当前登录状态
   const isLoggedIn = computed(() => !!jwt.value);
 
@@ -56,6 +54,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function syncJwtToRequest(config: InternalAxiosRequestConfig) {
+    // 如果已登录，自动附加 Authorization 头
+    if (isLoggedIn.value)
+      config.headers.Authorization = `Bearer ${jwt.value}`;
+  }
+
   async function ping(): Promise<boolean> {
     // 如果 JWT 为空，无需验证，直接返回
     if (!jwt.value)
@@ -79,11 +83,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     jwt,
-    authorizationHeader,
     isLoggedIn,
     login,
     logout,
     syncJwtFromResponse,
+    syncJwtToRequest,
     ping,
   };
 

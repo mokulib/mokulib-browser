@@ -25,13 +25,9 @@ axios.defaults.timeout = 5000
 // 全局请求拦截器
 axios.interceptors.request.use(
   (config) => {
-    // 获取 authStore
-    const authStore = useAuthStore();
     // 如果已登录，自动附加 Authorization 头
-    if (authStore.isLoggedIn) {
-      // 添加 Authorization 头
-      config.headers.Authorization = authStore.authorizationHeader;
-    }
+    useAuthStore().syncJwtToRequest(config);
+    // 返回配置
     return config;
   },
   (error) => {
