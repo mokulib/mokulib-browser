@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban } from '@lucide/vue'
 import * as echarts from 'echarts'
 import api from "@/api";
+import type { Dashboard } from "@/types";
 
 const availableCopies = ref(0);           // 可流通馆藏
 const bookTypes = ref(0);                 // 图书种类
@@ -92,6 +93,7 @@ function initCategoryChart() {
   if (!categoryChartRef.value) return
   const chart = echarts.init(categoryChartRef.value)
   chart.setOption({
+    color: categoryStats.value.length % 5 === 0 ? ['#d4a574', '#8fa8b8', '#cdb5a2', '#a8b8a0', '#a8d5ba'] : ['#d4a574', '#8fa8b8', '#cdb5a2', '#a8b8a0'],
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)',
@@ -157,7 +159,7 @@ function updateTrendChart() {
 /////////////////////////////////////////////
 
 onMounted(async () => {
-  const data = (await api.get('/api/dashboard')).data;
+  const data = (await api.get<Dashboard>('/api/dashboard')).data;
 
   availableCopies.value = data.available_copies;
   bookTypes.value = data.book_types;
@@ -173,7 +175,7 @@ onMounted(async () => {
   returnTrend.value = data.return_trend;
   newCopyTrend.value = data.new_book_copy_trend;
   newTypeTrend.value = data.new_book_trend;
-  categoryStats.value = data.category_stats;
+  categoryStats.value = data.category_stats.map(stats => ({ name: stats.name, value: stats.count }));
   overdueBooks.value = data.overdue_records;
   withdrawnCount.value = data.withdrawn_count;
   lostWithdrawnCount.value = data.lost_withdrawn_count;

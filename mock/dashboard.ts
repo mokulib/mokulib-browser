@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { Dashboard } from "../src/types";
 
 export default [
   {
@@ -26,11 +26,12 @@ export default [
           new_book_copy_trend: [2, 3, 1, 4, 2, 0, 3],
           new_book_trend: [1, 2, 0, 3, 1, 0, 2],
           category_stats: [
-            { value: 256, name: '文学', itemStyle: { color: '#d4a574' } },
-            { value: 180, name: '历史', itemStyle: { color: '#b8a08e' } },
-            { value: 145, name: '计算机', itemStyle: { color: '#8fa8b8' } },
-            { value: 120, name: '哲学', itemStyle: { color: '#a8b8a0' } },
-            { value: 98, name: '其他', itemStyle: { color: '#c8b8a8' } },
+            { name: '政治', count: 2 },
+            { name: '历史', count: 1 },
+            { name: '语言', count: 1 },
+            { name: '自然科学', count: 3 },
+            { name: '计算机', count: 13 },
+            { name: '其他', count: 4 },
           ],
           overdue_records: [
             { id: 1, title: '挪威的森林', borrower: '张明', dueDate: '2026-08-10', days: 7 },
@@ -44,7 +45,7 @@ export default [
           lost_withdrawn_count: 5,
           damaged_withdrawn_count: 4,
           other_withdrawn_count: 3,
-        }
+        } as Dashboard
       }
     }
   }
