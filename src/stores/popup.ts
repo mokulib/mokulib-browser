@@ -272,6 +272,7 @@ export const usePopupStore = defineStore('popup', () => {
   }
 
   return {
+    popups,
     registerInitHook,
     unregisterInitHook,
     isOpen,
