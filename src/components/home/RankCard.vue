@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, type PropType, ref } from "vue";
+import { onMounted, type PropType, ref } from "vue";
 import { useBookStore } from "@/stores/book.ts";
 import { useRouter } from "vue-router";
 import { useThemeStore } from "@/stores/theme.ts";
