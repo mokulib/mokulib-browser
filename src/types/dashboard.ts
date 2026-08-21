@@ -9,7 +9,7 @@ export interface OverdueRecord {
   book_copy_id: number;
   book_id: number;
   user_id: number;
-  dueTime: string;
+  due_time: string;
 }
 
 // 仪表盘数据

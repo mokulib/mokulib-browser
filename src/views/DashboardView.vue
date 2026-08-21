@@ -302,9 +302,9 @@ onMounted(async () => {
                 <span class="text-(--primary)">#{{ book.book_copy_id }}</span>
                 <span class="ml-2">{{ book.user_id }}</span>
               </p>
-              <p class="line-clamp-1 text-xs text-(--muted-foreground)">应还 {{ book.dueTime }} · {{ bookStore.book(book.book_id).value?.title }}</p>
+              <p class="line-clamp-1 text-xs text-(--muted-foreground)">应还 {{ DateTime.fromISO(book.due_time).toFormat("yyyy-MM-dd") }} · {{ bookStore.book(book.book_id).value?.title }}</p>
             </div>
-              <span class="ml-3 shrink-0 text-sm text-(--destructive)">+{{ Math.ceil(DateTime.now().diff(DateTime.fromISO(book.dueTime), 'days').days) }}天</span>
+              <span class="ml-3 shrink-0 text-sm text-(--destructive)">+{{ Math.ceil(DateTime.now().diff(DateTime.fromISO(book.due_time), 'days').days) }}天</span>
           </div>
         </div>
       </div>
