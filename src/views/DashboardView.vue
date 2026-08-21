@@ -6,8 +6,10 @@ import api from "@/api";
 import type { Dashboard, OverdueRecord } from "@/types";
 import { DateTime } from "luxon";
 import { useBookStore } from "@/stores/book.ts";
+import { useUserStore } from "@/stores/user.ts";
 
 const bookStore = useBookStore();
+const userStore = useUserStore();
 
 const availableCopies = ref(0);           // 可流通馆藏
 const bookTypes = ref(0);                 // 图书种类
@@ -191,6 +193,8 @@ onMounted(async () => {
 
   // 预加载图书数据
   await bookStore.preload(...overdueBooks.value.map(record => record.book_id));
+  // 预加载用户数据
+  await userStore.preload(...overdueBooks.value.map(record => record.user_id));
 })
 </script>
 
@@ -300,9 +304,12 @@ onMounted(async () => {
             <div class="min-w-0 flex-1">
               <p class="line-clamp-1 text-sm">
                 <span class="text-(--primary)">#{{ book.book_copy_id }}</span>
-                <span class="ml-2">{{ book.user_id }}</span>
+                <span class="ml-2 hover:text-(--primary) hover:underline cursor-pointer">{{ userStore.user(book.user_id).value?.username }}</span>
               </p>
-              <p class="line-clamp-1 text-xs text-(--muted-foreground)">应还 {{ DateTime.fromISO(book.due_time).toFormat("yyyy-MM-dd") }} · {{ bookStore.book(book.book_id).value?.title }}</p>
+              <p class="line-clamp-1 text-xs text-(--muted-foreground)">
+                <span>应还 {{ DateTime.fromISO(book.due_time).toFormat("yyyy-MM-dd") }} · </span>
+                <RouterLink :to="{ name: 'book', params: { id: book.book_id } }" class="hover:text-(--primary) hover:underline cursor-pointer">{{ bookStore.book(book.book_id).value?.title }}</RouterLink>
+              </p>
             </div>
               <span class="ml-3 shrink-0 text-sm text-(--destructive)">+{{ Math.ceil(DateTime.now().diff(DateTime.fromISO(book.due_time), 'days').days) }}天</span>
           </div>
