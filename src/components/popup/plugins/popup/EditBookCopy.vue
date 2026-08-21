@@ -10,6 +10,10 @@ const purchasePrice = ref<number>(0);
 const purchaseDate = ref<string>("");
 const source = ref<string>("");
 
+function confirmHandler() {
+  return api.put<BookCopyAdmin>(`/api/book-copies/${bookCopyId.value}`, { purchase_price: purchasePrice.value, purchase_date: purchaseDate.value, source: source.value })
+}
+
 onMounted(() => {
   usePopupStore().registerInitHook('editBookCopy', ({ clone }) => {
     bookCopyId.value = clone.bookCopyId;
@@ -21,7 +25,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="editBookCopy" title="编辑入库信息" confirm-text="保存" :confirm-handler="() => api.put<BookCopyAdmin>(`/api/book-copies/${bookCopyId}`, { purchase_price: purchasePrice, purchase_date: purchaseDate, source })">
+  <Popup popup-key="editBookCopy" title="编辑入库信息" confirm-text="保存" :confirm-handler="confirmHandler">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">

@@ -14,6 +14,10 @@ const user = ref<User | undefined>(undefined); // 查询结果
 const delayRequest = ref<ReturnType<typeof setTimeout> | undefined>(undefined); // 需要查询（延迟请求）
 const userNotFound = computed(() => !!delayRequest.value || !user.value); // 用户未找到状态，用于控制能否提交
 
+function confirmHandler() {
+  return api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/borrow`, { user_id: user.value?.id, is_renewed: isRenewedInput.value });
+}
+
 // 监听输入
 watch(userIdOrEmailInput, (newValue) => {
   // 清除请求
@@ -70,7 +74,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="() => api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/borrow`, { user_id: user?.id, is_renewed: isRenewedInput })">
+  <Popup popup-key="borrow" title="借出馆藏" confirm-text="确认借出" :confirm-disabled="userNotFound" :confirm-handler="confirmHandler">
     <div class="space-y-3">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
