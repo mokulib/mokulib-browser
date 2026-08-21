@@ -36,7 +36,7 @@ export const useBookStore = defineStore('book', () => {
   }
 
   /**
-   * 重新设置 bookIds 的数据，无论是否已经缓存
+   * 重新请求 bookIds 的数据，无论是否已经缓存
    * @param bookIds bookIds
    */
   async function load(...bookIds: number[]) {
