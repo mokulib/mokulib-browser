@@ -5,17 +5,18 @@ import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
 import RouteButton from "@/components/profile/my/RouteButton.vue";
 import api from "@/api";
-import type { Book, Response } from "@/types";
+import type { BorrowRecordWithBookId, History, Response } from "@/types";
 import { usePopupStore } from "@/stores/popup.ts";
 import { ElMessage } from "element-plus";
+import { useBookStore } from "@/stores/book.ts";
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
+const bookStore = useBookStore();
 
 const borrowing = ref<{ id: number, title: string }[]>([]);
 const favorites = ref<{ id: number, title: string }[]>([]);
 const history = ref<{ id: number, title: string }[]>([]);
-const books = ref<Book[]>([]);
 
 /////////////////////////////////////////////
 // 弹窗回调
@@ -35,34 +36,15 @@ async function uploadAvatarCallback(data: Response<any>) {
 /////////////////////////////////////////////
 
 onMounted(async () => {
-  // 请求借阅中的数据
-  const borrowing_ = (await api.get<{ books: any[], borrow_records: any[] }>('/api/users/borrowing')).data;
+  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/borrowing')).data;
+  const favorites_ = (await api.get<number[]>("/api/users/favorites")).data;
+  const history_ = (await api.get<History[]>('/api/users/history')).data;
+  // 预加载
+  await bookStore.preload(...borrowing_.map(record => record.book_id), ...favorites_, ...history_.map(record => record.book_id));
   // 将数据转换为 { id: number, title: string }[] 格式
-  borrowing.value = borrowing_.borrow_records.map(record => {
-    const book = borrowing_.books.find(book => book.id === record.book_id)
-    return { id: book.id as number, title: book.title as string }
-  })
-  // 请求收藏夹数据
-  const favorites_ = (await api.get<Book[]>("/api/users/favorites")).data;
-  // 将数据转换为 { id: number, title: string }[] 格式
-  favorites.value = favorites_.map(book => ({ id: book.id as number, title: book.title as string }))
-  // 请求借阅历史数据
-  const history_ = (await api.get<any[]>('/api/users/history')).data;
-  // 收集待查询的图书 id （去掉已查过的图书）
-  const bookIds = history_.map(record => record.book_id as number).filter(bookId => !books.value.some(book => bookId === book.id));
-  // 构造批量查询
-  const bookPromises = bookIds.map(bookId => api.get<Book>(`/api/books/${bookId}`));
-  // 并发请求数据
-  const data = await Promise.all(bookPromises);
-  // 获取结果
-  const books_ = data.map(d => d.data);
-  // 追加保存
-  books.value.push(...books_);
-  // 构造历史记录
-  history.value = history_.map(record => ({
-    id: record.book_id,
-    title: books.value.find(book => book.id === record.book_id)!.title
-  }));
+  borrowing.value = borrowing_.map(record => ({ id: record.book_id, title: bookStore.book(record.book_id).value?.title! as string }));
+  favorites.value = favorites_.map(bookId => ({ id: bookId, title: bookStore.book(bookId).value?.title! as string }));
+  history.value = history_.map(record => ({ id: record.book_id, title: bookStore.book(record.book_id).value?.title! as string }));
 })
 </script>
 
