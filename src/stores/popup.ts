@@ -80,6 +80,10 @@ export interface PopupMap {
     payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
     response: void;
   };
+  userInfo: {
+    payload: { id: number };
+    response: void;
+  }
   search: {
     payload: { keyword?: string; };
     response: void;
