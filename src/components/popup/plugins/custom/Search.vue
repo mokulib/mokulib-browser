@@ -2,16 +2,18 @@
 import { ArrowLeft, Search, Loader, ArrowUpNarrowWide, ArrowDownNarrowWide } from "@lucide/vue";
 import { computed, onMounted, ref } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book, SortMode } from "@/types";
+import type { SortMode } from "@/types";
 import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useRouter } from "vue-router";
+import { useBookStore } from "@/stores/book.ts";
 
 // 定义类型
 type Conditions = { keyword: string, sortMode: SortMode };
 
 const router = useRouter();
 const popupStore = usePopupStore();
+const bookStore = useBookStore();
 
 const isSearched = ref(false);
 const isLoading = ref(false);
@@ -21,7 +23,7 @@ const hotSearches = ref<string[]>([]);
 const conditions = ref<Conditions>({ keyword: "", sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD" })
 const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_DATE_FROM_NEW_TO_OLD" || conditions.value.sortMode === "PUBLISH_DATE_FROM_OLD_TO_NEW");
 const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
-const results = ref<Page<Book>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
+const results = ref<Page<number>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
 const hoveredIndex = ref<number>(0);
 
 async function hotSearch(keyword: string) {
@@ -40,10 +42,12 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
 
   isLoading.value = true;
   requestTimestamp.value = Date.now();
-  const data = await api.get<{ conditions: Conditions, results: Page<Book> }>('/api/search', { params: { keyword: searchInput.value, sortMode: sortMode_, pageNum } });
+  const data = await api.get<{ conditions: Conditions, results: Page<number> }>('/api/search', { params: { keyword: searchInput.value, sortMode: sortMode_, pageNum } });
   conditions.value = data.data.conditions;
   results.value = data.data.results;
   hoveredIndex.value = 0;
+  // 预加载数据
+  await bookStore.preload(...results.value.records);
   // 至少等待 1s
   if (Date.now() - requestTimestamp.value < 1000) {
     setTimeout(() => {
@@ -128,16 +132,16 @@ onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
       <!-- 搜索结果 -->
       <div v-if="isSearched && results.total > 0" class="w-full overflow-y-auto overscroll-behavior-contain min-h-30 max-h-[calc(100vh-190px)] md:max-h-[calc(100vh-255px)]">
         <div class="flex flex-col gap-2">
-          <template v-for="(result, index) in results.records" :key="result.id">
-            <div @click="router.push({ name: 'book', params: { id: result.id } })" @mouseenter="hoveredIndex = index" :data-is-hovered="hoveredIndex === index" class="
+          <template v-for="(bookId, index) in results.records" :key="bookId">
+            <div @click="router.push({ name: 'book', params: { id: bookId } })" @mouseenter="hoveredIndex = index" :data-is-hovered="hoveredIndex === index" class="
               flex p-2 gap-4 border border-(--border) rounded md:data-[is-hovered=true]:border-(--primary) cursor-pointer
               md:[&_.title]:text-(--muted-foreground)/50 md:data-[is-hovered=true]:[&_.title]:text-(--foreground)
               [&_.desc]:text-(--muted-foreground) md:[&_.desc]:text-(--muted-foreground)/50 md:data-[is-hovered=true]:[&_.desc]:text-(--muted-foreground)">
-              <img :src="`/books/${result.id}`" class="size-24 object-cover rounded-lg md:rounded" alt="Book Cover"/>
+              <img :src="`/books/${bookId}`" class="size-24 object-cover rounded-lg md:rounded" alt="Book Cover"/>
               <div class="flex flex-col items-start">
-                <div class="title mt-0.5 line-clamp-1 text-sm">{{ result.title }}</div>
-                <div class="desc mt-0.5 line-clamp-1 text-xs">{{ result.author }} / {{ result.publish_date }} / {{ result.publisher }} / {{ result.price.toFixed(2) }}￥</div>
-                <div class="desc mt-3.5 line-clamp-2 text-sm">{{ result.description }}</div>
+                <div class="title mt-0.5 line-clamp-1 text-sm">{{ bookStore.book(bookId).value?.title }}</div>
+                <div class="desc mt-0.5 line-clamp-1 text-xs">{{ bookStore.book(bookId).value?.author }} / {{ bookStore.book(bookId).value?.publish_date }} / {{ bookStore.book(bookId).value?.publisher }} / {{ bookStore.book(bookId).value?.price.toFixed(2) }}￥</div>
+                <div class="desc mt-3.5 line-clamp-2 text-sm">{{ bookStore.book(bookId).value?.description }}</div>
               </div>
             </div>
           </template>
