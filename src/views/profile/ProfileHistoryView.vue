@@ -3,9 +3,9 @@ import { Folders } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import api from "@/api";
-import type { Book } from "@/types";
 import { DateTime } from "luxon";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
+import { useBookStore } from "@/stores/book.ts";
 
 interface History {
   id: number;
@@ -19,15 +19,14 @@ interface History {
 }
 
 interface ExtendedHistory extends History {
-  book: Book;
   is_overdue: boolean;
 }
 
 const router = useRouter();
+const bookStore = useBookStore();
 
 const isLoading = ref(true);
 const history = ref<ExtendedHistory[]>([]);
-const books = ref<Book[]>([]);
 
 /////////////////////////////////////////////
 // 工具方法
@@ -45,20 +44,11 @@ onMounted(async () => {
   isLoading.value = true;
   // 查询历史记录
   const history_ = (await api.get<History[]>('/api/users/history')).data;
-  // 收集待查询的图书 id （去掉已查过的图书）
-  const bookIds = history_.map(record => record.book_id as number).filter(bookId => !books.value.some(book => bookId === book.id));
-  // 构造批量查询
-  const bookPromises = bookIds.map(bookId => api.get<Book>(`/api/books/${bookId}`));
-  // 并发请求数据
-  const data = await Promise.all(bookPromises);
-  // 获取结果
-  const books_ = data.map(d => d.data);
-  // 追加保存
-  books.value.push(...books_);
+  // 预加载
+  await bookStore.preload(...history_.map(record => record.book_id));
   // 构造历史记录
   history.value = history_.map(record => ({
     ...record,
-    book: books.value.find(book => book.id === record.book_id)!,
     is_overdue: DateTime.fromISO(record.return_time).diff(DateTime.fromISO(record.due_time)).milliseconds > 0
   }));
   isLoading.value = false;
@@ -98,10 +88,10 @@ onMounted(async () => {
             <div class="flex justify-between gap-4 pr-4">
               <!-- 图书信息 -->
               <div class="flex gap-4">
-                <img :src="`/books/${record.book_id}`" @click="router.push({ name: 'book', params: { id: record.book_id } })" :alt="record.book.title" class="size-24 rounded-lg"/>
+                <img :src="`/books/${record.book_id}`" @click="router.push({ name: 'book', params: { id: record.book_id } })" :alt="bookStore.book(record.book_id).value?.title" class="size-24 rounded-lg"/>
                 <div class="flex flex-col gap-1.5">
-                  <RouterLink :to="{ name: 'book', params: { id: record.book_id } }" class="line-clamp-1 text-sm hover:text-(--primary) hover:underline">{{ record.book.title }}</RouterLink>
-                  <p class="line-clamp-1 text-xs text-(--muted-foreground)">{{ record.book.author }} / {{ record.book.publish_date }} / {{ record.book.publisher }} / {{ record.book.price.toFixed(2) }}￥</p>
+                  <RouterLink :to="{ name: 'book', params: { id: record.book_id } }" class="line-clamp-1 text-sm hover:text-(--primary) hover:underline">{{ bookStore.book(record.book_id).value?.title }}</RouterLink>
+                  <p class="line-clamp-1 text-xs text-(--muted-foreground)">{{ bookStore.book(record.book_id).value?.author }} / {{ bookStore.book(record.book_id).value?.publish_date }} / {{ bookStore.book(record.book_id).value?.publisher }} / {{ bookStore.book(record.book_id).value?.price.toFixed(2) }}￥</p>
                 </div>
               </div>
               <!-- 归还信息 -->
