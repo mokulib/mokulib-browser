@@ -65,7 +65,7 @@ async function goToPage(pageNum: number, sortMode: SortMode) {
 
 onMounted(async () => {
   // 获取热搜
-  hotSearches.value = (await api.get<string[]>('/api/search/hot')).data;
+  hotSearches.value = (await api.get<string[]>('/api/hot-search')).data;
   // 获取所有分类
   categories.value = (await api.get<Category[]>('/api/categories')).data.sort((a, b) => a.id - b.id);
   // 添加分类状态

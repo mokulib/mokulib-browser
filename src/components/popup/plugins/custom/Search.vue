@@ -42,7 +42,7 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
 
   isLoading.value = true;
   requestTimestamp.value = Date.now();
-  const data = await api.get<{ conditions: Conditions, results: Page<number> }>('/api/search', { params: { keyword: searchInput.value, sortMode: sortMode_, pageNum } });
+  const data = await api.get<{ conditions: Conditions, results: Page<number> }>('/api/books/search', { params: { keyword: searchInput.value, sortMode: sortMode_, pageNum } });
   conditions.value = data.data.conditions;
   results.value = data.data.results;
   hoveredIndex.value = 0;
@@ -65,7 +65,7 @@ async function goToPage(pageNum: number, sortMode_: SortMode) {
 /////////////////////////////////////////////
 
 onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
-  hotSearches.value = (await api.get<string[]>('/api/search/hot')).data;
+  hotSearches.value = (await api.get<string[]>('/api/hot-search')).data;
   if (clone?.keyword) {
     isSearched.value = false;
     searchInput.value = clone.keyword;
