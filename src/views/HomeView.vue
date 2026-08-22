@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { Search, ArrowDownNarrowWide, ArrowUpNarrowWide, BookDashed } from "@lucide/vue";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide, BookDashed, Search } from "@lucide/vue";
 import { usePopupStore } from "@/stores/popup.ts";
 import { computed, onMounted, ref } from "vue";
-import type { Book, Category, Rank, SortMode } from "@/types";
+import type { Category, Rank, SortMode } from "@/types";
 import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useBookStore } from "@/stores/book.ts";
-import { useRouter } from "vue-router";
 import RankCard from "@/components/home/RankCard.vue";
 
 type BaseStatus = { isActive: boolean };
 type HotStatus = BaseStatus & { type: 'hot' };
 type NewStatus = BaseStatus & { type: 'new' };
-type CategoryStatus = BaseStatus & { type: 'category'; id: number; pageNum: number; sortMode: SortMode; books: Page<Book>; };
+type CategoryStatus = BaseStatus & { type: 'category'; id: number; pageNum: number; sortMode: SortMode; books: Page<number>; };
 type Status = HotStatus | NewStatus | CategoryStatus;
 
-const router = useRouter();
 const bookStore = useBookStore();
 const popupStore = usePopupStore();
 
@@ -57,7 +55,8 @@ function setActive(type: Status['type'], id?: number) {
 
 async function goToPage(pageNum: number, sortMode: SortMode) {
   activeCategory.value!.sortMode = sortMode;
-  activeCategory.value!.books = (await api.get<Page<Book>>(`/api/categories/${activeCategory.value!.id}/books`, { params: { pageNum, sortMode } })).data;
+  activeCategory.value!.books = (await api.get<Page<number>>(`/api/categories/${activeCategory.value!.id}/books/page`, { params: { pageNum, sortMode } })).data;
+  await bookStore.preload(...activeCategory.value!.books.records);
 }
 
 /////////////////////////////////////////////
@@ -171,10 +170,10 @@ onMounted(async () => {
             </div>
             <!-- 图书展示 -->
             <div v-if="activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-rows-3 grid-cols-4 m-4 gap-2">
-              <template v-for="book in activeCategory.books?.records" :key="book.id">
-                <RouterLink :to="{ name: 'book', params: { id: book.id } }" class="flex flex-col items-center justify-start px-4 gap-1 hover:[&_a]:text-(--primary) hover:[&_a]:underline cursor-pointer">
-                  <img :src="`/books/${book.id}`" class="size-24 object-cover" :alt="book.title"/>
-                  <a class="line-clamp-2 text-sm text-center">{{ book.title }}</a>
+              <template v-for="bookId in activeCategory.books?.records" :key="bookId">
+                <RouterLink :to="{ name: 'book', params: { id: bookId } }" class="flex flex-col items-center justify-start px-4 gap-1 hover:[&_a]:text-(--primary) hover:[&_a]:underline cursor-pointer">
+                  <img :src="`/books/${bookId}`" class="size-24 object-cover" :alt="bookStore.book(bookId).value?.title"/>
+                  <a class="line-clamp-2 text-sm text-center">{{ bookStore.book(bookId).value?.title }}</a>
                 </RouterLink>
               </template>
             </div>
