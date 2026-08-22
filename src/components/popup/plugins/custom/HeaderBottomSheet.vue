@@ -17,10 +17,6 @@ function switchTheme() {
   popupStore.close();
 }
 
-/////////////////////////////////////////////
-// 弹窗回调
-/////////////////////////////////////////////
-
 async function addBookCallback(data: Response<number>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);

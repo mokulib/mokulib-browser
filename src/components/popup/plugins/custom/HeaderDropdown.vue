@@ -22,10 +22,6 @@ function switchTheme() {
   popupStore.close();
 }
 
-/////////////////////////////////////////////
-// 弹窗回调
-/////////////////////////////////////////////
-
 async function addBookCallback(data: Response<number>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -34,10 +30,6 @@ async function addBookCallback(data: Response<number>) {
     ElMessage.error(data.message);
   }
 }
-
-/////////////////////////////////////////////
-// 监听
-/////////////////////////////////////////////
 
 onMounted(() => {
   popupStore.registerInitHook('header', ({ raw }) => payload.value = raw )
