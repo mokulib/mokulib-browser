@@ -114,6 +114,10 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('@/views/DashboardView.vue'),
+      meta: {
+        requiresAuth: true,
+        redirectToHomeOnLogout: true,
+      },
     },
     {
       path: '/about',
