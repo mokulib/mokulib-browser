@@ -25,6 +25,7 @@ const borrowTrend = ref<number[]>([]);    // 借出趋势
 const returnTrend = ref<number[]>([]);    // 归还趋势
 const newCopyTrend = ref<number[]>([]);   // 新增馆藏趋势
 const newTypeTrend = ref<number[]>([]);   // 新增图书趋势
+const trendDays = ref<string[]>([]);      // 趋势图日期
 const categoryStats = ref<{ name: string; value: number }[]>([]);
 const overdueBooks = ref<OverdueRecord[]>([]);
 const withdrawnCount = ref(0);            // 已下架总量
@@ -49,7 +50,7 @@ function initTrendChart() {
     grid: { left: 30, right: 10, top: 20, bottom: 20 },
     xAxis: {
       type: 'category',
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      data: trendDays.value.map(day => DateTime.fromISO(day).toFormat('M/d')),
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { fontSize: 11, color: '#9ca3af' },
@@ -182,6 +183,7 @@ onMounted(async () => {
   returnTrend.value = data.return_trend;
   newCopyTrend.value = data.new_book_copy_trend;
   newTypeTrend.value = data.new_book_trend;
+  trendDays.value = data.trend_days;
   categoryStats.value = data.category_stats.map(stats => ({ name: stats.name, value: stats.count }));
   overdueBooks.value = data.overdue_records;
   withdrawnCount.value = data.withdrawn_count;

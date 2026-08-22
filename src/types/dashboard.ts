@@ -28,6 +28,7 @@ export interface Dashboard {
   return_trend: number[];
   new_book_copy_trend: number[];
   new_book_trend: number[];
+  trend_days: string[];
   category_stats: CategoryStat[];
   overdue_records: OverdueRecord[];
   withdrawn_count: number;
