@@ -2,13 +2,17 @@
 import { FolderHeart, Heart } from "@lucide/vue";
 import { onMounted, ref } from "vue";
 import api from "@/api";
-import type { Book, Favorite } from "@/types";
+import type { Favorite } from "@/types";
 import { ElMessage } from "element-plus";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
+import { useBookStore } from "@/stores/book.ts";
 
-interface FavoriteBook extends Book {
-  is_favorite: boolean;
+interface FavoriteBook {
+  bookId: number;
+  isFavorite: boolean;
 }
+
+const bookStore = useBookStore();
 
 const isLoading = ref(true);
 const favoriteBooks = ref<FavoriteBook[]>([]);
@@ -19,11 +23,11 @@ const favoriteBooks = ref<FavoriteBook[]>([]);
 
 async function favoriteHandler(index: number) {
   // 根据当前状态决定请求类型
-  const data = favoriteBooks.value[index]!.is_favorite ? await api.delete<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.id) : await api.post<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.id);
+  const data = favoriteBooks.value[index]!.isFavorite ? await api.delete<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.bookId) : await api.post<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.bookId);
   // 处理数据
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    favoriteBooks.value[index]!.is_favorite = data.data.is_favorite;
+    favoriteBooks.value[index]!.isFavorite = data.data.is_favorite;
   } else {
     ElMessage.error(data.message);
   }
@@ -35,8 +39,9 @@ async function favoriteHandler(index: number) {
 
 onMounted(async () => {
   isLoading.value = true;
-  const favorites = (await api.get<Book[]>("/api/users/favorites")).data;
-  favoriteBooks.value = favorites.map((book: Book) => ({ ...book, is_favorite: true }));
+  const favorites = (await api.get<number[]>("/api/users/favorites")).data;
+  await bookStore.preload(...favorites);
+  favoriteBooks.value = favorites.map(bookId => ({ bookId, isFavorite: true }));
   isLoading.value = false;
 })
 </script>
@@ -55,8 +60,8 @@ onMounted(async () => {
           <div class="flex flex-col items-center gap-2">
             <!-- 封面 Box -->
             <div class="relative">
-              <img :src="`/books/${favoriteBook.id}`" class="rounded" alt="book.title">
-              <Heart @click="favoriteHandler(index)" :disabled="false" :data-is-favorite="favoriteBook.is_favorite" class="
+              <img :src="`/books/${favoriteBook.bookId}`" class="rounded" alt="book.title">
+              <Heart @click="favoriteHandler(index)" :disabled="false" :data-is-favorite="favoriteBook.isFavorite" class="
                 absolute bottom-2 left-2 size-5 shrink-0 text-(--foreground) bg-clip-padding outline-none transition-all cursor-pointer
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
                 active:not-disabled:not-aria-[haspopup]:translate-y-px
@@ -64,7 +69,7 @@ onMounted(async () => {
                 data-[is-favorite=true]:fill-(--destructive) data-[is-favorite=true]:text-(--destructive)"/>
             </div>
             <!-- 标题 -->
-            <RouterLink :to="{ name: 'book', params: { id: favoriteBook.id } }" class="px-1 line-clamp-2 tracking-wider text-center text-sm text-(--foreground) hover:text-(--primary) hover:underline">{{ favoriteBook.title }}</RouterLink>
+            <RouterLink :to="{ name: 'book', params: { id: favoriteBook.bookId } }" class="px-1 line-clamp-2 tracking-wider text-center text-sm text-(--foreground) hover:text-(--primary) hover:underline">{{ bookStore.book(favoriteBook.bookId).value?.title }}</RouterLink>
           </div>
         </template>
       </div>
