@@ -5,18 +5,25 @@ import { BookOpen, CalendarClock } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { DateTime } from "luxon";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
+import type { BorrowRecord } from "@/types";
+import { useBookStore } from "@/stores/book.ts";
+
+type BorrowRecordWithBookId = BorrowRecord & { book_id: number };
+type ExtendedBorrowRecordWithBookId = BorrowRecordWithBookId & { book: any; isOverdue: boolean; percent: number; };
 
 const router = useRouter();
+const bookStore = useBookStore();
 
 const isLoading = ref(true)
-const borrowing = ref<any[]>([])
+const borrowing = ref<ExtendedBorrowRecordWithBookId[]>([])
 
 onMounted(async () => {
   isLoading.value = true
-  const borrowing_ = (await api.get<{ books: any[], borrow_records: any[] }>('/api/users/borrowing')).data;
-  borrowing.value = borrowing_.borrow_records.length > 0 ? borrowing_.borrow_records.map(record => ({
+  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/borrowing')).data;
+  await bookStore.preload(...borrowing_.map(record => record.book_id));
+  borrowing.value = borrowing_.length > 0 ? borrowing_.map(record => ({
     ...record,
-    book: borrowing_.books.find(book => book.id === record.book_id),
+    book: bookStore.book(record.book_id).value,
     isOverdue: DateTime.fromISO(record.due_time) < DateTime.now(),
     percent: (1 - DateTime.fromISO(record.due_time).diffNow('days').days / DateTime.fromISO(record.due_time).diff(DateTime.fromISO(record.create_time), 'days').days) * 100,
   })) : []
