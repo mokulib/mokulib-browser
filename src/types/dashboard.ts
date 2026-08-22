@@ -34,4 +34,5 @@ export interface Dashboard {
   lost_withdrawn_count: number;
   damaged_withdrawn_count: number;
   other_withdrawn_count: number;
+  update_time: string;
 }

@@ -31,6 +31,7 @@ const withdrawnCount = ref(0);            // 已下架总量
 const lostWithdrawnCount = ref(0);        // 丢失数量
 const damagedWithdrawnCount = ref(0);     // 损坏数量
 const otherWithdrawnCount = ref(0);       // 其他下架数量
+const updateTime = ref('');               // 更新时间
 
 /////////////////////////////////////////////
 // 图表初始化 & 切换数据
@@ -187,6 +188,7 @@ onMounted(async () => {
   lostWithdrawnCount.value = data.lost_withdrawn_count;
   damagedWithdrawnCount.value = data.damaged_withdrawn_count;
   otherWithdrawnCount.value = data.other_withdrawn_count;
+  updateTime.value = data.update_time;
 
   initTrendChart()
   initCategoryChart()
@@ -203,7 +205,7 @@ onMounted(async () => {
     <!-- 第一行：页面标题 -->
     <div class="mb-8">
       <h1 class="font-serif text-3xl">数据概览</h1>
-      <p class="mt-1 text-sm text-(--muted-foreground)">个人图书馆运营数据总览 · 更新于今日 14:30</p>
+      <p class="mt-1 text-sm text-(--muted-foreground)">个人图书馆运营数据总览 · 更新于 {{ DateTime.fromISO(updateTime).toFormat('yyyy-MM-dd HH:mm:ss') }}</p>
     </div>
 
     <!-- 第二行：统计卡片 -->
