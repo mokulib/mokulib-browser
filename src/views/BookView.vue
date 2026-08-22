@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
@@ -7,15 +7,19 @@ import type { Book, BookCopy, BookReview, Category, Tag, Response, Favorite, Bor
 import api from "@/api"
 import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user.ts";
+import { useBookStore } from "@/stores/book.ts";
 
-const props = defineProps(['id']);
-const id = toRef(props, 'id');
+const props = defineProps({
+  id: { type: String, required: true } // 路径参数解析始终是字符串
+});
+const id = computed(() => Number(props.id));
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
 const userStore = useUserStore();
+const bookStore = useBookStore();
 
-const book = ref<Book>();
+const book = computed(() => bookStore.book(id.value).value);
 const category = ref<Category>({ id: -1, name: '' });
 const tags = ref<Tag[]>([]);
 const bookCopies = ref<BookCopy[]>([]);
@@ -148,17 +152,15 @@ async function uploadBookCoverCallback(data: Response<any>) {
 async function editCategoryCallback(data: Response<Book>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    book.value = data.data;
     await fetchCategory(); // 更新分类名
   } else {
     ElMessage.error(data.message);
   }
 }
 
-function editBookCallback(data: Response<Book>) {
+async function editBookCallback(data: Response<Book>) {
   if (data.status === 'OK') {
     ElMessage.success(data.message);
-    book.value = data.data;
   } else {
     ElMessage.error(data.message);
   }
@@ -235,7 +237,7 @@ async function relistCallback(data: Response<BookCopyAdmin>) {
 
 watch(id, async () => {
   // 请求图书信息
-  book.value = (await api.get<Book>('/api/books/' + id.value)).data ?? {};
+  await bookStore.load(id.value);
   // 请求分类信息
   await fetchCategory();
   // 请求标签信息

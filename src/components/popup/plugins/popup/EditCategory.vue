@@ -4,6 +4,7 @@ import { usePopupStore } from "@/stores/popup.ts";
 import api from "@/api";
 import { computed, onMounted, ref } from "vue";
 import type { Book, Category } from "@/types";
+import { useBookStore } from "@/stores/book.ts";
 
 const book = ref<Book>();
 const originalCategory = ref<Category>();
@@ -22,7 +23,7 @@ async function confirmHandler() {
   else
     category = selectedCategory.value;
   // 提交请求
-  return api.put<Book>(`/api/books/${book.value?.id}`, { ...book.value, category_id: category?.id });
+  return useBookStore().update({ ...book.value, category_id: category.id } as Book);
 }
 
 onMounted(() => {

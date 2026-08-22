@@ -2,8 +2,8 @@
 import Popup from "@/components/popup/core/Popup.vue";
 import { usePopupStore } from "@/stores/popup.ts";
 import { onMounted, ref } from "vue";
-import api from "@/api";
 import type { Book } from "@/types";
+import { useBookStore } from "@/stores/book.ts";
 
 const book = ref<Book>({ id: 0, isbn: '', category_id: 0, title: '', subtitle: '', author: '', publisher: '', publish_date: '', edition: '', page_count: 0, language: '', description: '', price: 0 });
 
@@ -13,7 +13,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="editBook" title="编辑图书信息" confirm-text="保存" :confirm-handler="() => api.put<Book>(`/api/books/${book.id}`, book)">
+  <Popup popup-key="editBook" title="编辑图书信息" confirm-text="保存" :confirm-handler="() => useBookStore().update(book)">
     <form class="max-h-[50vh] space-y-3 overflow-y-auto pl-1 pr-1 pb-1">
       <div class="space-y-1.5">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
