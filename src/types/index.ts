@@ -6,6 +6,7 @@ export * from './category.ts'
 export * from './dashboard.ts'
 export * from './favorite.ts'
 export * from './get-email-captcha.ts'
+export * from './history.ts'
 export * from "./page.ts"
 export * from "./rank.ts"
 export * from "./response.ts"

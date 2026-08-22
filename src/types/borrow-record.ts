@@ -8,3 +8,5 @@ export interface BorrowRecord {
   due_time: string;
   close_time: string | null;
 }
+
+export type BorrowRecordWithBookId = BorrowRecord & { book_id: number };

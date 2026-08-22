@@ -5,10 +5,9 @@ import { BookOpen, CalendarClock } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { DateTime } from "luxon";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
-import type { BorrowRecord } from "@/types";
+import type { BorrowRecordWithBookId } from "@/types";
 import { useBookStore } from "@/stores/book.ts";
 
-type BorrowRecordWithBookId = BorrowRecord & { book_id: number };
 type ExtendedBorrowRecordWithBookId = BorrowRecordWithBookId & { book: any; isOverdue: boolean; percent: number; };
 
 const router = useRouter();

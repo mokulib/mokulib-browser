@@ -6,17 +6,7 @@ import api from "@/api";
 import { DateTime } from "luxon";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
 import { useBookStore } from "@/stores/book.ts";
-
-interface History {
-  id: number;
-  book_copy_id: number;
-  book_id: number;
-  borrow_time: string;
-  return_time: string;
-  close_status: 'CLOSED' | 'LOST' | 'DAMAGED';
-  is_renewed: string;
-  due_time: string;
-}
+import { type History } from '@/types'
 
 interface ExtendedHistory extends History {
   is_overdue: boolean;
