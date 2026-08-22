@@ -119,11 +119,6 @@ const router = createRouter({
         redirectToHomeOnLogout: true,
       },
     },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import('@/views/AboutView.vue'),
-    },
     // 匹配所有未定义的路由
     {
       path: '/:pathMatch(.*)*', // 通配符路由
