@@ -453,7 +453,7 @@ watch(id, async () => {
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅人</span>
                   <span class="min-w-0 text-(--foreground)">
-                    <a href="#" @click.prevent="popupStore.open('userInfo', { id: bookCopy.current_borrow_record.user_id })" class="text-(--primary) underline-offset-2 hover:underline">
+                    <a href="#" @click.prevent="popupStore.open('userInfo', { x: $event.clientX, y: $event.clientY, id: bookCopy.current_borrow_record.user_id })" class="text-(--primary) underline-offset-2 hover:underline">
                       {{ userStore.user(bookCopy.current_borrow_record.user_id).value?.username }}
                     </a>
                   </span>
@@ -503,7 +503,7 @@ watch(id, async () => {
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">入库人</span>
                   <span class="min-w-0 text-(--foreground)">
-                    <a href="#" @click.prevent="popupStore.open('userInfo', { id: bookCopy.entry_by })" class="text-(--primary) underline-offset-2 hover:underline">
+                    <a href="#" @click.prevent="popupStore.open('userInfo', { x: $event.clientX, y: $event.clientY, id: bookCopy.entry_by })" class="text-(--primary) underline-offset-2 hover:underline">
                       {{ userStore.user(bookCopy.entry_by).value?.username }}
                     </a>
                   </span>

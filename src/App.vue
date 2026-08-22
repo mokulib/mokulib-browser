@@ -41,7 +41,7 @@ watch(() => popupStore.isOpen(), (newValue) => {
   </div>
 
   <!-- 弹窗遮罩 -->
-  <div ref="popupRef" v-show="popupStore.isOpen()" @click.self="popupStore.close()" @keydown.esc="popupStore.close()" tabindex="-1" class="fixed inset-0 z-50 bg-black/66 animate-in fade-in-0 flex items-end justify-center sm:items-center" :class="{ 'sm:bg-transparent': popupStore.isOpen('header') }">
+  <div ref="popupRef" v-show="popupStore.isOpen()" @click.self="popupStore.close()" @keydown.esc="popupStore.close()" tabindex="-1" class="fixed inset-0 z-50 bg-black/66 animate-in fade-in-0 flex items-end justify-center sm:items-center" :class="{ 'sm:bg-transparent': popupStore.isOpen('header') || popupStore.isOpen('userInfo') }">
     <!-- 自动挂载预设 Popup 弹窗 -->
     <component v-for="(plugin, index) in popupPlugins" :key="index" :is="plugin"/>
   </div>

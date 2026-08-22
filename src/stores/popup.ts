@@ -81,7 +81,7 @@ export interface PopupMap {
     response: void;
   };
   userInfo: {
-    payload: { id: number };
+    payload: { x: number; y: number; id: number };
     response: void;
   }
   search: {

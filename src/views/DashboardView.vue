@@ -310,7 +310,7 @@ onMounted(async () => {
             <div class="min-w-0 flex-1">
               <p class="line-clamp-1 text-sm">
                 <span class="text-(--primary)">#{{ book.book_copy_id }}</span>
-                <a href="#" @click.prevent="popupStore.open('userInfo', { id: book.user_id })" class="ml-2 hover:text-(--primary) hover:underline cursor-pointer">{{ userStore.user(book.user_id).value?.username }}</a>
+                <a href="#" @click.prevent="popupStore.open('userInfo', { x: $event.clientX, y: $event.clientY, id: book.user_id })" class="ml-2 hover:text-(--primary) hover:underline cursor-pointer">{{ userStore.user(book.user_id).value?.username }}</a>
               </p>
               <p class="line-clamp-1 text-xs text-(--muted-foreground)">
                 <span>应还 {{ DateTime.fromISO(book.due_time).toFormat("yyyy-MM-dd") }} · </span>
