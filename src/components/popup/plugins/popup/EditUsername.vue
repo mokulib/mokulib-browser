@@ -11,7 +11,7 @@ const authStore = useAuthStore();
 const input = ref("");
 
 function confirmHandler () {
-  return api.post('/api/users/username', { username: input.value });
+  return api.post('/api/users/me/username', { username: input.value });
 }
 
 onMounted(() => {

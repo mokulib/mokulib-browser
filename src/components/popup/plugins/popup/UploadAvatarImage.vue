@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import Popup from "@/components/popup/core/Popup.vue";
-import { usePopupStore } from "@/stores/popup.ts";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import api from "@/api";
-
-const id = ref<number>(-1);
 
 const selectedFile = ref<File | undefined>(undefined)
 const isSelectedFile = computed(() => !selectedFile.value);
@@ -25,12 +22,8 @@ async function confirmHandler() {
   } catch (error) {
     return { status: 'ERROR', businessType: '', message: '文件读取失败', data: null };
   }
-  return api.post(`/api/users/${id.value}/avatar`, data, { headers: { 'Content-Type': 'application/octet-stream' } });
+  return api.post(`/api/users/me/avatar`, data, { headers: { 'Content-Type': 'application/octet-stream' } });
 }
-
-onMounted(() => {
-  usePopupStore().registerInitHook('uploadAvatar', ({ clone }) => id.value = clone.id);
-})
 </script>
 
 <template>

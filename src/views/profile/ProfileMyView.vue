@@ -36,9 +36,9 @@ async function uploadAvatarCallback(data: Response<any>) {
 /////////////////////////////////////////////
 
 onMounted(async () => {
-  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/borrowing')).data;
-  const favorites_ = (await api.get<number[]>("/api/users/favorites")).data;
-  const history_ = (await api.get<History[]>('/api/users/history')).data;
+  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/me/borrowing')).data;
+  const favorites_ = (await api.get<number[]>("/api/users/me/favorites")).data;
+  const history_ = (await api.get<History[]>('/api/users/me/history')).data;
   // 预加载
   await bookStore.preload(...borrowing_.map(record => record.book_id), ...favorites_, ...history_.map(record => record.book_id));
   // 将数据转换为 { id: number, title: string }[] 格式
@@ -56,7 +56,7 @@ onMounted(async () => {
         <!-- 头像 -->
         <img :src="authStore.avatar" alt="avatar" class="w-full h-full object-cover">
         <!-- 遮罩 -->
-        <div @click="popupStore.open('uploadAvatar', { id: authStore.id }, uploadAvatarCallback)" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+        <div @click="popupStore.open('uploadAvatar', undefined, uploadAvatarCallback)" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
           <span class="text-sm text-white">上传头像</span>
         </div>
       </div>

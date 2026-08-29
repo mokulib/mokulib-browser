@@ -39,7 +39,7 @@ async function favoriteHandler(index: number) {
 
 onMounted(async () => {
   isLoading.value = true;
-  const favorites = (await api.get<number[]>("/api/users/favorites")).data;
+  const favorites = (await api.get<number[]>("/api/users/me/favorites")).data;
   await bookStore.preload(...favorites);
   favoriteBooks.value = favorites.map(bookId => ({ bookId, isFavorite: true }));
   isLoading.value = false;

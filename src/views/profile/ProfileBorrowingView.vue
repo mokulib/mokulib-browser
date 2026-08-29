@@ -18,7 +18,7 @@ const borrowing = ref<ExtendedBorrowRecordWithBookId[]>([])
 
 onMounted(async () => {
   isLoading.value = true
-  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/borrowing')).data;
+  const borrowing_ = (await api.get<BorrowRecordWithBookId[]>('/api/users/me/borrowing')).data;
   await bookStore.preload(...borrowing_.map(record => record.book_id));
   borrowing.value = borrowing_.length > 0 ? borrowing_.map(record => ({
     ...record,

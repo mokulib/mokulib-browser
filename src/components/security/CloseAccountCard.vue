@@ -13,7 +13,7 @@ const prefix = ref('--');
 const captcha = ref('');
 
 async function requestCaptcha() {
-  const data = await api.get('/api/auth/close-account');
+  const data = await api.get('/api/users/me/close-account');
   prefix.value = data.data.code_prefix;
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -23,7 +23,7 @@ async function requestCaptcha() {
 }
 
 async function closeAccount() {
-  const data = await api.delete('/api/auth/close-account', { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
+  const data = await api.delete('/api/users/me/close-account', { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
   if (data.status === 'OK') {
     ElMessage.success(data.message);
   } else {

@@ -25,7 +25,7 @@ export interface PopupMap {
     response: Response<any>;
   };
   uploadAvatar: {
-    payload: { id: number; };
+    payload: undefined;
     response: Response<any>;
   }
   editCategory: {

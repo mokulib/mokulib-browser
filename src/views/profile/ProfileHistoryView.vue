@@ -33,7 +33,7 @@ function formatTime(time: string) {
 onMounted(async () => {
   isLoading.value = true;
   // 查询历史记录
-  const history_ = (await api.get<History[]>('/api/users/history')).data;
+  const history_ = (await api.get<History[]>('/api/users/me/history')).data;
   // 预加载
   await bookStore.preload(...history_.map(record => record.book_id));
   // 构造历史记录

@@ -14,7 +14,7 @@ const prefix = ref('--');
 const captcha = ref('');
 
 async function requestCaptcha() {
-  const data = await api.get('/api/auth/reset-password');
+  const data = await api.get('/api/users/me/reset-password');
   prefix.value = data.data.code_prefix;
   if (data.status === 'OK') {
     ElMessage.success(data.message);
@@ -24,7 +24,7 @@ async function requestCaptcha() {
 }
 
 async function resetPassword() {
-  const data = await api.post('/api/auth/reset-password', { new_password: password.value, }, { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
+  const data = await api.post('/api/users/me/reset-password', { new_password: password.value, }, { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
   if (data.status === 'OK') {
     ElMessage.success(data.message);
   } else {
