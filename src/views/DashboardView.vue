@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban } from '@lucide/vue'
+import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban, RotateCw } from '@lucide/vue'
 import * as echarts from 'echarts'
 import api from "@/api";
 import type { Dashboard, OverdueRecord } from "@/types";
@@ -165,11 +165,11 @@ function updateTrendChart() {
 }
 
 /////////////////////////////////////////////
-// 监听
+// 请求
 /////////////////////////////////////////////
 
-onMounted(async () => {
-  const data = (await api.get<Dashboard>('/api/dashboard')).data;
+async function fetchDashboardData(noCache: boolean) {
+  const data = (await api.get<Dashboard>('/api/dashboard', { headers: { 'Cache-Control': noCache ? 'no-cache' : '' } })).data;
 
   availableCopies.value = data.available_copies;
   bookTypes.value = data.book_types;
@@ -201,15 +201,27 @@ onMounted(async () => {
   await bookStore.preload(...overdueBooks.value.map(record => record.book_id));
   // 预加载用户数据
   await userStore.preload(...overdueBooks.value.map(record => record.user_id));
-})
+}
+
+/////////////////////////////////////////////
+// 监听
+/////////////////////////////////////////////
+
+onMounted(async () => await fetchDashboardData(false))
 </script>
 
 <template>
   <main class="flex-1 mx-auto max-w-6xl w-full flex flex-col px-4 py-8 md:px-8">
     <!-- 第一行：页面标题 -->
     <div class="mb-8">
-      <h1 class="font-serif text-3xl">数据概览</h1>
-      <p class="mt-1 text-sm text-(--muted-foreground)">个人图书馆运营数据总览 · 更新于 {{ DateTime.fromISO(updateTime).toFormat('yyyy-MM-dd HH:mm:ss') }}</p>
+      <h3 class="font-serif text-3xl">数据概览</h3>
+      <div class="flex items-center mt-1 text-sm text-(--muted-foreground)">
+        个人图书馆运营数据总览
+        <div @click="fetchDashboardData(true)" class="flex items-center hover:text-(--primary) hover:underline cursor-pointer">
+          <RotateCw class="ml-2 mr-1 size-3.5"/>
+          更新于 {{ DateTime.fromISO(updateTime).toFormat('yyyy-MM-dd HH:mm:ss') }}
+        </div>
+      </div>
     </div>
 
     <!-- 第二行：统计卡片 -->
