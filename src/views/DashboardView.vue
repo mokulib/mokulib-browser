@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, Ban, RotateCw } from '@lucide/vue'
+import { Library, BookOpen, ArrowRightToLine, ArrowLeftToLine, Layers, BookX, BookAlert, Ban, RotateCw, BookOpenCheck } from '@lucide/vue'
 import * as echarts from 'echarts'
 import api from "@/api";
 import type { Dashboard, OverdueRecord } from "@/types";
@@ -318,6 +318,10 @@ onMounted(async () => await fetchDashboardData(false))
           <span class="text-xs text-(--muted-foreground)">共 {{ overdueBooks.length }} 本</span>
         </div>
         <div class="max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-(--muted) scrollbar-track-transparent">
+          <div v-if="overdueBooks.length === 0" class="flex items-center justify-center gap-1">
+            <BookOpenCheck class="size-4 text-(--muted-foreground)"/>
+            <p class="text-sm text-(--muted-foreground)">暂无逾期未还</p>
+          </div>
           <div v-for="book in overdueBooks" :key="book.book_copy_id" class="flex items-center justify-between border-b border-(--border)/50 py-2.5 last:border-0">
             <div class="min-w-0 flex-1">
               <p class="line-clamp-1 text-sm">
@@ -355,7 +359,7 @@ onMounted(async () => await fetchDashboardData(false))
               </div>
             </div>
             <div class="flex items-center gap-3 rounded-md bg-(--muted)/20 px-3 py-2">
-              <BookOpen class="size-5 shrink-0 text-(--chart-4)" />
+              <BookAlert class="size-5 shrink-0 text-(--chart-4)" />
               <div>
                 <p class="text-base text-(--chart-4)">{{ damagedWithdrawnCount }}</p>
                 <p class="text-xs text-(--muted-foreground)">损坏</p>
