@@ -20,69 +20,71 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
  * 需要注意的是，`reactive()` 不会将内部嵌套的 `Ref` 类型的属性解包：`{ x: { Ref<number> } }` 其中的 `Ref` 不会被解包。
  */
 export interface PopupMap {
-  uploadBookCover: {
-    payload: { id: number; };
-    response: Response<any>;
-  };
-  uploadAvatar: {
-    payload: undefined;
-    response: Response<any>;
-  }
-  editCategory: {
-    payload: { book: Book; category: Category; };
-    response: Response<Book>;
-  };
-  editBook: {
-    payload: { book: Book; };
-    response: Response<Book>;
-  };
-  editUsername: {
-    payload: undefined;
-    response: Response<any>;
-  }
-  addBook: {
-    payload: undefined;
-    response: Response<number>;
-  }
-  addTag: {
-    payload: { id: number; tags: Tag[]; };
-    response: Response<undefined>;
-  };
-  addBookCopy: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  };
-  editBookCopy: {
-    payload: { bookCopyId: number; purchasePrice: number; purchaseDate: string; source: string; };
-    response: Response<BookCopyAdmin>;
-  };
-  borrow: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  };
-  withdrawn: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  }
-  returnBook: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  };
-  relist: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  }
+  // custom
   header: {
     payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
+    response: void;
+  };
+  search: {
+    payload: { keyword?: string; };
     response: void;
   };
   userInfo: {
     payload: { x: number; y: number; id: number };
     response: void;
-  }
-  search: {
-    payload: { keyword?: string; };
-    response: void;
+  };
+  // popup
+  addBook: {
+    payload: undefined;
+    response: Response<number>;
+  };
+  addBookCopy: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  addTag: {
+    payload: { id: number; tags: Tag[]; };
+    response: Response<undefined>;
+  };
+  borrow: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  editBook: {
+    payload: { book: Book; };
+    response: Response<Book>;
+  };
+  editBookCopy: {
+    payload: { bookCopyId: number; purchasePrice: number; purchaseDate: string; source: string; };
+    response: Response<BookCopyAdmin>;
+  };
+  editCategory: {
+    payload: { book: Book; category: Category; };
+    response: Response<Book>;
+  };
+  editUsername: {
+    payload: undefined;
+    response: Response<any>;
+  };
+  relist: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  returnBook: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
+  };
+  uploadAvatar: {
+    payload: undefined;
+    response: Response<any>;
+  };
+  uploadBookCover: {
+    payload: { id: number; };
+    response: Response<any>;
+  };
+  withdrawn: {
+    payload: { id: number; };
+    response: Response<BookCopyAdmin>;
   };
 }
 
