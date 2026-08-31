@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, Trash2, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
+import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
-import type { Book, BookCopy, BookReview, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
+import type { Book, BookCopy, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
 import api from "@/api"
 import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user.ts";
@@ -23,7 +23,6 @@ const book = computed(() => bookStore.book(id.value).value);
 const category = ref<Category>({ id: -1, name: '' });
 const tags = ref<Tag[]>([]);
 const bookCopies = ref<BookCopy[]>([]);
-const bookReviews = ref<BookReview[]>([]);
 
 const bookCoverTimestamp = ref<number>(Date.now());
 const bookCoverSrc = computed<string>(() => '/books/' + id.value + '?timestamp=' + bookCoverTimestamp.value);
@@ -31,7 +30,6 @@ const isFavorite = ref(false);
 const availableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'AVAILABLE').length);
 const unavailableCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'UNAVAILABLE').length);
 const withdrawnCount = computed(() => bookCopies.value.filter(bookCopy => bookCopy.status === 'WITHDRAWN').length);
-const hasWrittenBookReview = computed(() => bookReviews.value.some(bookReview => authStore.id === bookReview.user_id));
 
 /////////////////////////////////////////////
 // 工具方法
@@ -248,22 +246,6 @@ watch(id, async () => {
   // 仅用户或管理员可以请求馆藏信息
   if (authStore.isAuthed)
     await fetchBookCopies();
-  // 书评信息
-  bookReviews.value = (await api.get('/api/book-review/' + id.value)).data ?? [];
-  // 处理书评信息
-  if (authStore.isAuthed && bookReviews.value.length > 0) {
-    const bookReviewIndex = bookReviews.value.findIndex(bookReview => authStore.id === bookReview.user_id);
-    // 如果我写过评论
-    if (bookReviewIndex !== -1) {
-      const firstItem = bookReviews.value[0];
-      const foundItem = bookReviews.value[bookReviewIndex];
-      // 交换置顶评论和我的评论
-      if (firstItem && foundItem) {
-        bookReviews.value[0] = foundItem;
-        bookReviews.value[bookReviewIndex] = firstItem;
-      }
-    }
-  }
 }, { immediate: true });
 </script>
 
@@ -372,6 +354,7 @@ watch(id, async () => {
         </div>
       </div>
     </section>
+
     <!-- 馆藏状态 -->
     <section class="border-t border-(--border) bg-(--muted)/30">
       <div class="mx-auto max-w-6xl px-4 py-10 md:px-8">
@@ -546,69 +529,6 @@ watch(id, async () => {
         </div>
         <!-- 管理员 -->
         <div></div>
-      </div>
-    </section>
-    <!-- 书评 -->
-    <section class="mx-auto max-w-6xl px-4 py-10 md:px-8">
-      <h2 class="font-serif text-2xl font-semibold">书评</h2>
-      <div class="mt-5 space-y-4">
-        <!-- 已登录，且未发表过书评 -->
-        <form v-if="authStore.isAuthed && !hasWrittenBookReview" class="rounded-xl border border-(--border) bg-(--card) p-4">
-          <p class="text-sm font-medium">发表书评</p>
-          <div class="mt-3 flex items-center gap-2">
-            <span class="text-sm text-(--muted-foreground)">评分</span>
-            <div class="flex gap-0.5">
-              <button type="button" aria-label="1 星"><Star class="size-5 fill-(--primary) text-(--primary)"/></button>
-              <button type="button" aria-label="2 星"><Star class="size-5 fill-(--primary) text-(--primary)"/></button>
-              <button type="button" aria-label="3 星"><Star class="size-5 fill-(--primary) text-(--primary)"/></button>
-              <button type="button" aria-label="4 星"><Star class="size-5 fill-(--primary) text-(--primary)"/></button>
-              <button type="button" aria-label="5 星"><Star class="size-5 fill-(--primary) text-(--primary)"/></button>
-            </div>
-          </div>
-          <textarea rows="3" placeholder="写下你对这本书的看法……" class="mt-3 flex w-full rounded-md border border-(--input) bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-(--ring)"></textarea>
-          <div class="mt-3 flex justify-end">
-            <button type="submit" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-(--primary) text-(--primary-foreground) [a]:hover:bg-(--primary)/80 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2">
-              发表
-            </button>
-          </div>
-        </form>
-        <!-- 其他书评 -->
-        <template v-for="bookReview in bookReviews">
-          <article class="rounded-xl border p-4" :class="{
-            'border-(--border) bg-(--card)': authStore.id !== bookReview.user_id,
-            'border-(--primary)/40 bg-(--primary)/5': authStore.id === bookReview.user_id,
-          }">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="relative size-10 overflow-hidden rounded-full ring-1 ring-(--border)">
-                  <img :src="'/avatars/' + bookReview.user_id" alt="history_fan 的头像" loading="lazy" decoding="async" data-nimg="fill" class="object-cover" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent">
-                </div>
-                <div class="self-stretch flex flex-col justify-between">
-                  <p class="flex items-center gap-2 text-sm font-medium">
-                    <span>{{ bookReview.user_name }}</span>
-                    <span v-if="authStore.id === bookReview.user_id" class="rounded-full bg-(--primary) px-1.5 py-0.5 text-xs text-(--primary-foreground)">我的书评</span>
-                  </p>
-                  <p class="text-xs text-(--muted-foreground)">{{ bookReview.create_time }}</p>
-                </div>
-              </div>
-              <div class="flex gap-0.5" aria-label="评分 4 星">
-                <template v-for="i in bookReview.score" :key="i">
-                  <Star class="size-4 fill-(--primary) text-(--primary)"/>
-                </template>
-                <template v-for="i in 5 - bookReview.score" :key="i">
-                  <Star class="size-4 text-(--border)"/>
-                </template>
-              </div>
-            </div>
-            <p class="mt-3 text-pretty leading-relaxed text-(--foreground)">{{ bookReview.content }}</p>
-            <div class="mt-3 flex justify-end">
-              <button v-if="authStore.id === bookReview.user_id || authStore.isAdmin" type="button" @click="popupStore.open('deleteBookReviewConfirm', bookReview)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-(--muted) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:hover:bg-(--muted)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5 text-(--destructive) hover:text-(--destructive)">
-                <Trash2 class="size-3.5"/>
-                删除
-              </button>
-            </div>
-          </article>
-        </template>
       </div>
     </section>
   </main>

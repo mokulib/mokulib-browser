@@ -1,6 +1,5 @@
 export * from "./book.ts"
 export * from "./book-copy.ts"
-export * from './book-review.ts'
 export * from './borrow-record.ts'
 export * from './category.ts'
 export * from './dashboard.ts'

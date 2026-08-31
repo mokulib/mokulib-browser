@@ -72,10 +72,6 @@ export interface PopupMap {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
   }
-  deleteBookReviewConfirm: {
-    payload: { user_name: string; };
-    response: void;
-  };
   header: {
     payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
     response: void;
