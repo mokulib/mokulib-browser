@@ -126,7 +126,7 @@ onMounted(async () => {
       <div class="flex-1 flex">
         <!-- 导航 -->
         <aside class="shrink-0 flex flex-col text-sm bg-(--muted)">
-          <div class="h-2"></div>
+          <div class="w-42 h-2 ml-2 pl-2"></div>
           <template v-for="category in categories" :key="category.id">
             <div @mouseenter="setActive('category', category.id)" :data-is-hovered="status.find(s => s.type === 'category' && s.id === category.id)!.isActive" class="w-42 ml-2 pl-2 data-[is-hovered=true]:pl-4 py-1.5 data-[is-hovered=true]:bg-(--primary)/10 border-(--primary) rounded-l data-[is-hovered=true]:text-base data-[is-hovered=true]:text-(--primary) transition-all cursor-pointer">
               <div class="line-clamp-1">
