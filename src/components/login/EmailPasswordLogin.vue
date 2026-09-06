@@ -2,9 +2,9 @@
 import { onMounted, ref } from "vue";
 import { RefreshCw } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
-import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 import api from "@/api";
+import { Message } from "@/components/message";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -83,13 +83,13 @@ const handleLogin = async () => {
   });
   // 失败
   if (data.status !== 'OK') {
-    ElMessage.error(data.message);
+    Message.error(data.message);
     refreshImageCaptcha() // 刷新验证码
     loginLoading.value = false
     return
   }
   // 成功
-  ElMessage.success(data.message);
+  Message.success(data.message);
   await router.push({ name: 'home' })
   loginLoading.value = false
 };

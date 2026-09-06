@@ -3,7 +3,7 @@ import { FolderHeart, Heart } from "@lucide/vue";
 import { onMounted, ref } from "vue";
 import api from "@/api";
 import type { Favorite } from "@/types";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 import ProfileLayout from "@/components/profile/ProfileLayout.vue";
 import { useBookStore } from "@/stores/book.ts";
 
@@ -26,10 +26,10 @@ async function favoriteHandler(index: number) {
   const data = favoriteBooks.value[index]!.isFavorite ? await api.delete<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.bookId) : await api.post<Favorite>('/api/favorites/' + favoriteBooks.value[index]!.bookId);
   // 处理数据
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     favoriteBooks.value[index]!.isFavorite = data.data.is_favorite;
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 

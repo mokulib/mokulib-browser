@@ -4,7 +4,7 @@ import { ArrowLeft, RefreshCw } from "@lucide/vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.ts";
 import { onMounted, ref } from "vue";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 import api from "@/api";
 import type { GetEmailCaptcha } from "@/types";
 
@@ -89,13 +89,13 @@ const handleEmailSubmit = async () => {
   }
   // 请求频繁
   if (data.status === 'TOO_FREQUENT') {
-    ElMessage.error(data.message);
+    Message.error(data.message);
     refreshImageCaptcha() // 刷新验证码
     emailSubmitLoading.value = false;
     return
   }
   // 失败
-  ElMessage.error(data.message);
+  Message.error(data.message);
   refreshImageCaptcha() // 刷新验证码
   emailSubmitLoading.value = false;
 }
@@ -117,7 +117,7 @@ const handleLogin = async () => {
   });
   // 失败
   if (data.status !== 'OK') {
-    ElMessage.error(data.message);
+    Message.error(data.message);
     refreshImageCaptcha() // 刷新图片验证码
     emailCaptcha.value = ''; // 清空邮箱验证码
     loginLoading.value = false
@@ -125,7 +125,7 @@ const handleLogin = async () => {
     return
   }
   // 成功
-  ElMessage.success(data.message);
+  Message.success(data.message);
   await router.push({ name: 'home' })
   loginLoading.value = false
 }

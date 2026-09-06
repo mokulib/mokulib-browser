@@ -7,7 +7,7 @@ import RouteButton from "@/components/profile/my/RouteButton.vue";
 import api from "@/api";
 import type { BorrowRecordWithBookId, History, Response } from "@/types";
 import { usePopupStore } from "@/stores/popup.ts";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 import { useBookStore } from "@/stores/book.ts";
 
 const authStore = useAuthStore();
@@ -24,10 +24,10 @@ const history = ref<{ id: number, title: string }[]>([]);
 
 async function uploadAvatarCallback(data: Response<any>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     authStore.avatarTimestamp = Date.now(); // 刷新头像
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 

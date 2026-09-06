@@ -5,7 +5,7 @@ import api from "@/api";
 import { DateTime } from "luxon";
 import type { BorrowRecord, FullBookCopy } from "@/types";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 
 const props = defineProps({ id: { type: String, required: true } });
 const id = toRef(props, "id");
@@ -21,10 +21,10 @@ const borrowRecords = ref<BorrowRecord[]>([]);
 async function rollbackReturn(id: number) {
   const data = await api.post(`/api/borrow-records/${id}/rollback-return`);
   if (data.status === "OK") {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     await init();
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 

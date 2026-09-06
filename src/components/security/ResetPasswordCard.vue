@@ -5,7 +5,7 @@ import { ref } from "vue";
 import SecurityCard from "@/components/security/SecurityCard.vue";
 import FormItem from "@/components/security/FormItem.vue";
 import api from "@/api";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 
 const authStore = useAuthStore();
 
@@ -17,18 +17,18 @@ async function requestCaptcha() {
   const data = await api.get('/api/users/me/reset-password');
   prefix.value = data.data.code_prefix;
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function resetPassword() {
   const data = await api.post('/api/users/me/reset-password', { new_password: password.value, }, { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 </script>

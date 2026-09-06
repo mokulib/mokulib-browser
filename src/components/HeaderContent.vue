@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Eye, RefreshCw, PaperBag, BookOpen, ArrowRight, ShieldKeyhole, BookPlus, LayoutDashboard, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
 import type { Response } from "@/types";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
@@ -19,10 +19,10 @@ function switchTheme() {
 
 async function addBookCallback(data: Response<number>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     router.push({ name: 'book', params: { id: data.data } });
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 </script>

@@ -5,7 +5,7 @@ import SecurityCard from "@/components/security/SecurityCard.vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import FormItem from "@/components/security/FormItem.vue";
 import api from "@/api";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 
 const authStore = useAuthStore();
 
@@ -16,18 +16,18 @@ async function requestCaptcha() {
   const data = await api.get('/api/users/me/close-account');
   prefix.value = data.data.code_prefix;
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function closeAccount() {
   const data = await api.delete('/api/users/me/close-account', { params: { emailCaptcha: prefix.value + '-' + captcha.value, } });
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 </script>

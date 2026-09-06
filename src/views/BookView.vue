@@ -5,10 +5,10 @@ import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Book, BookCopy, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
 import api from "@/api"
-import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user.ts";
 import { useBookStore } from "@/stores/book.ts";
 import { DateTime } from "luxon";
+import { Message } from "@/components/message";
 
 const props = defineProps({
   id: { type: String, required: true } // 路径参数解析始终是字符串
@@ -104,10 +104,10 @@ async function favoriteHandler() {
   const data = isFavorite.value ? await api.delete<Favorite>('/api/favorites/' + id.value) : await api.post<Favorite>('/api/favorites/' + id.value);
   // 处理数据
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     isFavorite.value = data.data.is_favorite;
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
@@ -116,10 +116,10 @@ async function deleteTagHandler(tagId: number) {
   const data = await api.delete('/api/books/' + id.value + '/tags/' + tagId);
   // 处理数据
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     await fetchTags();
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
@@ -128,10 +128,10 @@ async function renew(borrowRecordId: number) {
   const data = await api.post<BorrowRecord>('/api/borrow-records/' + borrowRecordId + '/renew');
   // 处理数据
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     (bookCopies.value.find(bookCopy => bookCopy.current_borrow_record?.id === data.data.id) as BookCopy).current_borrow_record = data.data; // 刷新借阅记录
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
@@ -141,92 +141,92 @@ async function renew(borrowRecordId: number) {
 
 async function uploadBookCoverCallback(data: Response<any>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCoverTimestamp.value = Date.now(); // 刷新封面
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function editCategoryCallback(data: Response<Book>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     await fetchCategory(); // 更新分类名
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function editBookCallback(data: Response<Book>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function addTagCallback(data: Response<undefined>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     await fetchTags();
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function addBookCopyCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value?.push(data.data);
     await fetchIdUsernameMapping();
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function editBookCopyCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function borrowCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
     await fetchIdUsernameMapping();
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function withdrawnCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function returnBookCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 
 async function relistCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 

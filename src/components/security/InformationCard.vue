@@ -5,16 +5,16 @@ import { useAuthStore } from "@/stores/auth.ts";
 import { DateTime } from "luxon";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Response } from "@/types";
-import { ElMessage } from "element-plus";
+import { Message } from "@/components/message";
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
 
 function editUsernameCallback(data: Response<any>) {
   if (data.status === 'OK') {
-    ElMessage.success(data.message);
+    Message.success(data.message);
   } else {
-    ElMessage.error(data.message);
+    Message.error(data.message);
   }
 }
 </script>
