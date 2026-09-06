@@ -36,7 +36,11 @@ onMounted(() => {
 <template>
   <div class="flex flex-col p-4 rounded-lg bg-contain bg-top bg-no-repeat bg-white dark:bg-black shadow-[0_12px_67px_0_rgba(0,0,0,0.04)]" :style="{ 'background-image': `url('/${themeStore.isSun ? backgroundImage : backgroundImageDark}')` }">
     <div class="text-xl tracking-wider">{{ title }}</div>
-    <div class="line-clamp-1 mt-0.5 mb-4 text-xs text-(--muted-foreground)/60">{{ description }}，统计时间截止至{{ DateTime.fromISO(rank.update_time).toFormat('MM-dd HH:mm') }}</div>
+    <div class="line-clamp-1 mt-0.5 mb-4 text-xs text-(--muted-foreground)/60">
+      <span>{{ description }}</span>
+      <span v-if="rank.update_time">，统计时间截止至{{ DateTime.fromISO(rank.update_time).toFormat('MM-dd HH:mm') }}</span>
+      <span v-else>，加载中...</span>
+    </div>
     <div class="flex flex-col gap-1" :class="{ 'pb-2': activatedIndex === 0 }">
       <template v-for="(bookId, index) in rank.rank" :key="bookId">
         <div v-if="activatedIndex !== index" @click="activatedIndex = index" @mouseenter="handleMouseEnter(index)" class="flex items-center mt-2 cursor-pointer">
