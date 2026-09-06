@@ -19,8 +19,8 @@ const popupStore = usePopupStore();
 const userStore = useUserStore();
 const bookStore = useBookStore();
 
-const book = computed(() => bookStore.book(id.value).value);
-const category = ref<Category>({ id: -1, name: '' });
+const book = computed(() => bookStore.book(id.value).value || { id: 0, isbn: '-', category_id: 0, title: '-', subtitle: '-', author: '-', publisher: '-', publish_date: '-', edition: '-', page_count: 0, language: '-', description: '-', price: 0 } as Book);
+const category = ref<Category>({ id: -1, name: '-' });
 const tags = ref<Tag[]>([]);
 const bookCopies = ref<BookCopy[]>([]);
 
@@ -61,7 +61,7 @@ const removeStatusToString = (removeStatus: string) => {
 /////////////////////////////////////////////
 
 async function fetchCategory() {
-  category.value = (await api.get<Category>('/api/categories/' + book.value?.category_id)).data ?? {};
+  category.value = (await api.get<Category>('/api/categories/' + book.value?.category_id)).data ?? { id: -1, name: '-' };
 }
 
 async function fetchTags() {
@@ -337,6 +337,7 @@ watch(id, async () => {
             <!-- 标签图标 -->
             <TagIcon class="size-4 text-(--muted-foreground)"/>
             <!-- 标签列表 -->
+            <span v-if="tags.length === 0">-</span>
             <template v-for="tag in tags" :key="tag.id">
               <span class="inline-flex items-center gap-1 rounded-full bg-(--secondary) px-2.5 py-0.5 text-xs text-(--secondary-foreground)">
                 {{ tag.name }}
