@@ -5,7 +5,6 @@
 ![@vueuse/core](https://img.shields.io/badge/%40vueuse%2Fcore-14.3.0-4FC08D)
 ![axios](https://img.shields.io/badge/axios-v1.18.1-5A29E4)
 ![echarts](https://img.shields.io/badge/echarts-v6.1.0-409EFF)
-![element-plus](https://img.shields.io/badge/element--plus-v2.14.2-409EFF)
 ![js-base64](https://img.shields.io/badge/js--base64-v3.8.0-5A29E4)
 ![luxon](https://img.shields.io/badge/luxon-v3.7.2-5A29E4)
 ![pinia](https://img.shields.io/badge/pinia-v3.0.4-4FC08D)
