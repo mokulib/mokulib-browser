@@ -267,7 +267,7 @@ watch(id, async () => {
                 active:not-aria-[haspopup]:translate-y-px">
                 <Upload class="size-5 shrink-0 pointer-events-none"/>
               </button>
-              <button type="button" @click="favoriteHandler" :disabled="!authStore.isAuthed" :data-is-favorite="isFavorite" class="
+              <button v-if="authStore.isAuthed" type="button" @click="favoriteHandler" :disabled="!authStore.isAuthed" :data-is-favorite="isFavorite" class="
                 p-2 rounded-md text-(--foreground) bg-(--background)/60 bg-clip-padding outline-none transition-all border border-(--border)
                 hover:not-disabled:bg-(--background)
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
