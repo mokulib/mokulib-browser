@@ -8,6 +8,7 @@ import api from "@/api"
 import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user.ts";
 import { useBookStore } from "@/stores/book.ts";
+import { DateTime } from "luxon";
 
 const props = defineProps({
   id: { type: String, required: true } // 路径参数解析始终是字符串
@@ -427,7 +428,7 @@ watch(id, async () => {
                 <!-- 已借出详情（仅用户显示）（当前用户借阅时） -->
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && bookCopy.current_borrow_record && authStore.isUser && bookCopy.role === 'USER'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">应还时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.current_borrow_record.due_time }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.current_borrow_record.due_time).toFormat("yyyy-MM-dd HH:mm:ss") }}</span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && bookCopy.current_borrow_record && authStore.isUser && bookCopy.role === 'USER'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">是否续借</span>
@@ -448,11 +449,11 @@ watch(id, async () => {
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">借阅时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.current_borrow_record.create_time }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.current_borrow_record.create_time).toFormat("yyyy-MM-dd HH:mm:ss") }}</span>
                 </div>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">应还时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.current_borrow_record.due_time }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.current_borrow_record.due_time).toFormat("yyyy-MM-dd HH:mm:ss") }}</span>
                 </div>
                 <!-- 已下架（仅管理显示） -->
                 <div v-if="bookCopy.status === 'WITHDRAWN' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
@@ -461,7 +462,7 @@ watch(id, async () => {
                 </div>
                 <div v-if="bookCopy.status === 'WITHDRAWN' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">下架时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.withdrawn_time }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.withdrawn_time).toFormat("yyyy-MM-dd HH:mm:ss") }}</span>
                 </div>
               </div>
               <!-- 入库信息 -->
@@ -478,7 +479,7 @@ watch(id, async () => {
                 </div>
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">购入日期</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.purchase_date }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.purchase_date).toFormat("yyyy-MM-dd") }}</span>
                 </div>
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">来源</span>
@@ -494,7 +495,7 @@ watch(id, async () => {
                 </div>
                 <div class="flex gap-2 text-sm">
                   <span class="w-24 shrink-0 text-(--muted-foreground)">入库时间</span>
-                  <span class="min-w-0 text-(--foreground)">{{ bookCopy.create_time }}</span>
+                  <span class="min-w-0 text-(--foreground)">{{ DateTime.fromISO(bookCopy.create_time).toFormat("yyyy-MM-dd HH:mm:ss") }}</span>
                 </div>
               </div>
               <!-- 操作按钮 -->
