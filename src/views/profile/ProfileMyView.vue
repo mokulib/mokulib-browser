@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, FolderHeart, Folders } from "@lucide/vue";
+import { BookOpen, Star, Folders } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
@@ -74,14 +74,14 @@ onMounted(async () => {
     <!-- 窄屏：路由按钮 -->
     <div class="grid grid-cols-3 sm:hidden mx-2 py-2 shadow rounded bg-(--card)">
       <RouteButton title="我的借阅" route="profile-borrowing" :icon="BookOpen"></RouteButton>
-      <RouteButton title="收藏" route="profile-favorite" :icon="FolderHeart"></RouteButton>
+      <RouteButton title="收藏" route="profile-favorite" :icon="Star"></RouteButton>
       <RouteButton title="借阅历史" route="profile-history" :icon="Folders"></RouteButton>
     </div>
 
     <!-- 宽屏：路由卡片 -->
     <div class="hidden sm:flex gap-3 md:gap-4">
       <RouteCard title="我的借阅" route="profile-borrowing" empty-text="当前没有借阅" :empty-icon="BookOpen" :book-list="borrowing"/>
-      <RouteCard title="好书收藏" route="profile-favorite" empty-text="还没有收藏图书" :empty-icon="FolderHeart" :book-list="favorites"/>
+      <RouteCard title="好书收藏" route="profile-favorite" empty-text="还没有收藏图书" :empty-icon="Star" :book-list="favorites"/>
       <RouteCard title="借阅过的好书" route="profile-history" empty-text="没有借阅记录" :empty-icon="Folders" :book-list="history"/>
     </div>
   </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FolderHeart, Heart } from "@lucide/vue";
+import { Star } from "@lucide/vue";
 import { onMounted, ref } from "vue";
 import api from "@/api";
 import type { Favorite } from "@/types";
@@ -47,7 +47,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ProfileLayout :is-loading="isLoading" :is-empty="favoriteBooks.length === 0" empty-text="收藏夹空空的" :empty-icon="FolderHeart">
+  <ProfileLayout :is-loading="isLoading" :is-empty="favoriteBooks.length === 0" empty-text="收藏夹空空的" :empty-icon="Star">
     <template #title>
       <div class="tracking-wide text-lg font-bold">我的收藏</div>
     </template>
@@ -61,8 +61,8 @@ onMounted(async () => {
             <!-- 封面 Box -->
             <div class="relative">
               <img :src="`/books/${favoriteBook.bookId}`" class="rounded" alt="book.title">
-              <Heart @click="favoriteHandler(index)" :disabled="false" :data-is-favorite="favoriteBook.isFavorite" class="
-                absolute bottom-2 left-2 size-5 shrink-0 text-(--foreground) bg-clip-padding outline-none transition-all cursor-pointer
+              <Star @click="favoriteHandler(index)" :disabled="false" :data-is-favorite="favoriteBook.isFavorite" class="
+                absolute bottom-2 right-2 size-5 shrink-0 text-(--foreground) bg-clip-padding outline-none transition-all cursor-pointer
                 focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50
                 active:not-disabled:not-aria-[haspopup]:translate-y-px
                 disabled:text-(--muted-foreground) active:disabled:not-aria-[haspopup]:translate-x-px

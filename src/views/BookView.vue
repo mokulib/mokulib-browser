@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { ArrowDownToLine, ArrowUpFromLine, BookUp, Heart, Lock, Pencil, Plus, RefreshCw, Star, Tag as TagIcon, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
+import { ArrowDownToLine, ArrowUpFromLine, BookUp, Lock, Pencil, Trash, Plus, RefreshCw, Star, Sparkles, Tag as TagIcon, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Book, BookCopy, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
@@ -275,7 +275,7 @@ watch(id, async () => {
                 disabled:text-(--muted-foreground) active:disabled:not-aria-[haspopup]:translate-x-px
                 data-[is-favorite=true]:[&_svg]:fill-(--destructive) data-[is-favorite=true]:[&_svg]:text-(--destructive)"
               >
-                <Heart class="size-5 shrink-0 pointer-events-none"/>
+                <Star class="size-5 shrink-0 pointer-events-none"/>
               </button>
             </div>
           </div>
@@ -410,7 +410,7 @@ watch(id, async () => {
                   已借出
                 </span>
                 <div v-if="bookCopy.status === 'UNAVAILABLE' && isMyBorrowRecord(bookCopy.current_borrow_record)" class="inline-flex items-center leading-none gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-(--primary-foreground) bg-(--primary)">
-                  <Star class="size-3"/>
+                  <Sparkles class="size-3"/>
                   我的借阅
                 </div>
                 <span v-if="bookCopy.status === 'WITHDRAWN'" class="inline-flex leading-none rounded-full px-2.5 py-1 text-xs font-medium text-(--muted-foreground) bg-(--muted)">
