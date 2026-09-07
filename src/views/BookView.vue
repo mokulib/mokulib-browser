@@ -9,12 +9,14 @@ import { useUserStore } from "@/stores/user.ts";
 import { useBookStore } from "@/stores/book.ts";
 import { DateTime } from "luxon";
 import { Message } from "@/components/message";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   id: { type: String, required: true } // 路径参数解析始终是字符串
 });
 const id = computed(() => Number(props.id));
 
+const router = useRouter();
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
 const userStore = useUserStore();
@@ -230,6 +232,19 @@ async function relistCallback(data: Response<BookCopyAdmin>) {
   }
 }
 
+async function confirmDeleteBookCallback(data: boolean) {
+  if (data) {
+    const data = await api.delete('/api/books/' + id.value);
+    if (data.status === 'OK') {
+      Message.success(data.message);
+      router.push({ name: 'home' });
+    } else {
+      Message.error(data.message);
+    }
+  }
+}
+
+
 /////////////////////////////////////////////
 // 监听
 /////////////////////////////////////////////
@@ -294,10 +309,16 @@ watch(id, async () => {
               <p class="mt-1 text-pretty text-lg text-(--muted-foreground)">{{ book.subtitle }}</p>
               <p class="mt-2 text-sm text-(--foreground)">{{ book.author }}</p>
             </div>
-            <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('editBook', { book }, editBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
-              <Pencil class="size-3.5"/>
-              编辑
-            </button>
+            <div class="flex items-center gap-2">
+              <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('editBook', { book }, editBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
+                <Pencil class="size-3.5"/>
+                编辑
+              </button>
+              <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('confirm', { title: '删除图书', message: '确认删除？（此操作无法撤销）', button: '删除', type: 'danger' }, confirmDeleteBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
+                <Trash class="size-3.5"/>
+                删除
+              </button>
+            </div>
           </div>
           <div class="mt-5 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
             <div class="flex gap-2 text-sm">

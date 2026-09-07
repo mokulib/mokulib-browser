@@ -20,6 +20,11 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
  * 需要注意的是，`reactive()` 不会将内部嵌套的 `Ref` 类型的属性解包：`{ x: { Ref<number> } }` 其中的 `Ref` 不会被解包。
  */
 export interface PopupMap {
+  // common
+  confirm: {
+    payload: { title: string, message: string; button: string; type?: 'default' | 'danger' };
+    response: boolean;
+  }
   // custom
   header: {
     payload: { top: Ref<number>; right: Ref<number>; height: Ref<number>; };
