@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { X } from "@lucide/vue";
 import { usePopupStore } from "@/stores/popup.ts";
-import HeaderContent from "@/components/HeaderContent.vue";
+import HeaderContent from "@/components/popup/HeaderContent.vue";
 
 const popupStore = usePopupStore();
 </script>

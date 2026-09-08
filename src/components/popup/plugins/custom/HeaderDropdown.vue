@@ -2,7 +2,7 @@
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import { computed, onMounted, type Reactive, ref } from "vue";
-import HeaderContent from "@/components/HeaderContent.vue";
+import HeaderContent from "@/components/popup/HeaderContent.vue";
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
