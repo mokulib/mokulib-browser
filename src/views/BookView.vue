@@ -102,16 +102,39 @@ async function fetchBookCopies() {
 // 业务操作请求
 /////////////////////////////////////////////
 
+/**
+ * 处理简单响应
+ * @param data 响应数据
+ * @param onSuccess 成功回调
+ */
+async function simpleResponseHandler<T>(data: Response<T>, onSuccess?: (data: T) => void | Promise<void>) {
+  if (data.status === 'OK') {
+    Message.success(data.message);
+    if (onSuccess)
+      await onSuccess(data.data);
+  } else
+    Message.error(data.message);
+}
+
 async function favoriteHandler() {
   // 根据当前状态决定请求类型
   const data = isFavorite.value ? await api.delete<Favorite>('/api/favorites/' + id.value) : await api.post<Favorite>('/api/favorites/' + id.value);
   // 处理数据
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    isFavorite.value = data.data.is_favorite;
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, (data) => {
+    isFavorite.value = data.is_favorite;
+  });
+}
+
+async function deleteBookHandler() {
+  // 确认弹窗
+  if (!await useConfirm().confirm({ message: '确认删除图书：' + book.value.title + '？（此操作无法撤销）', type: 'danger' }))
+    return;
+  // 提交请求
+  const data = await api.delete('/api/books/' + id.value);
+  // 处理数据
+  await simpleResponseHandler(data, async () => {
+    await router.push({ name: 'home' });
+  });
 }
 
 async function deleteTagHandler(tagId: number) {
@@ -121,24 +144,18 @@ async function deleteTagHandler(tagId: number) {
   // 提交请求
   const data = await api.delete('/api/books/' + id.value + '/tags/' + tagId);
   // 处理数据
-  if (data.status === 'OK') {
-    Message.success(data.message);
+  await simpleResponseHandler(data, async () => {
     await fetchTags();
-  } else {
-    Message.error(data.message);
-  }
+  });
 }
 
 async function renew(borrowRecordId: number) {
   // 提交请求
   const data = await api.post<BorrowRecord>('/api/borrow-records/' + borrowRecordId + '/renew');
   // 处理数据
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    (bookCopies.value.find(bookCopy => bookCopy.current_borrow_record?.id === data.data.id) as BookCopy).current_borrow_record = data.data; // 刷新借阅记录
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, (data) => {
+    (bookCopies.value.find(bookCopy => bookCopy.current_borrow_record?.id === data.id) as BookCopy).current_borrow_record = data; // 刷新借阅记录
+  });
 }
 
 async function withdrawnHandler(bookCopyId: number) {
@@ -148,12 +165,9 @@ async function withdrawnHandler(bookCopyId: number) {
   // 提交请求
   const data = await api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/withdrawn`);
   // 处理数据
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, (data) => {
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.id)] = data; // 刷新数据
+  });
 }
 
 async function relistHandler(bookCopyId: number) {
@@ -163,12 +177,9 @@ async function relistHandler(bookCopyId: number) {
   // 提交请求
   const data = await api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/relist`);
   // 处理数据
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, (data) => {
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.id)] = data; // 刷新数据
+  });
 }
 
 /////////////////////////////////////////////
@@ -176,90 +187,47 @@ async function relistHandler(bookCopyId: number) {
 /////////////////////////////////////////////
 
 async function uploadBookCoverCallback(data: Response<any>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
+  await simpleResponseHandler(data, () => {
     bookCoverTimestamp.value = Date.now(); // 刷新封面
-  } else {
-    Message.error(data.message);
-  }
+  });
 }
 
 async function editCategoryCallback(data: Response<Book>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
+  await simpleResponseHandler(data, async () => {
     await fetchCategory(); // 更新分类名
-  } else {
-    Message.error(data.message);
-  }
-}
-
-async function editBookCallback(data: Response<Book>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-  } else {
-    Message.error(data.message);
-  }
+  });
 }
 
 async function addTagCallback(data: Response<undefined>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
+  await simpleResponseHandler(data, async () => {
     await fetchTags();
-  } else {
-    Message.error(data.message);
-  }
+  });
 }
 
 async function addBookCopyCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value?.push(data.data);
+  await simpleResponseHandler(data, async (data) => {
+    bookCopies.value?.push(data);
     await fetchIdUsernameMapping();
-  } else {
-    Message.error(data.message);
-  }
+  });
 }
 
 async function editBookCopyCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, async (data) => {
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.id)] = data; // 刷新数据
+  });
 }
 
 async function borrowCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-    await fetchIdUsernameMapping();
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, async (data) => {
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.id)] = data; // 刷新数据
+  });
 }
 
 async function returnBookCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
+  await simpleResponseHandler(data, async (data) => {
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.id)] = data; // 刷新数据
+  });
 }
-
-async function confirmDeleteBookCallback(data: boolean) {
-  if (data) {
-    const data = await api.delete('/api/books/' + id.value);
-    if (data.status === 'OK') {
-      Message.success(data.message);
-      router.push({ name: 'home' });
-    } else {
-      Message.error(data.message);
-    }
-  }
-}
-
 
 /////////////////////////////////////////////
 // 监听
@@ -326,11 +294,11 @@ watch(id, async () => {
               <p class="mt-2 text-sm text-(--foreground)">{{ book.author }}</p>
             </div>
             <div class="flex items-center gap-2">
-              <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('editBook', { book }, editBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
+              <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('editBook', { book }, simpleResponseHandler)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
                 <Pencil class="size-3.5"/>
                 编辑
               </button>
-              <button v-if="authStore.isAdmin" type="button" @click="popupStore.open('confirm', { title: '删除图书', message: '确认删除？（此操作无法撤销）', button: '删除', type: 'danger' }, confirmDeleteBookCallback)" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
+              <button v-if="authStore.isAdmin" type="button" @click="deleteBookHandler()" tabindex="0" data-slot="button" class="group/button inline-flex items-center justify-center mt-2 border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 shrink-0 gap-1.5">
                 <Trash class="size-3.5"/>
                 删除
               </button>
