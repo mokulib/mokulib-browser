@@ -4,14 +4,17 @@ import PageHeader from "@/components/PageHeader.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import { computed, nextTick, ref, watch } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
+import { useScrollLock } from "@/composables/useScrollLock.ts";
 
 const route = useRoute();
 const popupStore = usePopupStore();
 
 const hideHeader = computed(() => route.meta.hideHeader ?? false);
 const hideFooter = computed(() => route.meta.hideFooter ?? false);
-const popupRef = ref<HTMLElement>();
+const popupRef = ref<HTMLElement | null>(null);
 const popupPlugins = Object.values(import.meta.glob('./components/popup/plugins/**/*.vue', { eager: true })).map((mod: any) => mod.default);
+
+const { wheelHandler } = useScrollLock(popupRef);
 
 watch(() => popupStore.isOpen(), (newValue) => {
   if (newValue) {
@@ -41,7 +44,7 @@ watch(() => popupStore.isOpen(), (newValue) => {
   </div>
 
   <!-- 弹窗遮罩 -->
-  <div ref="popupRef" v-show="popupStore.isOpen()" @click.self="popupStore.close()" @keydown.esc="popupStore.close()" tabindex="-1" class="fixed inset-0 z-50 bg-black/66 animate-in fade-in-0 flex items-end justify-center sm:items-center" :class="{ 'sm:bg-transparent': popupStore.isOpen('header') || popupStore.isOpen('userInfo') }">
+  <div ref="popupRef" v-show="popupStore.isOpen()" @click.self="popupStore.close()" @keydown.esc="popupStore.close()" @wheel="wheelHandler" tabindex="-1" class="fixed inset-0 z-50 bg-black/66 animate-in fade-in-0 flex items-end justify-center sm:items-center" :class="{ 'sm:bg-transparent': popupStore.isOpen('header') || popupStore.isOpen('userInfo') }">
     <!-- 自动挂载预设 Popup 弹窗 -->
     <component v-for="(plugin, index) in popupPlugins" :key="index" :is="plugin"/>
   </div>
