@@ -20,7 +20,7 @@ onMounted(() => {
 
 <template>
   <Popup popup-key="confirm" :title="title" :confirm-text="button" :confirm-type="type" :confirm-handler="async () => { return true; }">
-    {{ message }}
+    <span v-html="message"/>
   </Popup>
 </template>
 
