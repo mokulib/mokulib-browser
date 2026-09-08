@@ -7,6 +7,7 @@ import { type PopupKey, type PopupResponse, usePopupStore } from "@/stores/popup
 const props = withDefaults(defineProps<{
   popupKey: K;
   title?: string;
+  description?: string;
   confirmText?: string;
   confirmType?: 'default' | 'danger';
   confirmDisabled?: boolean;
@@ -33,13 +34,13 @@ async function confirm() {
 </script>
 
 <template>
-  <div v-if="popupStore.isOpen(popupKey)" class="relative z-50 w-full max-w-md rounded-t-2xl border border-(--border) bg-(--popover) text-(--popover-foreground) shadow-2xl animate-in slide-in-from-bottom sm:rounded-2xl sm:zoom-in-95">
+  <div v-if="popupStore.isOpen(popupKey)" class="relative z-50 w-full max-w-md rounded-t-2xl border border-(--border) bg-(--background) text-(--background-foreground) shadow-2xl animate-in slide-in-from-bottom sm:rounded-2xl sm:zoom-in-95">
     <!-- 标题 -->
     <div class="flex items-start justify-between gap-4 border-b border-(--border) px-5 py-4">
       <div>
         <h2 class="font-serif text-lg font-semibold">{{ title }}</h2>
         <p class="mt-1 text-sm text-(--muted-foreground)">
-          <slot name="content"></slot>
+          <slot name="description">{{ description }}</slot>
         </p>
       </div>
       <button type="button" @click="popupStore.close()" class="rounded-md p-1.5 text-(--muted-foreground) transition-colors hover:bg-(--accent) hover:text-(--foreground)">

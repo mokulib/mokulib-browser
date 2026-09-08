@@ -27,10 +27,7 @@ async function confirmHandler() {
 </script>
 
 <template>
-  <Popup popup-key="uploadAvatar" title="上传头像" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="confirmHandler">
-    <template #content>
-      选择一张新的头像。
-    </template>
+  <Popup popup-key="uploadAvatar" title="上传头像" description="选择一张新的头像。" confirm-text="保存" :confirm-disabled="isSelectedFile" :confirm-handler="confirmHandler">
     <template #default>
       <form class="space-y-3">
         <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50" for="cover-file">

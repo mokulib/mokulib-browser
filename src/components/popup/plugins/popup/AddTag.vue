@@ -67,10 +67,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="addTag" title="添加标签" confirm-text="添加" :confirm-handler="confirmHandler">
-    <template #content>
-      从标签库中选择，或自定义一个新标签。
-    </template>
+  <Popup popup-key="addTag" title="添加标签" description="从标签库中选择，或自定义一个新标签。" confirm-text="添加" :confirm-handler="confirmHandler">
     <template #default>
       <div class="space-y-4">
         <div class="space-y-1.5">
