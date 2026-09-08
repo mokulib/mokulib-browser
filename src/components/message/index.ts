@@ -37,18 +37,43 @@ const showMessage = (options: MessageOptions) => {
 }
 
 export const Message = {
+  /**
+   * 显示成功消息
+   * @param content 消息文本内容
+   * @param duration 显示时长（毫秒），可选，默认 3000
+   */
   success: (content: string, duration?: number) =>
     showMessage({ content, type: 'success', duration }),
 
+  /**
+   * 显示错误消息
+   * @param content 消息文本内容
+   * @param duration 显示时长（毫秒），可选，默认 3000
+   */
   error: (content: string, duration?: number) =>
     showMessage({ content, type: 'error', duration }),
 
+  /**
+   * 显示警告消息
+   * @param content 消息文本内容
+   * @param duration 显示时长（毫秒），可选，默认 3000
+   */
   warning: (content: string, duration?: number) =>
     showMessage({ content, type: 'warning', duration }),
 
+  /**
+   * 显示普通消息
+   * @param content 消息文本内容
+   * @param duration 显示时长（毫秒），可选，默认 3000
+   */
   info: (content: string, duration?: number) =>
     showMessage({ content, type: 'info', duration }),
 
+  /**
+   * 显示加载消息
+   * @param content 消息文本内容
+   * @param duration 显示时长（毫秒），可选，默认 0（持续显示）
+   */
   loading: (content: string, duration?: number) =>
     showMessage({ content, type: 'loading', duration: duration || 0 }),
 
