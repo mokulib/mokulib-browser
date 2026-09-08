@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
 
 const title = ref<string>();
+const description = ref<string>();
 const message = ref<string>();
 const button = ref<string>();
 const type = ref<'default' | 'danger'>();
@@ -11,6 +12,7 @@ const type = ref<'default' | 'danger'>();
 onMounted(() => {
   usePopupStore().registerInitHook('confirm', ({ clone }) => {
     title.value = clone.title;
+    description.value = clone.description;
     message.value = clone.message;
     button.value = clone.button;
     type.value = clone.type ?? 'default';
@@ -19,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Popup popup-key="confirm" :title="title" :confirm-text="button" :confirm-type="type" :confirm-handler="async () => { return true; }">
+  <Popup popup-key="confirm" :title="title" :description="description" :confirm-text="button" :confirm-type="type" :confirm-handler="async () => { return true; }">
     <span v-html="message"/>
   </Popup>
 </template>

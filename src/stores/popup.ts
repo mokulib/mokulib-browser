@@ -22,7 +22,7 @@ import type { Book, BookCopyAdmin, Category, Response, Tag } from "@/types";
 export interface PopupMap {
   // common
   confirm: {
-    payload: { title: string, message: string; button: string; type?: 'default' | 'danger' };
+    payload: { title: string, description?: string, message?: string; button: string; type?: 'default' | 'danger' };
     response: boolean;
   }
   // custom
