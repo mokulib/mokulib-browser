@@ -55,6 +55,10 @@ export interface PopupMap {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
   };
+  categoryManager: {
+    payload: undefined;
+    response: void;
+  };
   editBook: {
     payload: { book: Book; };
     response: Response<Book>;
@@ -79,6 +83,10 @@ export interface PopupMap {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
   };
+  tagManager: {
+    payload: undefined;
+    response: void;
+  }
   uploadAvatar: {
     payload: undefined;
     response: Response<any>;

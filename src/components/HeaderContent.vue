@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, RefreshCw, PaperBag, BookOpen, ArrowRight, ShieldKeyhole, BookPlus, LayoutDashboard, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
+import { Eye, RefreshCw, PaperBag, BookOpen, ArrowRight, SquareLibrary, ShieldKeyhole, BookPlus, Tag, LayoutDashboard, LogOut, Moon, Sun, SunMoon, User } from "@lucide/vue";
 import type { Response } from "@/types";
 import { Message } from "@/components/message";
 import { useRouter } from "vue-router";
@@ -42,9 +42,8 @@ async function addBookCallback(data: Response<number>) {
       </div>
     </div>
   </div>
-
   <!-- 信息 -->
-  <div v-if="authStore.isAuthed" class="flex items-center gap-3 px-4 py-4">
+  <div v-if="authStore.isAuthed" class="flex items-center gap-3 px-4 my-4">
     <img :src="authStore.avatar" :alt="authStore.username + '的头像'" class="size-11 shrink-0 rounded-full border border-(--border) object-cover">
     <div class="min-w-0 self-stretch flex flex-col justify-between">
       <div class="flex items-center gap-2">
@@ -55,66 +54,94 @@ async function addBookCallback(data: Response<number>) {
     </div>
   </div>
 
-  <div v-if="!authStore.isAuthed" class="mb-1 border-t border-(--border)"></div>
-  <!-- 前往登录 -->
-  <div v-if="!authStore.isAuthed" class="px-2 py-1">
-    <RouterLink :to="{ name: 'login' }" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <User class="size-4"/>
-        登录/注册
-      </div>
-      <ArrowRight class="size-4"/>
-    </RouterLink>
-  </div>
+  <template v-if="!authStore.isAuthed">
+    <div class="my-1 border-t border-(--border)"></div>
+  
+    <!-- 前往登录 -->
+    <div class="px-2 my-1">
+      <RouterLink :to="{ name: 'login' }" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <User class="size-4"/>
+          登录/注册
+        </div>
+        <ArrowRight class="size-4"/>
+      </RouterLink>
+    </div>
+  </template>
 
-  <div v-if="authStore.isAuthed" class="mb-1 border-t border-(--border)"></div>
-  <!-- 个人中心 -->
-  <div v-if="authStore.isAuthed" class="px-2 py-1">
-    <RouterLink :to="{ name: 'profile' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <User class="size-4"/>
-        个人中心
-      </div>
-      <ArrowRight class="size-4"/>
-    </RouterLink>
-  </div>
-  <!-- 账号与安全 -->
-  <div v-if="authStore.isAuthed" class="px-2 py-1">
-    <RouterLink :to="{ name: 'security' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <ShieldKeyhole class="size-4"/>
-        账号与安全
-      </div>
-      <ArrowRight class="size-4"/>
-    </RouterLink>
-  </div>
+  <template v-if="authStore.isAuthed">
+    <div class="my-1 border-t border-(--border)"></div>
 
-  <div v-if="authStore.isAdmin" class="my-1 border-t border-(--border)"></div>
-  <!-- 录入新书 -->
-  <div v-if="authStore.isAdmin" class="px-2 py-1">
-    <a href="/" @click.prevent="popupStore.open('addBook', undefined, addBookCallback)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <BookPlus class="size-4"/>
-        录入新书
-      </div>
-    </a>
-  </div>
-  <!-- 数据概览 -->
-  <div v-if="authStore.isAdmin" class="px-2 py-1">
-    <RouterLink :to="{ name: 'dashboard' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <LayoutDashboard class="size-4"/>
-        数据概览
-      </div>
-      <ArrowRight class="size-4"/>
-    </RouterLink>
-  </div>
+    <!-- 个人中心 -->
+    <div class="px-2 my-1">
+      <RouterLink :to="{ name: 'profile' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <User class="size-4"/>
+          个人中心
+        </div>
+        <ArrowRight class="size-4"/>
+      </RouterLink>
+    </div>
+    <!-- 账号与安全 -->
+    <div class="px-2 my-1">
+      <RouterLink :to="{ name: 'security' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <ShieldKeyhole class="size-4"/>
+          账号与安全
+        </div>
+        <ArrowRight class="size-4"/>
+      </RouterLink>
+    </div>
+  </template>
+
+  <template v-if="authStore.isAdmin">
+    <div class="my-1 border-t border-(--border)"></div>
+
+    <!-- 录入新书 -->
+    <div class="px-2 my-1">
+      <a href="/" @click.prevent="popupStore.open('addBook', undefined, addBookCallback)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <BookPlus class="size-4"/>
+          录入新书
+        </div>
+      </a>
+    </div>
+    <!-- 分类管理 -->
+    <div class="px-2 my-1">
+      <a href="/" @click.prevent="popupStore.open('categoryManager', undefined)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <SquareLibrary class="size-4"/>
+          分类管理
+        </div>
+      </a>
+    </div>
+    <!-- 标签管理 -->
+    <div class="px-2 my-1">
+      <a href="/" @click.prevent="popupStore.open('tagManager', undefined)" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <Tag class="size-4"/>
+          标签库管理
+        </div>
+      </a>
+    </div>
+    <!-- 数据概览 -->
+    <div class="px-2 my-1">
+      <RouterLink :to="{ name: 'dashboard' }" @click="popupStore.close" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <LayoutDashboard class="size-4"/>
+          数据概览
+        </div>
+        <ArrowRight class="size-4"/>
+      </RouterLink>
+    </div>
+  </template>
 
   <div class="my-1 border-t border-(--border)"></div>
+
   <!-- 主题切换 -->
-  <div class="px-2 py-1 last:pb-2">
+  <div class="px-2 my-1 last:mb-2">
     <a href="/" @click.prevent="switchTheme()" class="flex items-center justify-between rounded-md px-2 text-(--foreground) hover:bg-(--accent) hover:text-(--accent-foreground) transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
+      <div class="flex items-center gap-2.5 py-1.5 text-sm">
         <SunMoon class="size-4"/>
         主题切换
       </div>
@@ -123,16 +150,19 @@ async function addBookCallback(data: Response<number>) {
     </a>
   </div>
 
-  <div v-if="authStore.isAuthed" class="my-1 border-t border-(--border)"></div>
-  <!-- 退出登录 -->
-  <div v-if="authStore.isAuthed" class="px-2 py-1 last:pb-2">
-    <a href="/" @click.prevent="authStore.logout" class="flex items-center rounded-md px-2 text-(--destructive) hover:bg-(--destructive)/10 transition-colors">
-      <div class="flex items-center gap-2.5 py-2 text-sm">
-        <LogOut class="size-4"/>
-        退出登录
-      </div>
-    </a>
-  </div>
+  <template v-if="authStore.isAuthed">
+    <div class="my-1 border-t border-(--border)"></div>
+
+    <!-- 退出登录 -->
+    <div class="px-2 my-1 last:mb-2">
+      <a href="/" @click.prevent="authStore.logout" class="flex items-center rounded-md px-2 text-(--destructive) hover:bg-(--destructive)/10 transition-colors">
+        <div class="flex items-center gap-2.5 py-1.5 text-sm">
+          <LogOut class="size-4"/>
+          退出登录
+        </div>
+      </a>
+    </div>
+  </template>
 </template>
 
 <style scoped>
