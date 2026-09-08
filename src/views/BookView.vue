@@ -10,6 +10,7 @@ import { useBookStore } from "@/stores/book.ts";
 import { DateTime } from "luxon";
 import { Message } from "@/components/message";
 import { useRouter } from "vue-router";
+import { useConfirm } from "@/composables/useConfirm.ts";
 
 const props = defineProps({
   id: { type: String, required: true } // 路径参数解析始终是字符串
@@ -114,6 +115,9 @@ async function favoriteHandler() {
 }
 
 async function deleteTagHandler(tagId: number) {
+  // 确认弹窗
+  if (!await useConfirm().confirm({ message: '确认删除标签：' + tags.value.find(tag => tag.id === tagId)?.name + '？', type: 'danger' }))
+    return;
   // 提交请求
   const data = await api.delete('/api/books/' + id.value + '/tags/' + tagId);
   // 处理数据
@@ -132,6 +136,36 @@ async function renew(borrowRecordId: number) {
   if (data.status === 'OK') {
     Message.success(data.message);
     (bookCopies.value.find(bookCopy => bookCopy.current_borrow_record?.id === data.data.id) as BookCopy).current_borrow_record = data.data; // 刷新借阅记录
+  } else {
+    Message.error(data.message);
+  }
+}
+
+async function withdrawnHandler(bookCopyId: number) {
+  // 确认弹窗
+  if (!await useConfirm().confirm({ message: '确认下架馆藏 #' + bookCopyId + '？', type: 'danger' }))
+    return;
+  // 提交请求
+  const data = await api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/withdrawn`);
+  // 处理数据
+  if (data.status === 'OK') {
+    Message.success(data.message);
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
+  } else {
+    Message.error(data.message);
+  }
+}
+
+async function relistHandler(bookCopyId: number) {
+  // 确认弹窗
+  if (!await useConfirm().confirm({ message: '确认重新上架馆藏 #' + bookCopyId + '？' }))
+    return;
+  // 提交请求
+  const data = await api.post<BookCopyAdmin>(`/api/book-copies/${bookCopyId}/relist`);
+  // 处理数据
+  if (data.status === 'OK') {
+    Message.success(data.message);
+    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
   } else {
     Message.error(data.message);
   }
@@ -205,25 +239,7 @@ async function borrowCallback(data: Response<BookCopyAdmin>) {
   }
 }
 
-async function withdrawnCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
-}
-
 async function returnBookCallback(data: Response<BookCopyAdmin>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
-  } else {
-    Message.error(data.message);
-  }
-}
-
-async function relistCallback(data: Response<BookCopyAdmin>) {
   if (data.status === 'OK') {
     Message.success(data.message);
     bookCopies.value[bookCopies.value.findIndex(bookCopy => bookCopy.id === data.data.id)] = data.data; // 刷新数据
@@ -527,7 +543,7 @@ watch(id, async () => {
                   借出
                 </button>
                 <!-- 可借阅状态按钮 - 下架 -->
-                <button v-if="bookCopy.status === 'AVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" type="button" @click="popupStore.open('withdrawn', { id: bookCopy.id }, withdrawnCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                <button v-if="bookCopy.status === 'AVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" type="button" @click="withdrawnHandler(bookCopy.id)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <ArrowDownToLine class="size-3.5"/>
                   下架
                 </button>
@@ -542,7 +558,7 @@ watch(id, async () => {
                   {{ bookCopy.current_borrow_record.is_renewed ? '已续借' : '续借' }}
                 </button>
                 <!-- 已下架状态按钮 - 重新上架 -->
-                <button v-if="authStore.isAdmin && bookCopy.role === 'ADMIN' && bookCopy.status === 'WITHDRAWN'" type="button" @click="popupStore.open('relist', { id: bookCopy.id }, relistCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
+                <button v-if="authStore.isAdmin && bookCopy.role === 'ADMIN' && bookCopy.status === 'WITHDRAWN'" type="button" @click="relistHandler(bookCopy.id)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-(--border) bg-(--background) hover:bg-(--muted) hover:text-(--foreground) aria-expanded:bg-(--muted) aria-expanded:text-(--foreground) dark:border-(--input) dark:bg-(--input)/30 dark:hover:bg-(--input)/50 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <ArrowUpFromLine class="size-3.5"/>
                   重新上架
                 </button>

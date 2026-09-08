@@ -75,10 +75,6 @@ export interface PopupMap {
     payload: undefined;
     response: Response<any>;
   };
-  relist: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
-  };
   returnBook: {
     payload: { id: number; };
     response: Response<BookCopyAdmin>;
@@ -94,10 +90,6 @@ export interface PopupMap {
   uploadBookCover: {
     payload: { id: number; };
     response: Response<any>;
-  };
-  withdrawn: {
-    payload: { id: number; };
-    response: Response<BookCopyAdmin>;
   };
 }
 
