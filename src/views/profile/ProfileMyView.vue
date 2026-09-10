@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, Star, Folders } from "@lucide/vue";
+import { User, Mail, Calendar, BookOpen, Star, Folders } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { onMounted, ref } from "vue";
 import RouteCard from "@/components/profile/my/RouteCard.vue";
@@ -9,6 +9,7 @@ import type { BorrowRecordWithBookId, History, Response } from "@/types";
 import { usePopupStore } from "@/stores/popup.ts";
 import { Message } from "@/components/message";
 import { useBookStore } from "@/stores/book.ts";
+import { DateTime } from "luxon";
 
 const authStore = useAuthStore();
 const popupStore = usePopupStore();
@@ -61,12 +62,23 @@ onMounted(async () => {
         </div>
       </div>
       <!-- 昵称、邮箱 -->
-      <div class="flex flex-col gap-3">
-        <p class="text-xl">{{ authStore.username }}</p>
-        <div class="flex items-center gap-3">
-          <p class="text-sm">{{ authStore.email }}</p>
-          <div class="w-px h-3/4 bg-(--primary)/10"></div>
-          <span class="px-2 py-0.5 rounded-full text-xs text-(--primary) bg-(--primary)/10">{{ authStore.roleName }}</span>
+      <div class="flex flex-col pt-1 justify-between tracking-wide">
+        <div class="font-semibold text-xl text-(--foreground)">
+          {{ authStore.username }}
+        </div>
+        <div class="flex flex-col gap-0.5 font-serif text-sm text-(--muted-foreground)">
+          <div class="flex items-center gap-2">
+            <User class="size-3.5 shrink-0"/>
+            {{ authStore.roleName }} #{{ authStore.id }}
+          </div>
+          <div class="flex items-center gap-2">
+            <Mail class="size-3.5 shrink-0"/>
+            {{ authStore.email }}
+          </div>
+          <div class="flex items-center gap-2">
+            <Calendar class="size-3.5 shrink-0"/>
+            注册于 {{ DateTime.fromISO(authStore.createTime).toFormat("yyyy-MM-dd") }}
+          </div>
         </div>
       </div>
     </div>
