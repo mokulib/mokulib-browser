@@ -20,16 +20,18 @@ watch(() => props.userId, () => {
 <template>
   <template v-if="user">
     <!-- 用户基本信息 -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-stretch gap-3">
       <img :src="`/avatars/${user.id}`" :alt="user.username" class="size-12 shrink-0 rounded-full border border-(--border) object-cover">
-      <div class="min-w-0 flex-1">
+      <div class="min-w-0 flex-1 flex flex-col justify-center gap-1">
         <p class="truncate font-serif text-base font-semibold">{{ user.username }}</p>
-        <span class="text-xs text-(--muted-foreground)">{{ user.role === 'ADMIN' ? '管理员' : '读者' }}</span>
+        <div class="flex gap-2 text-xs text-(--muted-foreground)">
+          <span>{{ user.role === 'ADMIN' ? '管理员' : '读者' }} #{{ user.id }}</span>
+        </div>
       </div>
     </div>
 
     <!-- 详细信息 -->
-    <div class="mt-3 flex flex-col gap-1.5 border-t border-(--border) pt-3 text-sm">
+    <div class="mt-3 flex flex-col gap-1.5 border-t border-(--border) pt-3 font-serif text-sm tracking-wide">
       <div class="flex items-center gap-2 text-(--muted-foreground)">
         <Mail class="size-3.5 shrink-0"/>
         <span class="truncate">{{ user.email }}</span>
@@ -44,6 +46,7 @@ watch(() => props.userId, () => {
       </div>
     </div>
   </template>
+
   <template v-else>
     <div class="flex items-center justify-center py-8 text-sm text-(--muted-foreground)">加载中...</div>
   </template>
