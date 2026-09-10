@@ -6,11 +6,15 @@ import { DateTime } from "luxon";
 import type { BorrowRecord, FullBookCopy } from "@/types";
 import { useRouter } from "vue-router";
 import { Message } from "@/components/message";
+import { useUserStore } from "@/stores/user.ts";
+import { usePopupStore } from "@/stores/popup.ts";
 
 const props = defineProps({ id: { type: String, required: true } });
 const id = toRef(props, "id");
 
 const router = useRouter();
+const userStore = useUserStore();
+const popupStore = usePopupStore();
 
 const requestTimestamp = ref(DateTime.now());
 const isLoading = ref(false);
@@ -40,6 +44,8 @@ async function init() {
   // 检查
   if (!bookCopy.value || !borrowRecords.value)
     isError.value = true;
+  // 预加载用户数据
+  await userStore.preload(bookCopy.value.entry_by, ...borrowRecords.value.map(item => item.user_id));
   // 延迟加载完成
   setTimeout(() => isLoading.value = false, Math.max(0, 1000 - DateTime.now().diff(requestTimestamp.value).milliseconds));
 }
@@ -71,10 +77,10 @@ watch(id, async () => init(), { immediate: true })
         </div>
         <div class="flex flex-col justify-between gap-2 py-2 text-sm">
           <div class="flex items-center gap-2">
-            <span v-if="bookCopy.status === 'UNAVAILABLE'" class="rounded-full bg-(--primary)/10 px-3 py-1 text-xs text-(--primary)">已借出</span>
-            <span v-if="bookCopy.status === 'AVAILABLE'" class="rounded-full bg-(--primary)/10 px-3 py-1 text-xs text-(--primary)">可借阅</span>
-            <span v-if="bookCopy.status === 'WITHDRAWN'" class="rounded-full bg-(--primary)/10 px-3 py-1 text-xs text-(--primary)">已下架</span>
-            <span class="text-(--muted-foreground)">#{{ bookCopy.id }}</span>
+            <span class="text-xl text-(--muted-foreground)"># {{ bookCopy.id }}</span>
+            <span v-if="bookCopy.status === 'UNAVAILABLE'" class="rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs text-(--primary)">已借出</span>
+            <span v-if="bookCopy.status === 'AVAILABLE'" class="rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs text-(--primary)">可借阅</span>
+            <span v-if="bookCopy.status === 'WITHDRAWN'" class="rounded-full bg-(--primary)/10 px-2 py-0.5 text-xs text-(--primary)">已下架</span>
           </div>
           <div class="flex flex-col gap-1">
             <div class="flex">
@@ -91,7 +97,9 @@ watch(id, async () => init(), { immediate: true })
             </div>
             <div class="flex">
               <span class="w-20 md:w-24 text-(--muted-foreground)">入库人</span>
-              <p>#{{ bookCopy.entry_by }}</p>
+              <a href="/" @click.prevent="popupStore.open('userInfo', { x: $event.clientX, y: $event.clientY, id: bookCopy.entry_by })" class="text-(--primary) underline-offset-2 hover:underline">
+                {{ userStore.user(bookCopy.entry_by).value?.username }}
+              </a>
             </div>
             <div class="flex">
               <span class="w-20 md:w-24 text-(--muted-foreground)">入库时间</span>
@@ -120,7 +128,11 @@ watch(id, async () => init(), { immediate: true })
           </div>
           <div class="grid grid-cols-2 gap-2 text-sm md:grid-cols-3">
             <div><span class="text-(--muted-foreground)">记录编号：</span>{{ item.id }}</div>
-            <div><span class="text-(--muted-foreground)">用户编号：</span>{{ item.user_id }}</div>
+            <div><span class="text-(--muted-foreground)">借阅人：</span>
+              <a href="/" @click.prevent="popupStore.open('userInfo', { x: $event.clientX, y: $event.clientY, id: item.user_id })" class="text-(--primary) underline-offset-2 hover:underline">
+                {{ userStore.user(item.user_id).value?.username }}
+              </a>
+            </div>
             <div>
               <span class="text-(--muted-foreground)">状态：</span>
               <span v-if="item.close_status === 'OPEN'" class="text-(--primary)">尚未归还</span>
