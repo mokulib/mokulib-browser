@@ -4,11 +4,10 @@ import { ArrowDownToLine, ArrowUpFromLine, BookUp, Lock, Pencil, Trash, Plus, Re
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Book, BookCopy, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
-import api from "@/api"
+import api, { simpleResponseHandler } from "@/api"
 import { useUserStore } from "@/stores/user.ts";
 import { useBookStore } from "@/stores/book.ts";
 import { DateTime } from "luxon";
-import { Message } from "@/components/message";
 import { useRouter } from "vue-router";
 import { useConfirm } from "@/composables/useConfirm.ts";
 
@@ -101,20 +100,6 @@ async function fetchBookCopies() {
 /////////////////////////////////////////////
 // 业务操作请求
 /////////////////////////////////////////////
-
-/**
- * 处理简单响应
- * @param data 响应数据
- * @param onSuccess 成功回调
- */
-async function simpleResponseHandler<T>(data: Response<T>, onSuccess?: (data: T) => void | Promise<void>) {
-  if (data.status === 'OK') {
-    Message.success(data.message);
-    if (onSuccess)
-      await onSuccess(data.data);
-  } else
-    Message.error(data.message);
-}
 
 async function favoriteHandler() {
   // 根据当前状态决定请求类型
