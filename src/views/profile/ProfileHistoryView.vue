@@ -68,9 +68,9 @@ onMounted(async () => {
               <!-- 右侧：归还状态 -->
               <div class="flex items-center gap-2">
                 <p v-if="record.is_overdue">逾期</p>
-                <p v-if="record.close_status === 'CLOSED'">正常归还</p>
-                <p v-if="record.close_status === 'LOST'">借阅丢失</p>
-                <p v-if="record.close_status === 'DAMAGED'">借阅损坏</p>
+                <p v-if="record.status === 'RETURNED'">正常归还</p>
+                <p v-if="record.status === 'LOST'">借阅丢失</p>
+                <p v-if="record.status === 'DAMAGED'">借阅损坏</p>
               </div>
             </div>
 
