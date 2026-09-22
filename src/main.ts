@@ -45,10 +45,8 @@ axios.interceptors.response.use(
   async (error) => {
     // 认证失败：通常由用户凭证已过期或越权访问产生。
     if (error.response?.status === 401) {
-      // 重新认证
-      const authStore = useAuthStore();
       // 越权访问在正常的设计流程中不应触发，因此在正常情况下，必然是由凭证过期引起，则必然跳转
-      await authStore.logout();
+      await useAuthStore().logout();
       // 静默返回
       return error.response;
     }
