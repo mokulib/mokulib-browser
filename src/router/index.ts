@@ -109,6 +109,10 @@ const router = createRouter({
       name: 'borrow-record',
       component: () => import('@/views/BorrowRecordView.vue'),
       props: true, // 将路径参数作为 props 传递给组件
+      meta: {
+        requiresAuth: true,
+        redirectToHomeOnLogout: true,
+      },
     },
     {
       path: '/dashboard',
