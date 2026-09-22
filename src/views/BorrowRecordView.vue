@@ -4,7 +4,6 @@ import { ref, toRef, watch } from "vue";
 import api, { simpleResponseHandler } from "@/api";
 import { DateTime } from "luxon";
 import type { BorrowRecord, FullBookCopy } from "@/types";
-import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import { useBookStore } from "@/stores/book.ts";
@@ -13,7 +12,6 @@ import { useConfirm } from "@/composables/useConfirm.ts";
 const props = defineProps({ id: { type: String, required: true } });
 const id = toRef(props, "id");
 
-const router = useRouter();
 const bookStore = useBookStore();
 const userStore = useUserStore();
 const popupStore = usePopupStore();
