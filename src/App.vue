@@ -31,7 +31,7 @@ watch(() => popupStore.isOpen(), (newValue) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-(--background) text-(--foreground) flex flex-col">
+  <div class="min-h-screen flex flex-col bg-(--background) text-(--foreground) transition-colors">
     <header v-if="!hideHeader" class="sticky top-0 z-40 border-b border-(--border) bg-[radial-gradient(transparent_1px,var(--background)_1px)] bg-size-[4px_4px] backdrop-saturate-50 backdrop-blur-xs">
       <PageHeader/>
     </header>
