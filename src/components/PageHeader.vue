@@ -28,7 +28,7 @@ onMounted(() => {
       <!-- ===== 左：Logo ===== -->
       <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2 justify-start">
         <Landmark class="size-6 text-(--primary)"/>
-        <span class="font-serif text-xl font-semibold tracking-tight">墨库</span>
+        <span class="font-serif text-xl font-semibold tracking-tight">墨库 · 个人图书馆</span>
       </RouterLink>
 
       <!-- ===== 右：搜索 / Header 弹窗按钮 ===== -->

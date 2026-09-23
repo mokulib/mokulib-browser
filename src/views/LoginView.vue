@@ -30,7 +30,7 @@ function changeDescription() {
     <aside class="relative flex flex-col justify-between bg-(--primary) px-8 py-10 text-(--primary-foreground) md:w-2/5 md:px-12 md:py-14">
       <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2">
         <BookMarked class="size-6"/>
-        <span class="font-serif text-xl font-semibold tracking-tight">墨库</span>
+        <span class="font-serif text-xl font-semibold tracking-tight">墨库 · 个人图书馆</span>
       </RouterLink>
       <div class="hidden md:block">
         <p @click="changeDescription()" class="font-serif text-3xl leading-snug text-balance">{{ descriptions[currentDescriptionIndex] }}</p>
