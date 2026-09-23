@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Search, Loader, ArrowUpNarrowWide, ArrowDownNarrowWide } from "@lucide/vue";
+import { ArrowLeft, Search, Loader, Eraser, ArrowUpNarrowWide, ArrowDownNarrowWide } from "@lucide/vue";
 import { computed, onMounted, ref } from "vue";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { SortMode } from "@/types";
@@ -80,16 +80,21 @@ onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
     <div class="w-full h-full flex flex-col items-center mb-0 md:mb-8 p-4 md:rounded-lg bg-(--background)">
       <!-- 返回 + 输入 -->
       <div class="w-full flex items-center gap-3 bg-(--background)">
-        <button @click="popupStore.close()" class="md:hidden mx-2">
+        <button @click="popupStore.close()" class="md:hidden mx-2 cursor-pointer">
           <ArrowLeft class="size-5 text-(--secondary-foreground)"/>
         </button>
         <div class="w-full px-6 md:px-8 rounded border border-(--border)">
           <div class="w-full flex items-center py-2 gap-3">
-            <button @click="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')">
+            <button @click="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')" class="cursor-pointer">
               <Search class="size-5 text-(--secondary-foreground)"/>
             </button>
             <input v-model="searchInput" type="text" @keydown.enter="goToPage(1, 'PUBLISH_DATE_FROM_NEW_TO_OLD')" data-autofocus placeholder="搜索..." class="w-full text-(--secondary-foreground) outline-none"/>
-            <Loader class="size-5 text-(--secondary-foreground) opacity-0 animate-spin" :class="{ 'opacity-100': isLoading }" style="transition-duration: 500ms; animation-duration: 3000ms"/>
+            <div class="size-5">
+              <div v-if="isLoading" class="animate-in fade-in-0 duration-500">
+                <Loader class="size-5 text-(--muted-foreground) animate-spin duration-3000"/>
+              </div>
+              <Eraser v-if="!isLoading" @click="searchInput = ''" class="size-5 text-(--muted-foreground) animate-in fade-in-0 duration-500 cursor-pointer"/>
+            </div>
           </div>
         </div>
       </div>
