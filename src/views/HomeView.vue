@@ -7,6 +7,7 @@ import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useBookStore } from "@/stores/book.ts";
 import RankCard from "@/components/home/RankCard.vue";
+import { useHotSearchVisibleCount } from "@/composables/useHotSearchVisibleCount.ts";
 
 type CategoryStatus = { isActive: boolean; id: number; pageNum: number; sortMode: SortMode; books: Page<number>; };
 
@@ -16,6 +17,11 @@ const popupStore = usePopupStore();
 const hotSearches = ref<string[]>([]);
 const categories = ref<Category[]>([]);
 
+// 热搜
+const hotSearchContainer = ref<HTMLElement | null>(null);
+const { setHotSearchRef } = useHotSearchVisibleCount(hotSearches, hotSearchContainer);
+
+// 排行榜
 const ranksIsReady = ref(false);
 const activeCardSet = ref<'hot' | 'new'>('hot'); // 当前激活的榜单集合
 const borrowRank = ref<Rank>({ rank: [], update_time: '' });
@@ -23,6 +29,7 @@ const favoriteRank = ref<Rank>({ rank: [], update_time: '' });
 const newMonthlyRank = ref<Rank>({ rank: [], update_time: '' });
 const newStoreRank = ref<Rank>({ rank: [], update_time: '' });
 
+// 分类
 const status = ref<CategoryStatus[]>([]); // 分类状态
 const activeCategory = computed<CategoryStatus | undefined>(() => status.value.find(s => s.isActive)); // 当前激活的分类（计算属性）
 
@@ -89,9 +96,9 @@ onMounted(async () => {
         <!-- 热搜词 -->
         <div class="flex items-center justify-start mx-8 px-8 text-sm">
           <div class="text-(--muted-foreground) shrink-0">热搜：</div>
-          <div class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
-            <template v-for="search in hotSearches" :key="search">
-              <div @click="popupStore.open('search', { keyword: search })" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
+          <div ref="hotSearchContainer" class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
+            <template v-for="(search, index) in hotSearches" :key="search">
+              <div :ref="(el) => setHotSearchRef(el, index)" @click="popupStore.open('search', { keyword: search })" class="cursor-pointer text-(--muted-foreground) hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
             </template>
           </div>
         </div>

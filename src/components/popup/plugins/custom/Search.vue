@@ -7,6 +7,7 @@ import api from "@/api";
 import type { Page } from "@/types/page.ts";
 import { useRouter } from "vue-router";
 import { useBookStore } from "@/stores/book.ts";
+import { useHotSearchVisibleCount } from "@/composables/useHotSearchVisibleCount.ts";
 
 // 定义类型
 type Conditions = { keyword: string, sortMode: SortMode };
@@ -15,15 +16,20 @@ const router = useRouter();
 const popupStore = usePopupStore();
 const bookStore = useBookStore();
 
+const hotSearches = ref<string[]>([]);
+const results = ref<Page<number>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
+
+// 热搜
+const hotSearchContainer = ref<HTMLElement | null>(null);
+const { setHotSearchRef } = useHotSearchVisibleCount(hotSearches, hotSearchContainer);
+
 const isSearched = ref(false);
 const isLoading = ref(false);
 const requestTimestamp = ref(0);
 const searchInput = ref("");
-const hotSearches = ref<string[]>([]);
 const conditions = ref<Conditions>({ keyword: "", sortMode: "PUBLISH_DATE_FROM_NEW_TO_OLD" })
 const isPublishDateSort = computed(() => conditions.value.sortMode === "PUBLISH_DATE_FROM_NEW_TO_OLD" || conditions.value.sortMode === "PUBLISH_DATE_FROM_OLD_TO_NEW");
 const isPriceSort = computed(() => conditions.value.sortMode === "PRICE_FROM_LOW_TO_HIGH" || conditions.value.sortMode === "PRICE_FROM_HIGH_TO_LOW");
-const results = ref<Page<number>>({ current: 0, pages: 0, records: [], size: 0, total: 0 });
 const hoveredIndex = ref<number>(0);
 
 async function hotSearch(keyword: string) {
@@ -102,9 +108,9 @@ onMounted(() => popupStore.registerInitHook('search', async ({ clone }) => {
       <!-- 热搜 -->
       <div class="w-full flex items-center justify-start mt-2 pl-18 md:pl-8 pr-16 text-sm text-(--muted-foreground)">
         <div class="shrink-0">热搜：</div>
-        <div class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
-          <template v-for="search in hotSearches" :key="search">
-            <div @click="hotSearch(search)" class="cursor-pointer hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
+        <div ref="hotSearchContainer" class="flex items-center justify-start gap-2 overflow-hidden flex-nowrap">
+          <template v-for="(search, index) in hotSearches" :key="search">
+            <div :ref="(el) => setHotSearchRef(el, index)" @click="hotSearch(search)" class="cursor-pointer hover:text-(--primary) hover:underline whitespace-nowrap">{{ search }}</div>
           </template>
         </div>
       </div>
