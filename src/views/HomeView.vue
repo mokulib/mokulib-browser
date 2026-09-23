@@ -84,7 +84,7 @@ onMounted(async () => {
         <!-- 搜索框 -->
         <div @click="popupStore.open('search', {})" class="flex items-center gap-3 mx-8 mt-12 px-5 py-3 rounded-2xl border border-(--border) bg-(--card) cursor-pointer transition-shadow hover:border-(--primary) hover:shadow-md">
           <Search class="size-4 text-(--foreground) shrink-0"/>
-          <span class="text-sm text-(--muted-foreground) select-none">搜索书名、作者、ISBN…</span>
+          <span class="line-clamp-1 text-sm text-(--muted-foreground) select-none">搜索 ISBN、书名、作者、出版社...</span>
         </div>
         <!-- 热搜词 -->
         <div class="flex items-center justify-start mx-8 px-8 text-sm">
