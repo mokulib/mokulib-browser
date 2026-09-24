@@ -179,7 +179,7 @@ onMounted(async () => {
           <!-- 图书展示 -->
           <div v-if="!loadingCategories && activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-4 m-4 animate-in fade-in-0">
             <template v-for="bookId in activeCategory.books?.records" :key="bookId">
-              <RouterLink :to="{ name: 'book', params: { id: bookId } }" class="flex flex-col items-center justify-start px-4 gap-2 cursor-pointer
+              <RouterLink :to="{ name: 'book', params: { id: bookId } }" class="flex flex-col items-center justify-start gap-2 cursor-pointer
                hover:[&_img]:shadow-lg hover:[&_img]:-translate-y-1 hover:[&_a]:text-(--primary)">
                 <img :src="`/books/${bookId}`" class="w-24 aspect-4/5 border border-(--border) rounded-lg shadow object-cover transition-all" style="--tw-shadow-color: color-mix(in oklch, var(--primary) 10%, transparent);" :alt="bookStore.book(bookId).value?.title"/>
                 <a class="line-clamp-1 text-sm text-center">{{ bookStore.book(bookId).value?.title }}</a>
@@ -187,7 +187,7 @@ onMounted(async () => {
             </template>
             <!-- 空位补充 -->
             <template v-for="i in 12 - activeCategory.books.records.length" :key="i">
-              <div class="flex flex-col items-center justify-start px-4 gap-2 opacity-0">
+              <div class="flex flex-col items-center justify-start gap-2 opacity-0">
                 <div class="w-24 aspect-4/5 border border-(--border) rounded-lg"></div>
                 <div class="line-clamp-1 text-sm text-center">&ensp;</div>
               </div>
