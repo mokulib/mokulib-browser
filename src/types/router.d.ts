@@ -9,6 +9,8 @@ declare module 'vue-router' {
     hideHeader?: boolean
     // 是否隐藏 Footer
     hideFooter?: boolean
+    // 是否使用简单模式的 Footer
+    simpleFooter?: boolean
     // 是否需要登录
     requiresAuth?: boolean
     // 在未登录的情况下，是否需要强制跳转到登录页面

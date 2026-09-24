@@ -57,6 +57,7 @@ const router = createRouter({
       props: true, // 将路径参数作为 props 传递给组件
       meta: {
         title: '激活账户 - 墨库',
+        simpleFooter: true,
       },
       // 局部路由守卫
       async beforeEnter() {
@@ -74,6 +75,7 @@ const router = createRouter({
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
       meta: {
+        simpleFooter: true,
         requiresAuth: true,
         redirectToHomeOnLogout: true,
       },
@@ -118,6 +120,7 @@ const router = createRouter({
       component: () => import('@/views/SecurityView.vue'),
       meta: {
         title: '账户与安全 - 墨库',
+        simpleFooter: true,
         requiresAuth: true,
         redirectToHomeOnLogout: true,
       },
@@ -137,7 +140,8 @@ const router = createRouter({
           const book = bookStore.book(Number(to.params.id)).value;
           // 返回标题
           return book?.title ? `${book.title} - 墨库` : '图书不存在 - 墨库'
-        }
+        },
+        simpleFooter: true,
       },
     },
     {
@@ -146,6 +150,7 @@ const router = createRouter({
       component: () => import('@/views/BorrowRecordView.vue'),
       props: true, // 将路径参数作为 props 传递给组件
       meta: {
+        simpleFooter: true,
         requiresAuth: true,
         redirectToHomeOnLogout: true,
       },
@@ -156,6 +161,7 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
       meta: {
         title: '数据概览 - 墨库',
+        simpleFooter: true,
         requiresAuth: true,
         redirectToHomeOnLogout: true,
       },
@@ -167,6 +173,7 @@ const router = createRouter({
       component: () => import('@/views/NotFoundView.vue'),
       meta: {
         title: '404 - 墨库',
+        simpleFooter: true,
       },
     }
   ],
