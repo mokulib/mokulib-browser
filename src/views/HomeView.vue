@@ -30,27 +30,26 @@ const newMonthlyRank = ref<Rank>({ rank: [], update_time: '' });
 const newStoreRank = ref<Rank>({ rank: [], update_time: '' });
 
 // 分类
+const loadingCategories = ref(true); // 使用专用状态变量，涵盖分类加载与图书加载两步，全部加载完成后，状态变为 false
 const status = ref<CategoryStatus[]>([]); // 分类状态
 const activeCategory = computed<CategoryStatus | undefined>(() => status.value.find(s => s.isActive)); // 当前激活的分类（计算属性）
 
-function setActive(id: number) {
+async function setActive(id: number) {
   // 刷新全部分类状态中的激活状态
   status.value.forEach(s => s.isActive = (s.id === id));
-  // 如果当前分类尚未初始化，则初始化
+  // 如果目标分类尚未初始化，则初始化
   if (status.value.find(s => s.id === id)?.books.total === -1)
-    goToPage(1, "PUBLISH_DATE_FROM_NEW_TO_OLD"); // 初始化当前分类
+    await goToPage(1, "PUBLISH_DATE_FROM_NEW_TO_OLD"); // 初始化当前分类
 }
-
-/////////////////////////////////////////////
-// 页面展示用数据请求
-/////////////////////////////////////////////
 
 async function goToPage(pageNum: number, sortMode: SortMode) {
   if (!activeCategory.value)
     return;
+  loadingCategories.value = true;
   activeCategory.value.sortMode = sortMode;
   activeCategory.value.books = (await api.get<Page<number>>(`/api/categories/${activeCategory.value.id}/books/page`, { params: { pageNum, sortMode } })).data;
   await bookStore.preload(...activeCategory.value.books.records);
+  loadingCategories.value = false;
 }
 
 /////////////////////////////////////////////
@@ -148,19 +147,19 @@ onMounted(async () => {
         <!-- 内容 -->
         <section class="flex-1 flex flex-col">
           <!-- 加载中 -->
-          <div v-if="activeCategory && activeCategory.books.total === -1" class="h-143 flex flex-col items-center justify-center gap-4 animate-in fade-in-0">
+          <div v-if="loadingCategories" class="h-143 flex flex-col items-center justify-center gap-4 animate-in fade-in-0">
             <Loader class="size-10 text-(--muted-foreground) animate-spin duration-3000"/>
             <div class="mb-36 text-sm text-(--muted-foreground)">加载中...</div>
           </div>
 
           <!-- 分类空态 -->
-          <div v-if="activeCategory && activeCategory.books.total === 0" class="h-143 flex flex-col items-center justify-center gap-4 animate-in fade-in-0">
+          <div v-if="!loadingCategories && activeCategory && activeCategory.books.total === 0" class="h-143 flex flex-col items-center justify-center gap-4 animate-in fade-in-0">
             <BookDashed class="size-10 text-(--muted-foreground)"/>
             <div class="mb-36 text-sm text-(--muted-foreground)">没有找到符合条件的图书</div>
           </div>
 
           <!-- 排序 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center px-3 py-2 gap-4 text-(--muted-foreground) animate-in fade-in-0">
+          <div v-if="!loadingCategories && activeCategory && activeCategory.books.total > 0" class="flex items-center px-3 py-2 gap-4 text-(--muted-foreground) animate-in fade-in-0">
             <button @click="() => goToPage(1, activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' ? 'PUBLISH_DATE_FROM_OLD_TO_NEW' : 'PUBLISH_DATE_FROM_NEW_TO_OLD')"
                     :data-is-active="activeCategory?.sortMode === 'PUBLISH_DATE_FROM_NEW_TO_OLD' || activeCategory?.sortMode === 'PUBLISH_DATE_FROM_OLD_TO_NEW'"
                     class="flex items-center gap-2 hover:text-(--foreground) data-[is-active=true]:text-(--primary) transition-colors cursor-pointer">
@@ -178,7 +177,7 @@ onMounted(async () => {
             </button>
           </div>
           <!-- 图书展示 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-4 m-4 animate-in fade-in-0">
+          <div v-if="!loadingCategories && activeCategory && activeCategory.books.total > 0" class="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-4 m-4 animate-in fade-in-0">
             <template v-for="bookId in activeCategory.books?.records" :key="bookId">
               <RouterLink :to="{ name: 'book', params: { id: bookId } }" class="flex flex-col items-center justify-start px-4 gap-2 cursor-pointer
                hover:[&_img]:shadow-lg hover:[&_img]:-translate-y-1 hover:[&_a]:text-(--primary)">
@@ -195,7 +194,7 @@ onMounted(async () => {
             </template>
           </div>
           <!-- 分页组件 -->
-          <div v-if="activeCategory && activeCategory.books.total > 0" class="flex items-center justify-center mb-2 gap-2 animate-in fade-in-0">
+          <div v-if="!loadingCategories && activeCategory && activeCategory.books.total > 0" class="flex items-center justify-center mb-2 gap-2 animate-in fade-in-0">
             <button @click="goToPage(1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">首页</button>
             <button @click="goToPage(activeCategory.books?.current - 1, activeCategory?.sortMode)" class="text-sm text-(--foreground) hover:text-(--primary) disabled:text-(--muted-foreground)/50 cursor-pointer disabled:cursor-auto" :disabled="activeCategory.books?.current === 1">上一页</button>
             <template v-for="i in activeCategory.books?.pages">
