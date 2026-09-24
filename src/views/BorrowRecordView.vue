@@ -131,9 +131,14 @@ watch(id, async () => init(), { immediate: true })
           <!-- 标题 -->
           <div class="flex items-center justify-between">
             <div class="font-serif text-2xl font-semibold">全部借阅记录</div>
-            <button v-if="borrowRecords[0] && borrowRecords[0].status !== 'BORROWING'" @click="rollbackReturn(borrowRecords[0].id)" class="flex items-center px-2 py-1 gap-2 bg-(--background) hover:bg-(--muted) border border-(--border) rounded text-sm">
+            <button :disabled="!borrowRecords[0] || borrowRecords[0].status === 'BORROWING'" @click="rollbackReturn(borrowRecords[0]!.id)" class="flex items-center px-2 py-1 gap-2 bg-(--background) hover:bg-(--muted) border border-(--border) rounded text-sm disabled:pointer-events-none disabled:opacity-50">
               <Undo2 class="size-3"/>
-              撤销 #{{ borrowRecords[0].id }} 借阅记录的归还操作
+              <template v-if="!borrowRecords[0] || borrowRecords[0].status === 'BORROWING'">
+                撤销归还操作
+              </template>
+              <template v-if="borrowRecords[0] && borrowRecords[0].status !== 'BORROWING'">
+                撤销 #{{ borrowRecords[0]!.id }} 的归还操作
+              </template>
             </button>
           </div>
           <!-- 记录列表 -->
