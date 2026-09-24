@@ -70,7 +70,7 @@ watch(id, async () => init(), { immediate: true })
     </div>
 
     <div v-if="!isLoading && !isError" class="flex-1 flex flex-col">
-      <!-- 头部 -->
+      <!-- 馆藏信息及状态展示 -->
       <div class="mx-auto max-w-6xl w-full flex flex-col md:flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
         <!-- 封面 -->
         <div class="max-w-64 h-full flex items-start justify-center">
@@ -126,8 +126,9 @@ watch(id, async () => init(), { immediate: true })
         </div>
       </div>
 
-      <div class="border-t border-(--border) bg-(--muted)/30">
-        <div class="mx-auto max-w-6xl w-full flex-1 flex flex-col p-4 md:p-8 gap-4">
+      <!-- 借阅记录展示 -->
+      <div class="flex-1 border-t border-(--border) bg-(--muted)/30">
+        <div class="mx-auto max-w-6xl w-full flex flex-col p-4 md:p-8 gap-4">
           <!-- 标题 -->
           <div class="flex items-center justify-between">
             <div class="font-serif text-2xl font-semibold">全部借阅记录</div>
