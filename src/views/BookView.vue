@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { ArrowDownToLine, ArrowUpFromLine, BookUp, Lock, Pencil, Trash, Plus, RefreshCw, Star, Sparkles, Tag as TagIcon, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
+import { Loader, BookDashed, ArrowDownToLine, ArrowUpFromLine, BookUp, Lock, Pencil, Trash, Plus, RefreshCw, Star, Sparkles, Tag as TagIcon, ExternalLink, BookDown, Upload, X } from "@lucide/vue";
 import { useAuthStore } from "@/stores/auth.ts";
 import { usePopupStore } from "@/stores/popup.ts";
 import type { Book, BookCopy, Category, Tag, Response, Favorite, BorrowRecord, BookCopyAdmin } from "@/types";
@@ -22,7 +22,8 @@ const popupStore = usePopupStore();
 const userStore = useUserStore();
 const bookStore = useBookStore();
 
-const book = computed(() => bookStore.book(id.value).value || { id: 0, isbn: '-', category_id: 0, title: '-', subtitle: '-', author: '-', publisher: '-', publish_date: '-', edition: '-', page_count: 0, language: '-', description: '-', price: 0 } as Book);
+const isLoading = ref(true);
+const book = computed(() => bookStore.book(id.value).value || { id: -1, isbn: '-', category_id: 0, title: '-', subtitle: '-', author: '-', publisher: '-', publish_date: '-', edition: '-', page_count: 0, language: '-', description: '-', price: 0 } as Book);
 const category = ref<Category>({ id: -1, name: '-' });
 const tags = ref<Tag[]>([]);
 const bookCopies = ref<BookCopy[]>([]);
@@ -219,6 +220,7 @@ async function returnBookCallback(data: Response<BookCopyAdmin>) {
 /////////////////////////////////////////////
 
 watch(id, async () => {
+  isLoading.value = true;
   // 请求图书信息
   await bookStore.load(id.value);
   // 请求分类信息
@@ -231,13 +233,28 @@ watch(id, async () => {
   // 仅用户或管理员可以请求馆藏信息
   if (authStore.isAuthed)
     await fetchBookCopies();
+  isLoading.value = false;
 }, { immediate: true });
 </script>
 
 <template>
-  <main class="flex-1">
+  <main class="flex-1 flex flex-col">
+    <!-- 加载中 -->
+    <section v-if="isLoading" class="flex-1 flex flex-col items-center justify-center gap-2 animate-in fade-in-0">
+      <Loader class="size-10 text-(--muted-foreground) animate-spin duration-3000"/>
+      <p class="font-serif text-xl">加载中...</p>
+    </section>
+
+    <!-- 图书不存在 -->
+    <section v-if="!isLoading && book.id === -1" class="flex-1 flex flex-col items-center justify-center gap-2 animate-in fade-in-0">
+      <BookDashed class="size-10 text-(--muted-foreground)"/>
+      <p class="font-serif text-xl">图书不存在</p>
+      <p class="text-(--muted-foreground)">您查询的图书不存在，请检查图书 ID 是否正确。</p>
+      <RouterLink :to="{ name: 'home' }" class="text-(--muted-foreground) hover:text-(--primary) hover:underline transition-colors">返回首页</RouterLink>
+    </section>
+
     <!-- 信息 -->
-    <section v-if="book" class="mx-auto max-w-6xl px-4 py-8 md:px-8">
+    <section v-if="!isLoading && book.id !== -1" class="mx-auto max-w-6xl w-full px-4 py-8 md:px-8 animate-in fade-in-0">
       <div class="flex flex-col gap-8 md:flex-row">
         <!-- 封面 -->
         <div class="mx-auto w-full max-w-64 shrink-0 md:mx-0">
@@ -348,7 +365,7 @@ watch(id, async () => {
     </section>
 
     <!-- 馆藏状态 -->
-    <section class="border-t border-(--border) bg-(--muted)/30">
+    <section v-if="!isLoading && book.id !== -1" class="flex-1 border-t border-(--border) bg-(--muted)/30 animate-in fade-in-0">
       <div class="mx-auto max-w-6xl px-4 py-10 md:px-8">
         <!-- 标题 -->
         <div v-if="authStore.isAuthed" class="flex items-center justify-between">
