@@ -71,9 +71,9 @@ watch(id, async () => init(), { immediate: true })
 
     <div v-if="!isLoading && !isError" class="flex-1 flex flex-col">
       <!-- 头部 -->
-      <div class="mx-auto max-w-6xl w-full flex flex-col md:flex-row p-4 md:p-8 gap-4 md:gap-8">
+      <div class="mx-auto max-w-6xl w-full flex flex-col md:flex-row items-center p-4 md:p-8 gap-4 md:gap-8">
         <!-- 封面 -->
-        <div class="my-auto max-w-64 flex justify-center">
+        <div class="max-w-64 h-full flex items-start justify-center">
           <img :src="`/books/${bookCopy.book_id}`" class="object-cover aspect-3/4 rounded-lg shadow-md" alt="cover"/>
         </div>
         <!-- 信息 -->
