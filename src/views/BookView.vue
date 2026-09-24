@@ -398,12 +398,12 @@ watch(id, async () => {
         <!-- 用户/管理员 -->
         <div v-if="authStore.isAuthed" class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[1152px]:grid-cols-3!">
           <template v-for="bookCopy in bookCopies" :key="bookCopy.id">
-            <div class="flex flex-col rounded-xl border p-4 transition-colors border-(--border)" :class="{
+            <div class="flex flex-col p-4 gap-3 rounded-xl border transition-colors border-(--border)" :class="{
               'bg-(--card)': !isMyBorrowRecord(bookCopy.current_borrow_record),
               'bg-linear-to-b from-(--primary)/1 to-(--card) ring-1 ring-(--primary)/40': isMyBorrowRecord(bookCopy.current_borrow_record),
             }">
               <!-- 查看全部借阅记录 -->
-              <RouterLink v-if="authStore.isAdmin && bookCopy.role === 'ADMIN'" :to="{ name: 'borrow-record', params: { id: bookCopy.id } }" class="mb-3 inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline">
+              <RouterLink v-if="authStore.isAdmin && bookCopy.role === 'ADMIN'" :to="{ name: 'borrow-record', params: { id: bookCopy.id } }" class="inline-flex items-center gap-1 text-xs text-(--primary) underline-offset-2 hover:underline">
                 <ExternalLink class="size-3"/>
                 查看全部借阅记录
               </RouterLink>
@@ -425,11 +425,9 @@ watch(id, async () => {
                 </span>
               </div>
               <!-- 状态描述 -->
-              <div class="flex-1 mt-3 space-y-1.5">
+              <div class="flex-1 space-y-1.5">
                 <!-- 可借阅欢迎语（仅用户显示） -->
                 <p v-if="bookCopy.status === 'AVAILABLE' && authStore.isUser && bookCopy.role === 'USER'" class="text-sm text-(--muted-foreground)">当前可借阅，欢迎到馆借阅。</p>
-                <!-- 可借阅提示语（仅管理显示） -->
-                <p v-if="bookCopy.status === 'AVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" class="text-sm text-(--muted-foreground)">当前可借阅。</p>
                 <!-- 已借出欢迎语（仅用户显示）（非当前用户借阅时） -->
                 <p v-if="bookCopy.status === 'UNAVAILABLE' && !bookCopy.current_borrow_record && authStore.isUser && bookCopy.role === 'USER'" class="text-sm text-(--muted-foreground)">这一本被人借走啦。</p>
                 <!-- 已借出详情（仅用户显示）（当前用户借阅时） -->
@@ -473,7 +471,7 @@ watch(id, async () => {
                 </div>
               </div>
               <!-- 入库信息 -->
-              <div v-if="authStore.isAdmin && bookCopy.role === 'ADMIN'" class="mt-3 space-y-1.5 rounded-lg bg-(--muted)/50 p-3">
+              <div v-if="authStore.isAdmin && bookCopy.role === 'ADMIN'" class="space-y-1.5 rounded-lg bg-(--muted)/50 p-3">
                 <div class="flex items-center justify-between mb-1">
                   <p class="text-xs font-medium uppercase tracking-wide text-(--muted-foreground)">入库信息</p>
                   <button type="button" @click="popupStore.open('editBookCopy', { bookCopyId: bookCopy.id, purchasePrice: bookCopy.purchase_price, purchaseDate: bookCopy.purchase_date, source: bookCopy.source }, editBookCopyCallback)" aria-label="编辑分类" class="ml-0.5 text-(--accent-foreground)/70 hover:text-(--accent-foreground) active:not-aria-[haspopup]:translate-y-px transition-all">
@@ -506,7 +504,7 @@ watch(id, async () => {
                 </div>
               </div>
               <!-- 操作按钮 -->
-              <div class="mt-4 flex flex-wrap gap-2">
+              <div class="flex flex-wrap gap-2">
                 <!-- 可借阅状态按钮 - 借出 -->
                 <button v-if="bookCopy.status === 'AVAILABLE' && authStore.isAdmin && bookCopy.role === 'ADMIN'" type="button" @click="popupStore.open('borrow', { id: bookCopy.id }, borrowCallback)" tabindex="0" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-(--ring) focus-visible:ring-3 focus-visible:ring-(--ring)/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-(--destructive) aria-invalid:ring-3 aria-invalid:ring-(--destructive)/20 dark:aria-invalid:border-(--destructive)/50 dark:aria-invalid:ring-(--destructive)/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-(--primary) text-(--primary-foreground) [a]:hover:bg-(--primary)/80 h-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5 gap-1.5">
                   <BookUp class="size-3.5"/>
