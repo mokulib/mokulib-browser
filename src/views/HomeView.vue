@@ -134,7 +134,7 @@ onMounted(async () => {
       <!-- 分类导航 + 内容 -->
       <div v-if="categories.length && status.length" class="flex flex-col md:flex-row gap-4">
         <!-- 分类导航 -->
-        <aside class="shrink-0 flex md:flex-col gap-1 md:gap-0 text-sm text-(--muted-foreground) self-start rounded-lg">
+        <aside class="flex md:flex-col flex-wrap gap-1 md:gap-0 text-sm text-(--muted-foreground) self-start rounded-lg">
           <template v-for="category in categories" :key="category.id">
             <div @click="setActive(category.id)"
               :data-is-active="status.find(s => s.id === category.id)!.isActive"
