@@ -32,6 +32,7 @@ function selectCategory(category: CategoryWithStatus) {
   }
   if (category.id === selectedCategory.value?.id) {
     selectedCategory.value = null;
+    operationMode.value = null;
     return;
   }
   selectedCategory.value = category;

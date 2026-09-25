@@ -32,6 +32,7 @@ function selectTag(tag: TagWithStatus) {
   }
   if (tag.id === selectedTag.value?.id) {
     selectedTag.value = null;
+    operationMode.value = null;
     return;
   }
   selectedTag.value = tag;
